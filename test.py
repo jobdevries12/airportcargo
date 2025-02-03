@@ -3,41 +3,44 @@ from gurobipy import Model, GRB, quicksum
 import os
 
 # Specify the full path to your Gurobi license file
-gurobi_license_path = "/Users/mariannapiperigou/Documents/gurobi.lic"
+#gurobi_license_path = "/Users/mariannapiperigou/Documents/gurobi.lic"  # marianna
+gurobi_license_path = "C:/Users/Jacob/OneDrive - Delft University of Technology/Documents/gurobi.lic"  # job
 
 # Set the environment variable
 os.environ["GRB_LICENSE_FILE"] = gurobi_license_path
 
 #Data Extraction
-with open("G1/B.pickle", "rb") as file1:
+with open("B.pickle", "rb") as file1:
     bins = pickle.load(file1)
 
-with open("G1/I.pickle", "rb") as file2:
+with open("I.pickle", "rb") as file2:
     items = pickle.load(file2)
-
+print(items)
+print(bins)
 
 '''
 Parameter Definition
 '''
-mbins = sum(entry[1][2] for entry in bins.values()) #number of bins
-nitems = 10  #number of items
-li = [values[0] for values in items.values()] #length of item
-hi = [values[1] for values in items.values()] #height of item
-ai = [li[i] * hi[i] for i in range(len(li))] #area of iteam
-Lj = [300, 300, 300, 300, 192, 192, 192, 192] #Length of bin
+
+mbins = sum(entry[1][2] for entry in bins.values())  # number of bins -- should be halved i think
+nitems = 10                                        # number of items --> why???
+li = [values[0] for values in items.values()]        # length of item
+hi = [values[1] for values in items.values()]        # height of item
+ai = [li[i] * hi[i] for i in range(len(li))]         # area of iteam
+Lj = [300, 300, 300, 300, 192, 192, 192, 192]        # Length of bin
 L = max(Lj)
-Hj = [155, 155, 155, 155, 155, 155, 155, 155] #height of bin
+Hj = [155, 155, 155, 155, 155, 155, 155, 155]        # height of bin
 H = max(Hj)
-Aj = [Lj[i] * Hj[i] for i in range(len(Lj))] #area of bin
-Cj = [200, 200, 200 ,200, 150, 150, 150, 150] #cost of bin
-a = [-1, -1, -1, -1, 42, 42, 42, 42] #corner shape of bin
-b = [-1, -1, -1, -1, 53, 53, 53, 53] #corner shape of bin
+Aj = [Lj[i] * Hj[i] for i in range(len(Lj))]         # area of bin
+Cj = [200, 200, 200,200, 150, 150, 150, 150]        # cost of bin
+a = [-1, -1, -1, -1, 42, 42, 42, 42]                 # corner shape of bin
+b = [-1, -1, -1, -1, 53, 53, 53, 53]                 # corner shape of bin
 
 # Orientation parameters
-lip = [values[2] for values in items.values()] #item can be rotated by pi/2 or no
+lip = [values[2] for values in items.values()]       # item can be rotated by pi/2 or no
+#dont get points of this??:
 lplus = [1 if lip[i] == 1 else 0 for i in range(nitems)]  # 1 if can rotate along length, 0 otherwise
 hplus = [1 if lip[i] == 1 else 0 for i in range(nitems)]  # 1 if can rotate along height, 0 otherwise
-
 
 '''
 How to tackle the cut???
@@ -77,26 +80,26 @@ model.setParam('Method', 2)
 '''
 Variables Definition
 '''
-p_ij = model.addVars(nitems, mbins, vtype=GRB.BINARY, name="p_ij") #if box i in container j
-u_j = model.addVars(mbins, vtype=GRB.BINARY, name='u_j') #if container j is used
+p_ij = model.addVars(nitems, mbins, vtype=GRB.BINARY, name="p_ij")      # if box i in container j
+u_j = model.addVars(mbins, vtype=GRB.BINARY, name='u_j')                # if container j is used
 
-xp = model.addVars(nitems, nitems, vtype=GRB.BINARY, name="x_p") #if box i is to the right of box k
-zp = model.addVars(nitems, nitems, vtype=GRB.BINARY, name="z_p") #if box i is above box k
+xp = model.addVars(nitems, nitems, vtype=GRB.BINARY, name="x_p")        # if box i is to the right of box k
+zp = model.addVars(nitems, nitems, vtype=GRB.BINARY, name="z_p")        # if box i is above box k
 
 # Define variables (coordinates)
-x = model.addVars(nitems, vtype=GRB.CONTINUOUS, name="xi")  # Bottom-left x-coordinate
-z = model.addVars(nitems, vtype=GRB.CONTINUOUS, name="zi")  # Bottom-left z-coordinate
+x = model.addVars(nitems, vtype=GRB.CONTINUOUS, name="xi")              # Bottom-left x-coordinate
+z = model.addVars(nitems, vtype=GRB.CONTINUOUS, name="zi")              # Bottom-left z-coordinate
 xprime = model.addVars(nitems, vtype=GRB.CONTINUOUS, name="x_i_prime")  # Top-right x-coordinate
 zprime = model.addVars(nitems, vtype=GRB.CONTINUOUS, name="z_i_prime")  # Top-right z-coordinate
 
-r = model.addVars(nitems, 2, 2, vtype=GRB.BINARY, name="r")
-rho = model.addVars(nitems, vtype=GRB.BINARY, name='rho')
+r = model.addVars(nitems, 2, 2, vtype=GRB.BINARY, name="r")             # if
+rho = model.addVars(nitems, vtype=GRB.BINARY, name='rho')               # if item is rotated?
 
-g = model.addVars(nitems, vtype=GRB.BINARY, name= 'g') #1 if item i lies on the ground of the bin
+g = model.addVars(nitems, vtype=GRB.BINARY, name='g')                   # 1 if item i lies on the ground of the bin
 
-beta1 = model.addVars(nitems, nitems, vtype=GRB.BINARY, name='beta1') # 1 if vertex 1 of item i is supported by item j
-beta2 = model.addVars(nitems, nitems, vtype=GRB.BINARY, name='beta2') # 1 if vertex 2 of item i is supported by item j
-gamma = model.addVars(nitems, vtype=GRB.BINARY, name='gamma') # 1 if vertex 1 of item i is supported by the cut of the bin where it is placed
+beta1 = model.addVars(nitems, nitems, vtype=GRB.BINARY, name='beta1')   # 1 if vertex 1 of item i is supported by item j
+beta2 = model.addVars(nitems, nitems, vtype=GRB.BINARY, name='beta2')   # 1 if vertex 2 of item i is supported by item j
+gamma = model.addVars(nitems, vtype=GRB.BINARY, name='gamma')           # 1 if vertex 1 of item i is supported by the cut of the bin where it is placed
 
 
 '''
@@ -126,6 +129,7 @@ for i in range(nitems):
                     name=f"ItemFitToBinZ_{i}")
 
 #Constraint 8 and 10 : orthogonal rotation
+# why is rho not used here?
 for i in range(nitems):
     model.addConstr(
         xprime[i] - x[i] == sum(r[i, 0, b] * [li[i], hi[i]][b] for b in range(2)),
@@ -206,11 +210,10 @@ for i in range(nitems):
             z[i] + b[j] / a[j] * x[i] >= b[j] - 50000 * (1 - p_ij[i, j]) + 50000* (1 - gamma[i]), name=f'Constraint_{i}_{j}'
         )
 
-
 '''
 Constraints from lecture, mostly for vertical stability and cut
 '''
-#constraint 16 from lecture
+#constraint 16 from lecture (flagging constraint)
 for i in range(nitems):
     for j in range(mbins):
         model.addConstr(
@@ -220,7 +223,8 @@ for i in range(nitems):
 #Constraint for stability
 for i in range(nitems):
     model.addConstr(
-        gamma[i] + quicksum(beta1[i, j] for j in range(mbins)) + quicksum(beta2[i, j] for j in range(mbins)) + 2*g[i] >= 2
+        gamma[i] + quicksum(beta1[i, j] for j in range(mbins)) + quicksum(beta2[i, j] for j in range(mbins)) + 2*g[i]
+        >= 2
     )
 
 
@@ -260,26 +264,26 @@ if model.status == GRB.INFEASIBLE:
     model.computeIIS()
     model.write("infeasible.ilp")
 
-
-
 import matplotlib.pyplot as plt
-import matplotlib.patches as patches
+import numpy as np
 
-
-def visualize_with_overlap(nitems, mbins, Lj, Hj, xi, zi, x_i_prime, z_i_prime, p_ij):
+def visualize_with_overlap(nitems, mbins, Lj, Hj, xi, zi, x_i_prime, z_i_prime, p_ij, bins_with_cut, a, b):
     fig, axs = plt.subplots(1, mbins, figsize=(15, 5))
 
     # Ensure the model is optimized before visualization
-    if model.status == GRB.OPTIMAL or model.status == GRB.SUBOPTIMAL:
+    if model.status in [GRB.OPTIMAL, GRB.SUBOPTIMAL]:
         for j in range(mbins):
             axs[j].set_xlim(0, Lj[j])
             axs[j].set_ylim(0, Hj[j])
             axs[j].set_title(f"Bin {j}")
             axs[j].set_aspect('equal')
+            # Set x and y ticks every 25 units
+            axs[j].set_xticks(np.linspace(0, Lj[j], 5))
+            axs[j].set_yticks(np.linspace(0, Hj[j], 5))
 
             bin_items = []
             for i in range(nitems):
-                if p_ij[i, j].X > 0.5:  # Only visualize items that are assigned to bin j
+                if p_ij[i, j].X > 0.5:  # Only visualize items assigned to bin j
                     x_start = xi[i].X
                     z_start = zi[i].X
                     width = x_i_prime[i].X - xi[i].X
@@ -297,14 +301,39 @@ def visualize_with_overlap(nitems, mbins, Lj, Hj, xi, zi, x_i_prime, z_i_prime, 
                 axs[j].add_patch(plt.Rectangle((x, z), w, h, color=rect_color, alpha=0.5))
                 axs[j].text(x + w / 2, z + h / 2, f"Item {item}", ha='center', va='center')
 
+            # **Draw the ULD outline**
+            if j in bins_with_cut:  # Checking if bin has a cut
+                cut_a = a[j]
+                cut_b = b[j]
+                if cut_a != -1 and cut_b != -1:  # Only plot if the bin has a defined cut
+                    # Calculate the cut line
+                    x_cut_vals = np.array([0, Lj[j]])  # X starts at 0, ends at bin width
+                    z_cut_vals = - (cut_b / cut_a) * x_cut_vals + cut_b  # Compute cut line equation
+
+                    # Find intersection of cut with bin edge
+                    x_cut_intersect = cut_b / (cut_b / cut_a)  # Solves - (b/a) * x + b = 0
+                    z_cut_intersect = 0  # At the bottom
+
+                    # **Draw ULD outline**
+                    outline_x = [1, 1, Lj[j], Lj[j], x_cut_intersect, 0]  # x-coordinates
+                    outline_z = [cut_b, Hj[j], Hj[j], 0, z_cut_intersect, cut_b]  # z-coordinates
+
+                    axs[j].plot(outline_x, outline_z, 'k-', linewidth=2, label="ULD Outline")  # Draw outline
+
+            else:  # **Regular bins (without a cut)**
+                outline_x = [0, 0, Lj[j], Lj[j], 0]  # Full rectangle
+                outline_z = [0, Hj[j], Hj[j], 0, 0]  # Full rectangle
+
+                axs[j].plot(outline_x, outline_z, 'k-', linewidth=2, label="Bin Outline")
+
         plt.tight_layout()
         plt.show()
     else:
-        print("Model is not yet solved, please run the model optimization first.")
-
+        print("Model didn't find a solution within the time limit.")
 
 # Call the function
 if model.status == GRB.OPTIMAL or model.status == GRB.SUBOPTIMAL:
-    visualize_with_overlap(nitems, mbins, Lj, Hj, x, z, xprime, zprime, p_ij)
+    visualize_with_overlap(nitems, mbins, Lj, Hj, x, z, xprime, zprime, p_ij, indices_with_cut, a, b)
 else:
     print("Model didn't find a solution within the time limit.")
+print(x, z)
