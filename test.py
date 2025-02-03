@@ -299,7 +299,7 @@ def visualize_with_overlap(nitems, mbins, Lj, Hj, xi, zi, x_i_prime, z_i_prime, 
                             rect_color = "red"  # Overlapping items are marked in red
                             break
                 axs[j].add_patch(plt.Rectangle((x, z), w, h, color=rect_color, alpha=0.5))
-                axs[j].text(x + w / 2, z + h / 2, f"Item {item}", ha='center', va='center')
+                axs[j].text(x + w / 2, z + h / 2, f"{item}", ha='center', va='center')
 
             # **Draw the ULD outline**
             if j in bins_with_cut:  # Checking if bin has a cut
