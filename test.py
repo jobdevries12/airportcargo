@@ -25,7 +25,7 @@ Parameter Definition
 n_orient = 2
 n_axes = 2
 mbins = int(sum(entry[1][2] for entry in bins.values())/2)  # number of bins -- should be halved i think
-nitems = 9                                     # number of items --> why???
+nitems = 4                                     # number of items --> why???
 li = [values[0] for values in items.values()]        # length of item
 hi = [values[1] for values in items.values()]        # height of item
 ai = [li[i] * hi[i] for i in range(len(li))]         # area of item
@@ -75,7 +75,7 @@ bcut = bins_with_cut['b']
 Model Definition
 '''
 model = Model("2DBPP")
-model.setParam('TimeLimit', 60*5)
+model.setParam('TimeLimit', 60*20)
 model.setParam('Method', 2)
 '''
 Variables Definition
@@ -119,13 +119,13 @@ for i in range(nitems):
             model.addConstr(z[i] >= zprime[j] - M * (1 - beta1[i, j]), name=f"Beta1_Z_Lower_{i}_{j}")
             model.addConstr(x[i] <= xprime[j] + M * (1 - beta1[i, j]), name=f"Beta1_{i}_{j}__1")
             model.addConstr(x[i] >= x[j] - M * (1 - beta1[i, j]), name=f"Beta1_{i}_{j}__2")
-            model.addConstr(quicksum(beta1[i,k] for k in range(nitems))<=1,name=f"Beta1max{i}_{j}")
+            #model.addConstr(quicksum(beta1[i,k] for k in range(nitems))<=1,name=f"Beta1max{i}_{j}")
 
             model.addConstr(z[i] <= zprime[j] + M * (1 - beta2[i, j]), name=f"Beta2_Z_Upper_{i}_{j}")
             model.addConstr(z[i] >= zprime[j] - M * (1 - beta2[i, j]), name=f"Beta2_Z_Lower_{i}_{j}")
             model.addConstr(xprime[i] >= x[j] - M * (1 - beta2[i, j]), name=f"Beta2_{i}_{j}__1")
             model.addConstr(xprime[i] <= xprime[j] + M * (1 - beta2[i, j]), name=f"Beta2_{i}_{j}__2")
-            model.addConstr(quicksum(beta2[i,k] for k in range(nitems))<=1,name=f"Beta2max{i}_{j}")
+            #model.addConstr(quicksum(beta2[i,k] for k in range(nitems))<=1,name=f"Beta2max{i}_{j}")
 
 # constraint 3: area of items not larger than area of bin
 for i in range(nitems):
@@ -218,7 +218,7 @@ for i in range(nitems):
 
 # Orientation constraints (19–21)
 for i in range(nitems):
-    model.addConstr(r[i, 0, 0] <= lplus[i], name=f"OrientationLength_{i}")
+    model.addConstr(r[i, 0, 1] <= lplus[i], name=f"OrientationLength_{i}")
     model.addConstr(r[i, 1, 1] <= hplus[i], name=f"OrientationHeight_{i}")
 
 # #Constraint 22
