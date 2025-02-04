@@ -24,11 +24,15 @@ Parameter Definition
 '''
 
 mbins = int(sum(entry[1][2] for entry in bins.values())/2)  # number of bins -- should be halved i think
+<<<<<<< Updated upstream
 nitems = 10                                      # number of items --> why???
+=======
+nitems = 8                               # number of items --> why???
+>>>>>>> Stashed changes
 li = [values[0] for values in items.values()]        # length of item
 hi = [values[1] for values in items.values()]        # height of item
 ai = [li[i] * hi[i] for i in range(len(li))]         # area of iteam
-Lj = [values[1][0] for values in bins.values()]        # Length of bin
+Lj = [values[1][0] for values in bins.values()]        # Length of binf
 L = max(Lj)
 Hj = [values[1][1] for values in bins.values()]        # height of bin
 H = max(Hj)
@@ -100,7 +104,15 @@ beta1 = model.addVars(nitems, nitems, vtype=GRB.BINARY, name='beta1')   # 1 if v
 beta2 = model.addVars(nitems, nitems, vtype=GRB.BINARY, name='beta2')   # 1 if vertex 2 of item i is supported by item j
 gamma = model.addVars(nitems, vtype=GRB.BINARY, name='gamma')           # 1 if vertex 1 of item i is supported by the cut of the bin where it is placed
 
+<<<<<<< Updated upstream
 
+=======
+v=model.addVars(nitems,nitems, vtype=GRB.CONTINUOUS, lb=0, name="v_i_k")
+h=model.addVars(nitems,nitems, vtype=GRB.BINARY, name="h_i_k")
+n1=model.addVars(nitems,nitems, vtype=GRB.BINARY,  name="n1_i_k")
+n2=model.addVars(nitems,nitems, vtype=GRB.BINARY,  name="n2_i_k")
+model.update()
+>>>>>>> Stashed changes
 '''
 Constraints Definition
 '''
@@ -196,8 +208,13 @@ for i in range(nitems):
 
 # Orientation constraints (19–21)
 for i in range(nitems):
+<<<<<<< Updated upstream
     model.addConstr(r[i, 1, 0] <= lplus[i], name=f"OrientationLength_{i}") #if length in vertical position
     model.addConstr(r[i, 1, 1] <= hplus[i], name=f"OrientationHeight_{i}")  #if heigth
+=======
+    model.addConstr(r[i, 0, 1] <= lplus[i], name=f"OrientationLength_{i}")
+    model.addConstr(r[i, 1, 0] <= hplus[i], name=f"OrientationHeight_{i}")
+>>>>>>> Stashed changes
 
 # #Constraint 22
 for i in range(nitems):
@@ -212,6 +229,9 @@ for i in range(nitems):
 '''
 Constraints from lecture, mostly for vertical stability and cut
 '''
+
+## Stability extra
+
 #constraint 16 from lecture (flagging constraint)
 for i in range(nitems):
     for j in range(mbins):
@@ -359,3 +379,63 @@ if model.status in [GRB.OPTIMAL, GRB.SUBOPTIMAL]:
         residual = rhs_value - lhs_value  # Difference between RHS and LHS
 
         print(f"{constr.ConstrName}: LHS = {lhs_value}, RHS = {rhs_value}, Residual = {residual}")
+<<<<<<< Updated upstream
+=======
+
+    for i in range(nitems):
+        for j in range(mbins):
+                if p_ij[i, j].X == 1:
+                    print(f"p_ij[{i},{j}]: {p_ij[i, j].X}")
+
+    for j in range(mbins):
+        if u_j[j].X == 1:
+            print(f"u_j[{j}]: {u_j[j].X}")
+
+    for i in range(nitems):
+        for j in range(nitems):
+            if i != j:
+                if xp[i, j].X == 1:
+                    print(f"x_p[{i},{j}]: {xp[i, j].X}")
+
+    for i in range(nitems):
+        for j in range(nitems):
+            if i!=j:
+                if zp[i, j].X == 1:
+                    print(f"z_p[{i},{j}]: {zp[i, j].X}")
+
+    for i in range(nitems):
+        for j in range(n_orient):
+            for k in range(n_axes):
+                if r[i, j, k].X == 1:
+                    print(f"r[{i},{j},{k}]: {r[i, j, k].X}")
+
+    for i in range(nitems):
+        if rho[i].X == 1:
+            print(f"rho[{i}]: {rho[i].X}")
+
+    for i in range(nitems):
+        if g[i].X == 1:
+            print(f"g[{i}]: {g[i].X}")
+
+    for i in range(nitems):
+        for j in range(nitems):
+            if i != j:
+                if beta1[i, j].X == 1:
+                    print(f"beta1[{i},{j}]: {beta1[i, j].X}")
+
+    for i in range(nitems):
+        for j in range(nitems):
+            if i != j:
+                if beta2[i, j].X == 1:
+                    print(f"beta2[{i},{j}]: {beta2[i, j].X}")
+
+    for i in range(nitems):
+        if gamma[i].X == 1:
+            print(f"gamma[{i}]: {gamma[i].X}")
+
+    for i in range(nitems):
+        print(f"x[{i}] = {x[i].X}")
+        print(f"z[{i}] = {z[i].X}")
+        print(f"xprime[{i}] = {xprime[i].X}")
+        print(f"zprime[{i}] = {zprime[i].X}")
+>>>>>>> Stashed changes
