@@ -6,7 +6,7 @@ import numpy as np
 # Specify the full path to your Gurobi license file
 #gurobi_license_path = "/Users/mariannapiperigou/Documents/gurobi.lic"  # marianna
 #gurobi_license_path = "C:/Users/Jacob/OneDrive - Delft University of Technology/Documents/gurobi.lic"  # job
-
+os.environ['GRB_LICENSE_FILE'] = '/Users/julia/Documents/OperationsOptimisation/gurobi.lic'
 # Set the environment variable
 #os.environ["GRB_LICENSE_FILE"] = gurobi_license_path
 
@@ -196,8 +196,8 @@ for i in range(nitems):
 
 # Orientation constraints (19–21)
 for i in range(nitems):
-    model.addConstr(r[i, 0, 0] <= lplus[i], name=f"OrientationLength_{i}")
-    model.addConstr(r[i, 1, 1] <= hplus[i], name=f"OrientationHeight_{i}")
+    model.addConstr(r[i, 1, 0] <= lplus[i], name=f"OrientationLength_{i}") #if length in vertical position
+    model.addConstr(r[i, 1, 1] <= hplus[i], name=f"OrientationHeight_{i}")  #if heigth
 
 # #Constraint 22
 for i in range(nitems):
