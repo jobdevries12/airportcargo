@@ -25,7 +25,7 @@ Parameter Definition
 n_orient = 2
 n_axes = 2
 mbins = int(sum(entry[1][2] for entry in bins.values())/2)  # number of bins -- should be halved i think
-nitems = 11                                      # number of items --> why???
+nitems = 5                                     # number of items --> why???
 li = [values[0] for values in items.values()]        # length of item
 hi = [values[1] for values in items.values()]        # height of item
 ai = [li[i] * hi[i] for i in range(len(li))]         # area of iteam
@@ -87,10 +87,10 @@ xp = model.addVars(nitems, nitems, vtype=GRB.BINARY, name="x_p")        # if box
 zp = model.addVars(nitems, nitems, vtype=GRB.BINARY, name="z_p")        # if box i is above box k
 
 # Define variables (coordinates)
-x = model.addVars(nitems, vtype=GRB.CONTINUOUS, name="xi")              # Bottom-left x-coordinate
-z = model.addVars(nitems, vtype=GRB.CONTINUOUS, name="zi")              # Bottom-left z-coordinate
-xprime = model.addVars(nitems, vtype=GRB.CONTINUOUS, name="x_i_prime")  # Top-right x-coordinate
-zprime = model.addVars(nitems, vtype=GRB.CONTINUOUS, name="z_i_prime")  # Top-right z-coordinate
+x = model.addVars(nitems, vtype=GRB.CONTINUOUS, lb=0, name="xi")              # Bottom-left x-coordinate
+z = model.addVars(nitems, vtype=GRB.CONTINUOUS, lb=0, name="zi")              # Bottom-left z-coordinate
+xprime = model.addVars(nitems, vtype=GRB.CONTINUOUS, lb=0, name="x_i_prime")  # Top-right x-coordinate
+zprime = model.addVars(nitems, vtype=GRB.CONTINUOUS, lb=0, name="z_i_prime")  # Top-right z-coordinate
 
 r = model.addVars(nitems, n_orient, n_axes, vtype=GRB.BINARY, name="r")             # if
 rho = model.addVars(nitems, vtype=GRB.BINARY, name='rho')               # if item is rotated?
@@ -101,34 +101,31 @@ beta1 = model.addVars(nitems, nitems, vtype=GRB.BINARY, name='beta1')   # 1 if v
 beta2 = model.addVars(nitems, nitems, vtype=GRB.BINARY, name='beta2')   # 1 if vertex 2 of item i is supported by item j
 gamma = model.addVars(nitems, vtype=GRB.BINARY, name='gamma')           # 1 if vertex 1 of item i is supported by the cut of the bin where it is placed
 
-
+model.update()
 '''
 Constraints Definition
 '''
 M = 100000  # Big-M large constant
 for i in range(nitems):
-    for j in range(nitems):
-        if i != j:
-            model.addConstr(x[i] >= xprime[j] - M * (1 - beta1[i, j]), name=f"Beta1_{i}_{j}")
-            model.addConstr(z[i] <= zprime[j] + M * (1 - beta1[i, j]), name=f"Beta1_Z_Upper_{i}_{j}")
-            model.addConstr(z[i] >= zprime[j] - M * (1 - beta1[i, j]), name=f"Beta1_Z_Lower_{i}_{j}")
-
-            model.addConstr(xprime[j] >= x[i] - M * (1 - beta1[i, j]), name=f"Beta2_{i}_{j}")
-            model.addConstr(zprime[j] <= z[i] + M * (1 - beta1[i, j]), name=f"Beta2_Z_Upper_{i}_{j}")
-            model.addConstr(zprime[j] >= z[i] - M * (1 - beta1[i, j]), name=f"Beta2_Z_Lower_{i}_{j}")
-
-for i in range(nitems):
     # If g[i] = 1 → z[i] must be 0 (upper bound)
     model.addConstr(z[i] <= M * (1 - g[i]), name=f"GroundSupport_UpperBound_{i}")
-
-    # If g[i] = 0 → z[i] can be anything, so we don't need a lower bound
-for i in range(nitems):
     for j in indices_with_cut:
         # If gamma[i] = 1 → Item must be on the cut line equation
         model.addConstr(z[i] + (b[j] / a[j]) * x[i] - b[j] <= M * (1 - gamma[i]), name=f"CutSupport_UpperBound_{i}_{j}")
         model.addConstr(z[i] + (b[j] / a[j]) * x[i] - b[j] >= -M * (1 - gamma[i]), name=f"CutSupport_LowerBound_{i}_{j}")
 
-#constraint 3: area of items not larger than area of bin
+    for j in range(nitems):
+        if i != j:
+            model.addConstr(x[i] <= xprime[j] + M * (1 - beta1[i, j]), name=f"Beta1_{i}_{j}")
+            model.addConstr(z[i] <= zprime[j] + M * (1 - beta1[i, j]), name=f"Beta1_Z_Upper_{i}_{j}")
+            model.addConstr(z[i] >= zprime[j] - M * (1 - beta1[i, j]), name=f"Beta1_Z_Lower_{i}_{j}")
+
+            model.addConstr(xprime[i] >= x[j] - M * (1 - beta2[i, j]), name=f"Beta2_{i}_{j}")
+            model.addConstr(zprime[i] <= z[j] + M * (1 - beta2[i, j]), name=f"Beta2_Z_Upper_{i}_{j}")
+            model.addConstr(zprime[i] >= z[j] - M * (1 - beta2[i, j]), name=f"Beta2_Z_Lower_{i}_{j}")
+
+
+# constraint 3: area of items not larger than area of bin
 for i in range(nitems):
     for j in range(mbins):
         model.addConstr(
@@ -187,7 +184,7 @@ for i in range(nitems):
     for k in range(nitems):
         if i != k:  # Avoid self-comparison
             model.addConstr(xp[i, k] + xp[k, i] + zp[i, k] + zp[k, i] >= 1,
-                            name=f"Overlap_{i}_{k}")
+                            name=f"Overlap_{i}_{k}") # why this constraint??
 
             model.addConstr(xp[i, k] <= (1 - xp[k, i]), name=f"RightLeft_{i}_{k}")
             model.addConstr(xp[k, i] <= (1 - xp[i, k]), name=f"LeftRight_{i}_{k}")
@@ -223,14 +220,14 @@ for i in range(nitems):
     model.addConstr(r[i, 1, 1] <= hplus[i], name=f"OrientationHeight_{i}")
 
 # #Constraint 22
-for i in range(nitems):
+'''for i in range(nitems):
     for j in indices_with_cut:
         model.addConstr(
             z[i] + b[j]/a[j] * x[i] >= b[j] - M*(1 - p_ij[i, j]), name=f'Constraint_{i}_{j}'
         )
         model.addConstr(
             z[i] + b[j] / a[j] * x[i] >= b[j] - M * (1 - p_ij[i, j]) + M* (1 - gamma[i]), name=f'Constraint_{i}_{j}'
-        )
+        )'''
 
 '''
 Constraints from lecture, mostly for vertical stability and cut
@@ -242,13 +239,11 @@ for i in range(nitems):
             u_j[j] >= p_ij[i, j], name=f"Flagging_{i}_{j}"
         )
 
+
 #Constraint for stability
 for i in range(nitems):
-    for j in range(mbins):
-        model.addConstr(
-            gamma[i] + beta1[i, j] + beta2[i, j] + 2*g[i]
-            >= 2, name=f"Stability_{i}_{j}"
-        )
+        model.addConstr(gamma[i] + quicksum(beta1[i, j] for j in range(nitems) if i!=j) + quicksum(beta2[i, j] for j in range(nitems) if i!=j) + 2*g[i]
+            >= 2, name=f"Stability_{i}_{j}")
 
 #Constraints for cut of box
 
@@ -270,13 +265,13 @@ for i in range(nitems):
 #         model.addConstr(
 #             u_j[j] >= - bcut[j]/acut[j] * x[i] + bcut[j] - (1 - p_ij[i,j]) + (1 - gamma[i])
 #         )
-
+model.update()
 '''
 Objective Function
 '''
 objective = quicksum(Cj[j] * u_j[j] for j in range(len(Cj))) #sum of Cj[i] * u_j for each i
 model.setObjective(objective, GRB.MINIMIZE)
-
+model.update()
 
 '''
 Print constraints
@@ -292,7 +287,7 @@ Print constraints
 
 
 model.optimize()
-
+model.write('resuts.lp')
 if model.status == GRB.INFEASIBLE:
     print("The model is infeasible. Computing IIS...")
     model.computeIIS()
@@ -382,4 +377,54 @@ if model.status in [GRB.OPTIMAL, GRB.SUBOPTIMAL]:
 
         print(f"{constr.ConstrName}: LHS = {lhs_value}, RHS = {rhs_value}, Residual = {residual}")
 
-print(gamma[i], quicksum(beta1[i, j] for j in range(mbins)), quicksum(beta2[i, j] for j in range(mbins)), 2*g[i])
+    for i in range(nitems):
+        for j in range(mbins):
+                if p_ij[i, j].X == 1:
+                    print(f"p_ij[{i},{j}]: {p_ij[i, j].X}")
+
+    for j in range(mbins):
+        if u_j[j].X == 1:
+            print(f"u_j[{j}]: {u_j[j].X}")
+
+    for i in range(nitems):
+        for j in range(nitems):
+            if i != j:
+                if xp[i, j].X == 1:
+                    print(f"x_p[{i},{j}]: {xp[i, j].X}")
+
+    for i in range(nitems):
+        for j in range(nitems):
+            if i!=j:
+                if zp[i, j].X == 1:
+                    print(f"z_p[{i},{j}]: {zp[i, j].X}")
+
+    for i in range(nitems):
+        for j in range(n_orient):
+            for k in range(n_axes):
+                if r[i, j, k].X == 1:
+                    print(f"r[{i},{j},{k}]: {r[i, j, k].X}")
+
+    for i in range(nitems):
+        if rho[i].X == 1:
+            print(f"rho[{i}]: {rho[i].X}")
+
+    for i in range(nitems):
+        if g[i].X == 1:
+            print(f"g[{i}]: {g[i].X}")
+
+    for i in range(nitems):
+        for j in range(nitems):
+            if i != j:
+                if beta1[i, j].X == 1:
+                    print(f"beta1[{i},{j}]: {beta1[i, j].X}")
+
+    for i in range(nitems):
+        for j in range(nitems):
+            if i != j:
+                if beta2[i, j].X == 1:
+                    print(f"beta2[{i},{j}]: {beta2[i, j].X}")
+
+    for i in range(nitems):
+        if gamma[i].X == 1:
+            print(f"gamma[{i}]: {gamma[i].X}")
+
