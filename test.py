@@ -1,14 +1,14 @@
 import pickle
-from gurobipy import Model, GRB, quicksum
+from gurobipy import Model, GRB, quicksum, gurobi
 import os
 import numpy as np
 
 # Specify the full path to your Gurobi license file
 #gurobi_license_path = "/Users/mariannapiperigou/Documents/gurobi.lic"  # marianna
-gurobi_license_path = "C:/Users/Jacob/OneDrive - Delft University of Technology/Documents/gurobi.lic"  # job
+#gurobi_license_path = "C:/Users/Jacob/OneDrive - Delft University of Technology/Documents/gurobi.lic"  # job
 
 # Set the environment variable
-os.environ["GRB_LICENSE_FILE"] = gurobi_license_path
+#os.environ["GRB_LICENSE_FILE"] = gurobi_license_path
 
 #Data Extraction
 with open("B.pickle", "rb") as file1:
@@ -24,7 +24,7 @@ Parameter Definition
 '''
 
 mbins = int(sum(entry[1][2] for entry in bins.values())/2)  # number of bins -- should be halved i think
-nitems = 10                                        # number of items --> why???
+nitems = 12                                      # number of items --> why???
 li = [values[0] for values in items.values()]        # length of item
 hi = [values[1] for values in items.values()]        # height of item
 ai = [li[i] * hi[i] for i in range(len(li))]         # area of iteam
@@ -74,7 +74,7 @@ bcut = bins_with_cut['b']
 Model Definition
 '''
 model = Model("2DBPP")
-model.setParam('TimeLimit', 20)
+model.setParam('TimeLimit', 60*5)
 model.setParam('Method', 2)
 '''
 Variables Definition
@@ -256,6 +256,19 @@ objective = quicksum(Cj[j] * u_j[j] for j in range(len(Cj))) #sum of Cj[i] * u_j
 model.setObjective(objective, GRB.MINIMIZE)
 
 
+'''
+Print constraints
+'''
+'''def my_callback(model, where):
+    if where == GRB.Callback.MIPSOL:  # At integer feasible solutions
+        print("\n--- Constraint Values at Current Iteration ---")
+        for constr in model.getConstrs():
+            lhs = sum(model.getVarByName(var.varName).X * coeff
+                      for var, coeff in zip(constr.getVars(), constr.getCoeff()))
+            rhs = constr.RHS
+            print(f"{constr.ConstrName}: LHS = {lhs}, RHS = {rhs}, Residual = {rhs - lhs}")'''
+
+
 model.optimize()
 
 if model.status == GRB.INFEASIBLE:
@@ -266,7 +279,7 @@ if model.status == GRB.INFEASIBLE:
 import matplotlib.pyplot as plt
 import numpy as np
 
-def visualize_with_overlap(nitems, mbins, Lj, Hj, xi, zi, x_i_prime, z_i_prime, p_ij, bins_with_cut, a, b):
+def visualize_with_overlap(items, nitems, mbins, Lj, Hj, xi, zi, x_i_prime, z_i_prime, p_ij, bins_with_cut, a, b):
     fig, axs = plt.subplots(1, mbins, figsize=(15, 5))
 
     # Ensure the model is optimized before visualization
@@ -298,7 +311,8 @@ def visualize_with_overlap(nitems, mbins, Lj, Hj, xi, zi, x_i_prime, z_i_prime, 
                             rect_color = "red"  # Overlapping items are marked in red
                             break
                 axs[j].add_patch(plt.Rectangle((x, z), w, h, color=rect_color, alpha=0.5))
-                axs[j].text(x + w / 2, z + h / 2, f"{item}", ha='center', va='center')
+
+                axs[j].text(x + w / 2, z + h / 2, f"{item}\n {items[i][-3:]}", ha='center', va='center')
 
             # **Draw the ULD outline**
             if j in bins_with_cut:  # Checking if bin has a cut
@@ -332,7 +346,7 @@ def visualize_with_overlap(nitems, mbins, Lj, Hj, xi, zi, x_i_prime, z_i_prime, 
 
 # Call the function
 if model.status == GRB.OPTIMAL or model.status == GRB.SUBOPTIMAL:
-    visualize_with_overlap(nitems, mbins, Lj, Hj, x, z, xprime, zprime, p_ij, indices_with_cut, a, b)
+    visualize_with_overlap(items, nitems, mbins, Lj, Hj, x, z, xprime, zprime, p_ij, indices_with_cut, a, b)
 else:
     print("Model didn't find a solution within the time limit.")
 print(x, z)
