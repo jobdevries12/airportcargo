@@ -22,9 +22,10 @@ print(bins)
 '''
 Parameter Definition
 '''
-
+n_orient = 2
+n_axes = 2
 mbins = int(sum(entry[1][2] for entry in bins.values())/2)  # number of bins -- should be halved i think
-nitems = 12                                      # number of items --> why???
+nitems = 11                                      # number of items --> why???
 li = [values[0] for values in items.values()]        # length of item
 hi = [values[1] for values in items.values()]        # height of item
 ai = [li[i] * hi[i] for i in range(len(li))]         # area of iteam
@@ -91,7 +92,7 @@ z = model.addVars(nitems, vtype=GRB.CONTINUOUS, name="zi")              # Bottom
 xprime = model.addVars(nitems, vtype=GRB.CONTINUOUS, name="x_i_prime")  # Top-right x-coordinate
 zprime = model.addVars(nitems, vtype=GRB.CONTINUOUS, name="z_i_prime")  # Top-right z-coordinate
 
-r = model.addVars(nitems, 2, 2, vtype=GRB.BINARY, name="r")             # if
+r = model.addVars(nitems, n_orient, n_axes, vtype=GRB.BINARY, name="r")             # if
 rho = model.addVars(nitems, vtype=GRB.BINARY, name='rho')               # if item is rotated?
 
 g = model.addVars(nitems, vtype=GRB.BINARY, name='g')                   # 1 if item i lies on the ground of the bin
@@ -104,6 +105,28 @@ gamma = model.addVars(nitems, vtype=GRB.BINARY, name='gamma')           # 1 if v
 '''
 Constraints Definition
 '''
+M = 100000  # Big-M large constant
+for i in range(nitems):
+    for j in range(nitems):
+        if i != j:
+            model.addConstr(x[i] >= xprime[j] - M * (1 - beta1[i, j]), name=f"Beta1_{i}_{j}")
+            model.addConstr(z[i] <= zprime[j] + M * (1 - beta1[i, j]), name=f"Beta1_Z_Upper_{i}_{j}")
+            model.addConstr(z[i] >= zprime[j] - M * (1 - beta1[i, j]), name=f"Beta1_Z_Lower_{i}_{j}")
+
+            model.addConstr(xprime[j] >= x[i] - M * (1 - beta1[i, j]), name=f"Beta2_{i}_{j}")
+            model.addConstr(zprime[j] <= z[i] + M * (1 - beta1[i, j]), name=f"Beta2_Z_Upper_{i}_{j}")
+            model.addConstr(zprime[j] >= z[i] - M * (1 - beta1[i, j]), name=f"Beta2_Z_Lower_{i}_{j}")
+
+for i in range(nitems):
+    # If g[i] = 1 → z[i] must be 0 (upper bound)
+    model.addConstr(z[i] <= M * (1 - g[i]), name=f"GroundSupport_UpperBound_{i}")
+
+    # If g[i] = 0 → z[i] can be anything, so we don't need a lower bound
+for i in range(nitems):
+    for j in indices_with_cut:
+        # If gamma[i] = 1 → Item must be on the cut line equation
+        model.addConstr(z[i] + (b[j] / a[j]) * x[i] - b[j] <= M * (1 - gamma[i]), name=f"CutSupport_UpperBound_{i}_{j}")
+        model.addConstr(z[i] + (b[j] / a[j]) * x[i] - b[j] >= -M * (1 - gamma[i]), name=f"CutSupport_LowerBound_{i}_{j}")
 
 #constraint 3: area of items not larger than area of bin
 for i in range(nitems):
@@ -112,6 +135,8 @@ for i in range(nitems):
             ai[i] * p_ij[i, j] <= Aj[j] * u_j[j],
             name=f"AreaConstraint_{i}_{j}"
         )
+        if i == 3 & j ==1:
+            print(f'test, {ai[i]}, {p_ij[i,j]}, {Aj[j]}, {u_j[j]}')
 
 # Constraint 4: each item i is assigned to one bin j
 for i in range(nitems):
@@ -132,13 +157,11 @@ for i in range(nitems):
 for i in range(nitems):
     model.addConstr(
         xprime[i] - x[i] == sum(r[i, 0, b] * [li[i], hi[i]][b] for b in range(2)),
-        name=f"TransformX_{i}"
-    )
+        name=f"TransformX_{i}")
+
     model.addConstr(
         zprime[i] - z[i] == sum(r[i, 1, b] * [li[i], hi[i]][b] for b in range(2)),
-        name=f"TransformZ_{i}"
-    )
-
+        name=f"TransformZ_{i}")
 
 #constraint 11 and 12:
 for i in range(nitems):
@@ -203,10 +226,10 @@ for i in range(nitems):
 for i in range(nitems):
     for j in indices_with_cut:
         model.addConstr(
-            z[i] + b[j]/a[j] * x[i] >= b[j] - 50000*(1 - p_ij[i, j]), name=f'Constraint_{i}_{j}'
+            z[i] + b[j]/a[j] * x[i] >= b[j] - M*(1 - p_ij[i, j]), name=f'Constraint_{i}_{j}'
         )
         model.addConstr(
-            z[i] + b[j] / a[j] * x[i] >= b[j] - 50000 * (1 - p_ij[i, j]) + 50000* (1 - gamma[i]), name=f'Constraint_{i}_{j}'
+            z[i] + b[j] / a[j] * x[i] >= b[j] - M * (1 - p_ij[i, j]) + M* (1 - gamma[i]), name=f'Constraint_{i}_{j}'
         )
 
 '''
@@ -216,17 +239,16 @@ Constraints from lecture, mostly for vertical stability and cut
 for i in range(nitems):
     for j in range(mbins):
         model.addConstr(
-            u_j[j] >= p_ij[i, j]
+            u_j[j] >= p_ij[i, j], name=f"Flagging_{i}_{j}"
         )
 
 #Constraint for stability
 for i in range(nitems):
-    model.addConstr(
-        gamma[i] + quicksum(beta1[i, j] for j in range(mbins)) + quicksum(beta2[i, j] for j in range(mbins)) + 2*g[i]
-        >= 2
-    )
-
-
+    for j in range(mbins):
+        model.addConstr(
+            gamma[i] + beta1[i, j] + beta2[i, j] + 2*g[i]
+            >= 2, name=f"Stability_{i}_{j}"
+        )
 
 #Constraints for cut of box
 
@@ -312,7 +334,7 @@ def visualize_with_overlap(items, nitems, mbins, Lj, Hj, xi, zi, x_i_prime, z_i_
                             break
                 axs[j].add_patch(plt.Rectangle((x, z), w, h, color=rect_color, alpha=0.5))
 
-                axs[j].text(x + w / 2, z + h / 2, f"{item}\n {items[i][-3:]}", ha='center', va='center')
+                axs[j].text(x + w / 2, z + h / 2, f"{item}\n {items[i][-4:]}", ha='center', va='center')
 
             # **Draw the ULD outline**
             if j in bins_with_cut:  # Checking if bin has a cut
@@ -349,4 +371,15 @@ if model.status == GRB.OPTIMAL or model.status == GRB.SUBOPTIMAL:
     visualize_with_overlap(items, nitems, mbins, Lj, Hj, x, z, xprime, zprime, p_ij, indices_with_cut, a, b)
 else:
     print("Model didn't find a solution within the time limit.")
-print(x, z)
+
+if model.status in [GRB.OPTIMAL, GRB.SUBOPTIMAL]:
+    print("\n--- Final Constraint Values ---")
+    for constr in model.getConstrs():
+        expr = model.getRow(constr)  # Get the constraint's left-hand side expression
+        lhs_value = sum(expr.getVar(i).X * expr.getCoeff(i) for i in range(expr.size()))
+        rhs_value = constr.RHS  # Right-hand side of the constraint
+        residual = rhs_value - lhs_value  # Difference between RHS and LHS
+
+        print(f"{constr.ConstrName}: LHS = {lhs_value}, RHS = {rhs_value}, Residual = {residual}")
+
+print(gamma[i], quicksum(beta1[i, j] for j in range(mbins)), quicksum(beta2[i, j] for j in range(mbins)), 2*g[i])
