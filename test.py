@@ -1,6 +1,7 @@
 import pickle
 from gurobipy import Model, GRB, quicksum
 import os
+import numpy as np
 
 # Specify the full path to your Gurobi license file
 #gurobi_license_path = "/Users/mariannapiperigou/Documents/gurobi.lic"  # marianna
@@ -22,19 +23,19 @@ print(bins)
 Parameter Definition
 '''
 
-mbins = sum(entry[1][2] for entry in bins.values())  # number of bins -- should be halved i think
+mbins = int(sum(entry[1][2] for entry in bins.values())/2)  # number of bins -- should be halved i think
 nitems = 10                                        # number of items --> why???
 li = [values[0] for values in items.values()]        # length of item
 hi = [values[1] for values in items.values()]        # height of item
 ai = [li[i] * hi[i] for i in range(len(li))]         # area of iteam
-Lj = [300, 300, 300, 300, 192, 192, 192, 192]        # Length of bin
+Lj = [values[1][0] for values in bins.values()]        # Length of bin
 L = max(Lj)
-Hj = [155, 155, 155, 155, 155, 155, 155, 155]        # height of bin
+Hj = [values[1][1] for values in bins.values()]        # height of bin
 H = max(Hj)
 Aj = [Lj[i] * Hj[i] for i in range(len(Lj))]         # area of bin
-Cj = [200, 200, 200,200, 150, 150, 150, 150]        # cost of bin
-a = [-1, -1, -1, -1, 42, 42, 42, 42]                 # corner shape of bin
-b = [-1, -1, -1, -1, 53, 53, 53, 53]                 # corner shape of bin
+Cj = [values[1][3] for values in bins.values()]         # cost of bin
+a = [values[1][4] for values in bins.values()]                  # corner shape of bin
+b = [values[1][5] for values in bins.values()]                 # corner shape of bin
 
 # Orientation parameters
 lip = [values[2] for values in items.values()]       # item can be rotated by pi/2 or no
@@ -46,8 +47,8 @@ hplus = [1 if lip[i] == 1 else 0 for i in range(nitems)]  # 1 if can rotate alon
 How to tackle the cut???
 '''
 # Indices for bins without a cut (0-3) and bins with a cut (4-7)
-indices_no_cut = range(4)  # 0, 1, 2, 3
-indices_with_cut = range(4, 8)  # 4, 5, 6, 7
+indices_no_cut = [k for k, v in bins.items() if v[1][-2:] == [-1, -1]]#range(2)  # 0, 1, 2, 3
+indices_with_cut = [k for k, v in bins.items() if v[1][-2:] != [-1, -1]]#range(2, 4)  # 4, 5, 6, 7
 
 # Divide into subsets
 bins_no_cut = {
@@ -68,8 +69,6 @@ Lcut = bins_with_cut['length']
 Hcut = bins_with_cut['height']
 acut = bins_with_cut['a']
 bcut = bins_with_cut['b']
-
-
 
 '''
 Model Definition
