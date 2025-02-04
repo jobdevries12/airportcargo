@@ -24,7 +24,7 @@ Parameter Definition
 '''
 
 mbins = int(sum(entry[1][2] for entry in bins.values())/2)  # number of bins -- should be halved i think
-nitems = 12                                      # number of items --> why???
+nitems = 10                                      # number of items --> why???
 li = [values[0] for values in items.values()]        # length of item
 hi = [values[1] for values in items.values()]        # height of item
 ai = [li[i] * hi[i] for i in range(len(li))]         # area of iteam
@@ -349,4 +349,13 @@ if model.status == GRB.OPTIMAL or model.status == GRB.SUBOPTIMAL:
     visualize_with_overlap(items, nitems, mbins, Lj, Hj, x, z, xprime, zprime, p_ij, indices_with_cut, a, b)
 else:
     print("Model didn't find a solution within the time limit.")
-print(x, z)
+
+if model.status in [GRB.OPTIMAL, GRB.SUBOPTIMAL]:
+    print("\n--- Final Constraint Values ---")
+    for constr in model.getConstrs():
+        expr = model.getRow(constr)  # Get the constraint's left-hand side expression
+        lhs_value = sum(expr.getVar(i).X * expr.getCoeff(i) for i in range(expr.size()))
+        rhs_value = constr.RHS  # Right-hand side of the constraint
+        residual = rhs_value - lhs_value  # Difference between RHS and LHS
+
+        print(f"{constr.ConstrName}: LHS = {lhs_value}, RHS = {rhs_value}, Residual = {residual}")
