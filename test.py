@@ -25,10 +25,10 @@ Parameter Definition
 n_orient = 2
 n_axes = 2
 mbins = int(sum(entry[1][2] for entry in bins.values())/2)  # number of bins -- should be halved i think
-nitems = 5                                     # number of items --> why???
+nitems = 9                                     # number of items --> why???
 li = [values[0] for values in items.values()]        # length of item
 hi = [values[1] for values in items.values()]        # height of item
-ai = [li[i] * hi[i] for i in range(len(li))]         # area of iteam
+ai = [li[i] * hi[i] for i in range(len(li))]         # area of item
 Lj = [values[1][0] for values in bins.values()]        # Length of bin
 L = max(Lj)
 Hj = [values[1][1] for values in bins.values()]        # height of bin
@@ -111,19 +111,21 @@ for i in range(nitems):
     model.addConstr(z[i] <= M * (1 - g[i]), name=f"GroundSupport_UpperBound_{i}")
     for j in indices_with_cut:
         # If gamma[i] = 1 → Item must be on the cut line equation
-        model.addConstr(z[i] + (b[j] / a[j]) * x[i] - b[j] <= M * (1 - gamma[i]), name=f"CutSupport_UpperBound_{i}_{j}")
-        model.addConstr(z[i] + (b[j] / a[j]) * x[i] - b[j] >= -M * (1 - gamma[i]), name=f"CutSupport_LowerBound_{i}_{j}")
-
+        model.addConstr(z[i] + (b[j] / a[j]) * x[i] - b[j] <= M * (1 - gamma[i]) + M * (1-p_ij[i,j]), name=f"CutSupport_UpperBound_{i}_{j}")
+        model.addConstr(z[i] + (b[j] / a[j]) * x[i] - b[j] >= -M * (1 - p_ij[i,j]), name=f"CutSupport_LowerBound_{i}_{j}")
     for j in range(nitems):
         if i != j:
-            model.addConstr(x[i] <= xprime[j] + M * (1 - beta1[i, j]), name=f"Beta1_{i}_{j}")
             model.addConstr(z[i] <= zprime[j] + M * (1 - beta1[i, j]), name=f"Beta1_Z_Upper_{i}_{j}")
             model.addConstr(z[i] >= zprime[j] - M * (1 - beta1[i, j]), name=f"Beta1_Z_Lower_{i}_{j}")
+            model.addConstr(x[i] <= xprime[j] + M * (1 - beta1[i, j]), name=f"Beta1_{i}_{j}__1")
+            model.addConstr(x[i] >= x[j] - M * (1 - beta1[i, j]), name=f"Beta1_{i}_{j}__2")
+            model.addConstr(quicksum(beta1[i,k] for k in range(nitems))<=1,name=f"Beta1max{i}_{j}")
 
-            model.addConstr(xprime[i] >= x[j] - M * (1 - beta2[i, j]), name=f"Beta2_{i}_{j}")
-            model.addConstr(zprime[i] <= z[j] + M * (1 - beta2[i, j]), name=f"Beta2_Z_Upper_{i}_{j}")
-            model.addConstr(zprime[i] >= z[j] - M * (1 - beta2[i, j]), name=f"Beta2_Z_Lower_{i}_{j}")
-
+            model.addConstr(z[i] <= zprime[j] + M * (1 - beta2[i, j]), name=f"Beta2_Z_Upper_{i}_{j}")
+            model.addConstr(z[i] >= zprime[j] - M * (1 - beta2[i, j]), name=f"Beta2_Z_Lower_{i}_{j}")
+            model.addConstr(xprime[i] >= x[j] - M * (1 - beta2[i, j]), name=f"Beta2_{i}_{j}__1")
+            model.addConstr(xprime[i] <= xprime[j] + M * (1 - beta2[i, j]), name=f"Beta2_{i}_{j}__2")
+            model.addConstr(quicksum(beta2[i,k] for k in range(nitems))<=1,name=f"Beta2max{i}_{j}")
 
 # constraint 3: area of items not larger than area of bin
 for i in range(nitems):

@@ -1,30 +1,20 @@
 \ Model 2DBPP_copy
 \ LP format - for model browsing. Use MPS format to capture full model detail.
-\ Signature: 0x20045267b9c212b0
+\ Signature: 0x6dfa12e65343742
 Minimize
  
 Subject To
- Beta1_1_2: xi[1] - x_i_prime[2] - 100000 beta1[1,2] <= -100000
- Beta1_Z_Lower_1_2: zi[1] - z_i_prime[2] - 100000 beta1[1,2] >= -100000
- Beta1_2_1: xi[2] - x_i_prime[1] - 100000 beta1[2,1] <= -100000
- Beta1_Z_Lower_2_1: zi[2] - z_i_prime[1] - 100000 beta1[2,1] >= -100000
- TransformX_1: - xi[1] + x_i_prime[1] - 64 r[1,0,0] - 35 r[1,0,1] = 0
- TransformZ_1: - zi[1] + z_i_prime[1] - 64 r[1,1,0] - 35 r[1,1,1] = 0
- TransformX_2: - xi[2] + x_i_prime[2] - 53 r[2,0,0] - 32 r[2,0,1] = 0
- TransformZ_2: - zi[2] + z_i_prime[2] - 53 r[2,1,0] - 32 r[2,1,1] = 0
- LengthAlign_2: r[2,0,0] + r[2,1,0] = 1
- HeightAlign_2: r[2,0,1] + r[2,1,1] = 1
- XAxisAlign_2: r[2,0,0] + r[2,0,1] = 1
+ Beta2_1_2__2: x_i_prime[1] - x_i_prime[2] + 100000 beta1[1,2] >= 100000
+ Beta1max1_2: beta1[1,0] + beta1[1,1] + beta1[1,2] + beta1[1,3]
+   + beta1[1,4] <= 1
+ Beta2_1_4__2: x_i_prime[1] - x_i_prime[4] + 100000 beta1[1,4] >= 100000
+ Beta2_2_1__2: - x_i_prime[1] + x_i_prime[2] + 100000 beta1[2,1] >= 100000
+ Beta2_4_1__2: - x_i_prime[1] + x_i_prime[4] + 100000 beta1[4,1] >= 100000
 Bounds
- xi[1] free
- xi[2] free
- zi[1] free
- zi[2] free
  x_i_prime[1] free
  x_i_prime[2] free
- z_i_prime[1] free
- z_i_prime[2] free
+ x_i_prime[4] free
 Binaries
- r[1,0,0] r[1,0,1] r[1,1,0] r[1,1,1] r[2,0,0] r[2,0,1] r[2,1,0] r[2,1,1]
- beta1[1,2] beta1[2,1]
+ beta1[1,0] beta1[1,1] beta1[1,2] beta1[1,3] beta1[1,4] beta1[2,1]
+ beta1[4,1]
 End
