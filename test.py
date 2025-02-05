@@ -24,7 +24,11 @@ Parameter Definition
 '''
 
 mbins = int(sum(entry[1][2] for entry in bins.values())/2)  # number of bins -- should be halved i think
+<<<<<<< Updated upstream
 nitems = 10                                      # number of items --> why???
+=======
+nitems = 10                                     # number of items --> why???
+>>>>>>> Stashed changes
 li = [values[0] for values in items.values()]        # length of item
 hi = [values[1] for values in items.values()]        # height of item
 ai = [li[i] * hi[i] for i in range(len(li))]         # area of iteam
@@ -37,6 +41,9 @@ Cj = [values[1][3] for values in bins.values()]         # cost of bin
 a = [values[1][4] for values in bins.values()]                  # corner shape of bin
 b = [values[1][5] for values in bins.values()]                 # corner shape of bin
 
+fragile = [values[3] for values in items.values()]
+perishable = [values[4] for values in items.values()]
+radioactive = [values[5] for values in items.values()]
 # Orientation parameters
 lip = [values[2] for values in items.values()]       # item can be rotated by pi/2 or no
 #dont get points of this??:
@@ -100,12 +107,53 @@ beta1 = model.addVars(nitems, nitems, vtype=GRB.BINARY, name='beta1')   # 1 if v
 beta2 = model.addVars(nitems, nitems, vtype=GRB.BINARY, name='beta2')   # 1 if vertex 2 of item i is supported by item j
 gamma = model.addVars(nitems, vtype=GRB.BINARY, name='gamma')           # 1 if vertex 1 of item i is supported by the cut of the bin where it is placed
 
+<<<<<<< Updated upstream
 
 '''
 Constraints Definition
 '''
 
 #constraint 3: area of items not larger than area of bin
+=======
+s = model.addVars(nitems, nitems, vtype=GRB.BINARY, name='s')
+model.update()
+'''
+Constraints Definition
+'''
+for i in range(nitems):
+    for j in range(mbins):
+        for k in range(nitems):
+            model.addConstr(p_ij[i,j] - p_ij[k,j] <= 1 - s[i,k], name=f"SupportSameBin_{i}_{k}_{j}")
+            model.addConstr(p_ij[k,j] - p_ij[i,j] <= 1 - s[i,k], name=f"SupportSameBin_{i}_{k}_{j}")
+
+M = 100000  # Big-M large constant
+for i in range(nitems):
+    # If g[i] = 1 → z[i] must be 0 (upper bound)
+    model.addConstr(z[i] <= M * (1 - g[i]), name=f"GroundSupport_UpperBound_{i}")
+    for j in indices_with_cut:
+        # If gamma[i] = 1 → Item must be on the cut line equation
+        model.addConstr(z[i] + (b[j] / a[j]) * x[i] - b[j] <= M * (1 - gamma[i]) + M * (1-p_ij[i,j]), name=f"CutSupport_UpperBound_{i}_{j}")
+        model.addConstr(z[i] + (b[j] / a[j]) * x[i] - b[j] >= -M * (1 - p_ij[i,j]), name=f"CutSupport_LowerBound_{i}_{j}")
+    for j in range(nitems):
+        if i != j:
+            #for k in range(mbins):
+                model.addConstr(z[i] <= zprime[j] + M * (1 - beta1[i, j]), name=f"Beta1_Z_Upper_{i}_{j}")  # + M * (2 - p_ij[i, k] - p_ij[j, k]), name=f"Beta1_Z_Upper_{i}_{j}")
+                model.addConstr(z[i] >= zprime[j] - M * (1 - beta1[i, j]), name=f"Beta1_Z_Lower_{i}_{j}")  # - M * (2 - p_ij[i, k] - p_ij[j, k]), name=f"Beta1_Z_Lower_{i}_{j}")
+                model.addConstr(x[i] <= xprime[j] + M * (1 - beta1[i, j]), name=f"Beta1_{i}_{j}__1")  # + M * (2 - p_ij[i, k] - p_ij[j, k]), name=f"Beta1_{i}_{j}__1")
+                model.addConstr(x[i] >= x[j] - M * (1 - beta1[i, j]), name=f"Beta1_{i}_{j}__2")  # - M * (2 - p_ij[i, k] - p_ij[j, k]), name=f"Beta1_{i}_{j}__2")
+                model.addConstr(quicksum(beta1[i,k] for k in range(nitems))<=1,name=f"Beta1max{i}_{j}")
+
+
+                model.addConstr(z[i] <= zprime[j] + M * (1 - beta2[i, j]), name=f"Beta2_Z_Upper_{i}_{j}")  # + M * (2 - p_ij[i, k] - p_ij[j, k]), name=f"Beta2_Z_Upper_{i}_{j}")
+                model.addConstr(z[i] >= zprime[j] - M * (1 - beta2[i, j]), name=f"Beta2_Z_Lower_{i}_{j}")  # - M * (2 - p_ij[i, k] - p_ij[j, k]), name=f"Beta2_Z_Lower_{i}_{j}")
+                model.addConstr(xprime[i] >= x[j] - M * (1 - beta2[i, j]), name=f"Beta2_{i}_{j}__1")  # - M * (2 - p_ij[i, k] - p_ij[j, k]), name=f"Beta2_{i}_{j}__1")
+                model.addConstr(xprime[i] <= xprime[j] + M * (1 - beta2[i, j]), name=f"Beta2_{i}_{j}__2")  # + M * (2 - p_ij[i, k] - p_ij[j, k]), name=f"Beta2_{i}_{j}__2")
+                model.addConstr(quicksum(beta2[i,k] for k in range(nitems))<=1,name=f"Beta2max{i}_{j}")
+
+                model.addConstr(beta1[i, j] <= s[i, j], name= f"SupportFlag1_{i}_{j}")
+                model.addConstr(beta2[i, j] <= s[i, j], name=f"SupportFlag2_{i}_{j}")
+# constraint 3: area of items not larger than area of bin
+>>>>>>> Stashed changes
 for i in range(nitems):
     for j in range(mbins):
         model.addConstr(
@@ -196,8 +244,13 @@ for i in range(nitems):
 
 # Orientation constraints (19–21)
 for i in range(nitems):
+<<<<<<< Updated upstream
     model.addConstr(r[i, 0, 0] <= lplus[i], name=f"OrientationLength_{i}")
     model.addConstr(r[i, 1, 1] <= hplus[i], name=f"OrientationHeight_{i}")
+=======
+    model.addConstr(r[i, 0, 1] <= lplus[i], name=f"OrientationLength_{i}")
+    model.addConstr(r[i, 1, 0] <= hplus[i], name=f"OrientationHeight_{i}")
+>>>>>>> Stashed changes
 
 # #Constraint 22
 for i in range(nitems):
@@ -228,8 +281,21 @@ for i in range(nitems):
 
 
 
-#Constraints for cut of box
+#some items might be fragile and, as such, no other box can be stacked on top of them
+for i in range(nitems):
+    for k in range(nitems):
+        model.addConstr(
+            s[i, k] <= nitems * (1 - fragile[k]),
+            name=f"Fragile_{i}_{k}")
 
+# Ensure that a ULD cannot contain both perishable and radioactive items
+for j in range(mbins):
+    model.addConstr(
+        quicksum(p_ij[i, j] * perishable[i] for i in range(nitems)) +
+        quicksum(p_ij[i, j] * radioactive[i] for i in range(nitems)) <= 1,
+        name=f"Perishable_radioactive_{j}")
+
+<<<<<<< Updated upstream
 # #constraint for when theres no cut
 # for i in range(nitems):
 #     for j in range(len(Lnc)):
@@ -249,6 +315,9 @@ for i in range(nitems):
 #             u_j[j] >= - bcut[j]/acut[j] * x[i] + bcut[j] - (1 - p_ij[i,j]) + (1 - gamma[i])
 #         )
 
+=======
+model.update()
+>>>>>>> Stashed changes
 '''
 Objective Function
 '''
