@@ -24,11 +24,8 @@ Parameter Definition
 '''
 
 mbins = int(sum(entry[1][2] for entry in bins.values())/2)  # number of bins -- should be halved i think
-<<<<<<< Updated upstream
-nitems = 10                                      # number of items --> why???
-=======
+
 nitems = 10                                     # number of items --> why???
->>>>>>> Stashed changes
 li = [values[0] for values in items.values()]        # length of item
 hi = [values[1] for values in items.values()]        # height of item
 ai = [li[i] * hi[i] for i in range(len(li))]         # area of iteam
@@ -107,14 +104,6 @@ beta1 = model.addVars(nitems, nitems, vtype=GRB.BINARY, name='beta1')   # 1 if v
 beta2 = model.addVars(nitems, nitems, vtype=GRB.BINARY, name='beta2')   # 1 if vertex 2 of item i is supported by item j
 gamma = model.addVars(nitems, vtype=GRB.BINARY, name='gamma')           # 1 if vertex 1 of item i is supported by the cut of the bin where it is placed
 
-<<<<<<< Updated upstream
-
-'''
-Constraints Definition
-'''
-
-#constraint 3: area of items not larger than area of bin
-=======
 s = model.addVars(nitems, nitems, vtype=GRB.BINARY, name='s')
 model.update()
 '''
@@ -153,7 +142,6 @@ for i in range(nitems):
                 model.addConstr(beta1[i, j] <= s[i, j], name= f"SupportFlag1_{i}_{j}")
                 model.addConstr(beta2[i, j] <= s[i, j], name=f"SupportFlag2_{i}_{j}")
 # constraint 3: area of items not larger than area of bin
->>>>>>> Stashed changes
 for i in range(nitems):
     for j in range(mbins):
         model.addConstr(
@@ -244,13 +232,10 @@ for i in range(nitems):
 
 # Orientation constraints (19–21)
 for i in range(nitems):
-<<<<<<< Updated upstream
-    model.addConstr(r[i, 0, 0] <= lplus[i], name=f"OrientationLength_{i}")
-    model.addConstr(r[i, 1, 1] <= hplus[i], name=f"OrientationHeight_{i}")
-=======
+
     model.addConstr(r[i, 0, 1] <= lplus[i], name=f"OrientationLength_{i}")
     model.addConstr(r[i, 1, 0] <= hplus[i], name=f"OrientationHeight_{i}")
->>>>>>> Stashed changes
+
 
 # #Constraint 22
 for i in range(nitems):
@@ -295,29 +280,6 @@ for j in range(mbins):
         quicksum(p_ij[i, j] * radioactive[i] for i in range(nitems)) <= 1,
         name=f"Perishable_radioactive_{j}")
 
-<<<<<<< Updated upstream
-# #constraint for when theres no cut
-# for i in range(nitems):
-#     for j in range(len(Lnc)):
-#         model.addConstr(
-#             gamma[i] <= 1 - p_ij[i, j]
-#         )
-#
-# for i in range(nitems):
-#     for j in range(len(Lcut)):
-#         model.addConstr(
-#             u_j[j] >= - bcut[j]/acut[j] * x[i] + bcut[j] - (1 - p_ij[i,j])
-#         )
-#
-# for i in range(nitems):
-#     for j in range(len(Lcut)):
-#         model.addConstr(
-#             u_j[j] >= - bcut[j]/acut[j] * x[i] + bcut[j] - (1 - p_ij[i,j]) + (1 - gamma[i])
-#         )
-
-=======
-model.update()
->>>>>>> Stashed changes
 '''
 Objective Function
 '''
