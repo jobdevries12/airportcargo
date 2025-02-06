@@ -3,13 +3,6 @@ from gurobipy import Model, GRB, quicksum, gurobi
 import os
 import numpy as np
 
-# Specify the full path to your Gurobi license file
-#gurobi_license_path = "/Users/mariannapiperigou/Documents/gurobi.lic"  # marianna
-#gurobi_license_path = "C:/Users/Jacob/OneDrive - Delft University of Technology/Documents/gurobi.lic"  # job
-
-# Set the environment variable
-#os.environ["GRB_LICENSE_FILE"] = gurobi_license_path
-
 #Data Extraction
 with open("B.pickle", "rb") as file1:
     bins = pickle.load(file1)
@@ -18,6 +11,7 @@ with open("I.pickle", "rb") as file2:
     items = pickle.load(file2)
 print(items)
 print(bins)
+items = {0: (65, 28, 1, 0, 0, 0), 1: (64, 35, 0, 0, 1, 0), 2: (53, 32, 1, 0, 0, 1), 3: (88, 36, 1, 1, 0, 0), 4: (88, 30, 1, 0, 0, 0), 5: (86, 29, 1, 0, 0, 0), 6: (78, 29, 1, 0, 0, 0), 7: (66, 43, 0, 0, 0, 0), 8: (78, 31, 1, 0, 0, 0), 9: (47, 36, 0, 1, 0, 0), 10: (77, 36, 1, 0, 0, 1), 11: (74, 44, 1, 0, 0, 0), 12: (49, 41, 1, 1, 0, 1), 13: (89, 39, 1, 0, 0, 0), 14: (45, 38, 1, 1, 0, 0), 15: (78, 40, 1, 0, 0, 0), 16: (61, 40, 1, 0, 0, 0), 17: (79, 26, 0, 0, 0, 0), 18: (45, 38, 1, 0, 1, 0), 19: (62, 42, 1, 0, 0, 0), 20: (45, 24, 1, 1, 1, 0), 21: (47, 45, 0, 0, 0, 0), 22: (67, 35, 1, 0, 0, 0), 23: (66, 36, 0, 0, 0, 0), 24: (50, 41, 0, 0, 0, 0)}
 
 '''
 Parameter Definition
@@ -25,13 +19,13 @@ Parameter Definition
 M = 10000       # Large number for dummy variables
 epsilon = 1     # Offset for overlap constraint (15)
 
-mbins = int(sum(entry[1][2] for entry in bins.values())/2)  # number of bins -- should be halved i think
-nitems = 3                                     # number of items --> why???
+mbins = len(bins)  # number of bins -- should be halved i think
+nitems = 10                                    # number of items --> why???
 n_axes = 2                                      # number of axes
 n_orients = 2                                   # number of different sides/orientations of an item
 li = [values[0] for values in items.values()]        # length of item
 hi = [values[1] for values in items.values()]        # height of item
-ai = [li[i] * hi[i] for i in range(len(li))]         # area of iteam
+ai = [li[i] * hi[i] for i in range(len(li))]         # area of item
 Lj = [values[1][0] for values in bins.values()]        # Length of bin
 L = max(Lj)
 Hj = [values[1][1] for values in bins.values()]        # height of bin
@@ -132,9 +126,9 @@ for i in range(nitems):
 
 # Constraint 8 and 10 : orthogonal rotation
 for i in range(nitems):
-    model.addConstr(x_r[i] - x_l[i] == sum(r[i, 0, d] * [li[i], hi[i]][d] for d in range(2)),
+    model.addConstr(x_r[i] - x_l[i] == sum(r[i, 0, d] * [li[i], hi[i]][d] for d in range(n_orients)),
         name=f"TransformX_{i}")
-    model.addConstr(z_hi[i] - z_lo[i] == sum(r[i, 1, d] * [li[i], hi[i]][d] for d in range(2)),
+    model.addConstr(z_hi[i] - z_lo[i] == sum(r[i, 1, d] * [li[i], hi[i]][d] for d in range(n_orients)),
         name=f"TransformZ_{i}")
 
 
@@ -142,10 +136,10 @@ for i in range(nitems):
 for i in range(nitems):
     # Each side aligns with exactly one axis
     for d in range(n_orients):
-        model.addConstr(quicksum(r[i, c, d] for c in range(n_axes)) == 1, name=f"SidesAlign_{i}")
+        model.addConstr(quicksum(r[i, c, d] for c in range(n_axes)) == 1, name=f"SidesAlign_{d}")
     # Each axis aligns with exactly one side
     for c in range(n_axes):
-        model.addConstr(quicksum(r[i, c, d] for d in range(n_orients)) == 1, name=f"AxesAlign_{i}")
+        model.addConstr(quicksum(r[i, c, d] for d in range(n_orients)) == 1, name=f"AxesAlign_{c}")
     """model.addConstr(r[i, 0, 0] + r[i, 1, 0] == 1, name=f"LengthAlign_{i}")
     model.addConstr(r[i, 0, 1] + r[i, 1, 1] == 1, name=f"HeightAlign_{i}")
 
@@ -162,44 +156,17 @@ for i in range(nitems):
                                 name=f"OverlapInBin_{i}_{k}_toBin_{j}")
 
 
-# Constraint for relative positioning (this ensures item relative positions) (added by chatgpt, so far they work )
+# Overlap cntd
 for i in range(nitems):
     for k in range(nitems):
         if i != k:  # Avoid self-comparison
-            model.addConstr(x_r[k] <= x_l[i] + (1 - xp[i, k] * L), name=f"Overlap_{i}_ToRightOf_{k}")
+            # 14:
+            model.addConstr(x_r[k] <= x_l[i] + (1 - xp[i, k]) * L, name=f"Overlap_{i}_ToRightOf_{k}")
+            # 15:
             model.addConstr(x_l[i] + epsilon <= x_r[k] + xp[i, k] * L, name=f"Overlap_{i}NotToRightOf_{k}")
-            model.addConstr(z_hi[k] <= z_lo[i] + (1 - zp[i,k] *H), name=f"Overlap_{i}_Above_{k}")
+            # 18:
+            model.addConstr(z_hi[k] <= z_lo[i] + (1 - zp[i,k]) * H, name=f"Overlap_{i}_Above_{k}")
             #model.addConstr(z_lo[i] + epsilon <= z_hi[k] + zp[i,k] * H, name=f"Overlap_{i}_NotAbove_{k}")
-
-            '''model.addConstr(xp[i, k] + xp[k, i] + zp[i, k] + zp[k, i] >= 1,
-                            name=f"Overlap_{i}_{k}")
-            model.addConstr(xp[i, k] <= (1 - xp[k, i]), name=f"RightLeft_{i}_{k}")
-            model.addConstr(xp[k, i] <= (1 - xp[i, k]), name=f"LeftRight_{i}_{k}")
-
-            model.addConstr(zp[i, k] <= (1 - zp[k, i]), name=f"AboveBelow_{i}_{k}")
-            model.addConstr(zp[k, i] <= (1 - zp[i, k]), name=f"BelowAbove_{i}_{k}")'''
-
-"""# Constraint 14:
-for i in range(nitems):
-    for k in range(nitems):
-        if i != k:  # Avoid self-comparison
-            model.addConstr(x_r[k] <= x_l[i] + (1 - xp[i, k]) * L,
-                            name=f"Constraint14_{i}_{k}")
-
-# Constraint 15:
-for i in range(nitems):
-    for k in range(nitems):
-        if i != k:  # Avoid self-comparison
-            model.addConstr(x_l[i] + 1 <= x_r[k] + xp[i, k] * L,
-                            name=f"Constraint15_{i}_{k}")
-
-# Constraint 18:
-for i in range(nitems):
-    for k in range(nitems):
-        if i != k:  # Avoid self-comparison
-            model.addConstr(z_hi[k] <= z_lo[i] + (1 - zp[i, k]) * H,
-                            name=f"Constraint16_{i}_{k}")"""
-
 
 # Orientation constraints (19(& 21))
 for i in range(nitems):
@@ -227,8 +194,8 @@ g = model.addVars(nitems, vtype=GRB.BINARY, name='g')                   # 1 if i
 h = model.addVars(nitems, nitems, vtype=GRB.BINARY, name='h')   # 1 if item j has suitable height to support i (z_lo[i]==z_hi[j])
 o = model.addVars(nitems, nitems, vtype=GRB.BINARY, name='o')   # 1 if item j has non-empty intersec. on x axis with item i
 s = model.addVars(nitems, nitems, vtype=GRB.BINARY, name='s')   # 1 if item j supports item i and they're in the same bin
-eta1 = model.addVars(nitems, nitems, vtype=GRB.BINARY, name='s') # 1 if vertex 1 of item j is to left of item i (x_l[j] <= x_l[i])
-eta2 = model.addVars(nitems, nitems, vtype=GRB.BINARY, name='s') # 1 if vertex 2 of item j is to right of item i (x_up[j] <= x_up[i])
+eta1 = model.addVars(nitems, nitems, vtype=GRB.BINARY, name='eta1') # 1 if vertex 1 of item j is to left of item i (x_l[j] <= x_l[i])
+eta2 = model.addVars(nitems, nitems, vtype=GRB.BINARY, name='eta2') # 1 if vertex 2 of item j is to right of item i (x_up[j] <= x_up[i])
 
 beta1 = model.addVars(nitems, nitems, vtype=GRB.BINARY, name='beta1')   # 1 if vertex 1 of item i is supported by item j
 beta2 = model.addVars(nitems, nitems, vtype=GRB.BINARY, name='beta2')   # 1 if vertex 2 of item i is supported by item j
@@ -237,48 +204,12 @@ gamma = model.addVars(nitems, vtype=GRB.BINARY, name='gamma')           # 1 if v
 v = model.addVars(nitems, nitems, vtype=GRB.CONTINUOUS, name='k')   # represents absolute value of z_hi[k] - z_lo[i]
 m = model.addVars(nitems, nitems, vtype=GRB.BINARY, name='m')   # 1 if k overlaps or exceeds i in height, i.e. z_hi[k] > z_lo[i]
 
-'''Vertical Stability Constraints'''
-for i in range(nitems):
-    for j in range(mbins):
-        for k in range(nitems):
-            model.addConstr(p_ij[i,j] - p_ij[k,j] <= 1 - s[i,k], name=f"SupportSameBin_{i}_{k}_{j}")
-            model.addConstr(p_ij[k,j] - p_ij[i,j] <= 1 - s[i,k], name=f"SupportSameBin_{i}_{k}_{j}")
+#'''Vertical Stability Constraints'''
 
-
-'''M = 100000  # Big-M large constant
-for i in range(nitems):
-    # If g[i] = 1 → z_lo[i] must be 0 (upper bound)
-    model.addConstr(z_lo[i] <= M * (1 - g[i]), name=f"GroundSupport_UpperBound_{i}")
-    for j in indices_with_cut:
-        # If gamma[i] = 1 → Item must be on the cut line equation
-        model.addConstr(z_lo[i] + (b[j] / a[j]) * x_l[i] - b[j] <= M * (1 - gamma[i]) + M * (1-p_ij[i,j]), name=f"CutSupport_UpperBound_{i}_{j}")
-        #model.addConstr(z_lo[i] + (b[j] / a[j]) * x_l[i] - b[j] >= -M * (1 - p_ij[i,j]), name=f"CutSupport_LowerBound_{i}_{j}")
-    for j in range(nitems):
-        if i != j:
-            #for k in range(mbins):
-                model.addConstr(z_lo[i] <= z_hi[j] + M * (1 - beta1[i, j]), name=f"Beta1_z_hipper_{i}_{j}")  # + M * (2 - p_ij[i, k] - p_ij[j, k]), name=f"Beta1_z_hipper_{i}_{j}")
-                model.addConstr(z_lo[i] >= z_hi[j] - M * (1 - beta1[i, j]), name=f"Beta1_Z_Lower_{i}_{j}")  # - M * (2 - p_ij[i, k] - p_ij[j, k]), name=f"Beta1_Z_Lower_{i}_{j}")
-                model.addConstr(x_l[i] <= x_r[j] + M * (1 - beta1[i, j]), name=f"Beta1_{i}_{j}__1")  # + M * (2 - p_ij[i, k] - p_ij[j, k]), name=f"Beta1_{i}_{j}__1")
-                model.addConstr(x_l[i] >= x_l[j] - M * (1 - beta1[i, j]), name=f"Beta1_{i}_{j}__2")  # - M * (2 - p_ij[i, k] - p_ij[j, k]), name=f"Beta1_{i}_{j}__2")
-                model.addConstr(quicksum(beta1[i,k] for k in range(nitems))<=1,name=f"Beta1max{i}_{j}")
-
-
-                model.addConstr(z_lo[i] <= z_hi[j] + M * (1 - beta2[i, j]), name=f"Beta2_z_hipper_{i}_{j}")  # + M * (2 - p_ij[i, k] - p_ij[j, k]), name=f"Beta2_z_hipper_{i}_{j}")
-                model.addConstr(z_lo[i] >= z_hi[j] - M * (1 - beta2[i, j]), name=f"Beta2_Z_Lower_{i}_{j}")  # - M * (2 - p_ij[i, k] - p_ij[j, k]), name=f"Beta2_Z_Lower_{i}_{j}")
-                model.addConstr(x_r[i] >= x_l[j] - M * (1 - beta2[i, j]), name=f"Beta2_{i}_{j}__1")  # - M * (2 - p_ij[i, k] - p_ij[j, k]), name=f"Beta2_{i}_{j}__1")
-                model.addConstr(x_r[i] <= x_r[j] + M * (1 - beta2[i, j]), name=f"Beta2_{i}_{j}__2")  # + M * (2 - p_ij[i, k] - p_ij[j, k]), name=f"Beta2_{i}_{j}__2")
-                model.addConstr(quicksum(beta2[i,k] for k in range(nitems))<=1,name=f"Beta2max{i}_{j}")
-
-                model.addConstr(beta1[i, j] <= s[i, j], name= f"SupportFlag1_{i}_{j}")
-                model.addConstr(beta2[i, j] <= s[i, j], name=f"SupportFlag2_{i}_{j}")
-'''
-'''
-Constraints from lecture, mostly for vertical stability and cut
-'''
 #Constraint 26 adapted for 2D stability
 for i in range(nitems):
     model.addConstr(
-        gamma[i] + quicksum(beta1[i, j] for j in range(mbins)) + quicksum(beta2[i, j] for j in range(mbins)) + 2*g[i]
+        gamma[i] + quicksum(beta1[i, j] for j in range(nitems) if i!= j) + quicksum(beta2[i, j] for j in range(nitems)if i!= j) + 2*g[i]
         >= 2
     )
 
@@ -301,7 +232,7 @@ for i in range(nitems):
             # 33: forces h, if v_ik is larger than 0, then h must be 1 (no height comp.)
             model.addConstr(v[i, k] <= h[i, k] * H, name=f"NoHeightCompat_{i}_{k}")
 
-            '''34 might need revising'''
+            ####34 might need revising
             # 34.1: forces o, if horizontal overlap, then o is 0 because neither i or k are to the right of each other
             model.addConstr(o[i, k] <= xp[i, k] + xp[k, i], name=f"Overlap_{i}_{k}")
             # 34.2: forces o, if no horizontal overlap, o must be 1 because either i or k are to right of each other
@@ -319,7 +250,7 @@ for i in range(nitems):
             # 38: forces s, if beta1 or beta2 is 1, s is flagged to 1
             model.addConstr(beta1[i, k] <= s[i, k], name=f"sBeta1Flag_{i}_{k}")
             model.addConstr(beta2[i, k] <= s[i, k], name=f"sBeta2Flag_{i}_{k}")
-            '''39 might need revising, might not even be necessary due to 34'''
+            ####39 might need revising, might not even be necessary due to 34
             # 39.1: if i supports j (beta=1), x_l[i]>x_l[j] (eta1 = 0) and x_r[k] > x_l[i]
             model.addConstr(eta1[i, k] <= 1 - beta1[i, k], name=f"Eta1Overlap_{i}_{k}")
             model.addConstr(eta2[i, k] <= 1 - beta2[i, k], name=f"Eta2Overlap_{i}_{k}")
@@ -332,19 +263,19 @@ for i in range(nitems):
                 model.addConstr(p_ij[i, j] - p_ij[k, j] <= s[i, k], name=f"{k}_Supports_{i}_InSameBin1_{j}")
                 model.addConstr(p_ij[k, j] - p_ij[i, j] <= s[i, k], name=f"{k}_Supports_{i}_InSameBin2_{j}")
 
-                '''# 49: forces gamma to be 0 if there is no cut (technically gamma could be 1 for no-cut ULD as a=b=0)
-                model.addConstr(p_ij[i,j] + gamma[i] <= a[j] + b[j] + 3, name={f"Gamma0ForItems_{i}_inBins_{j}_NoCut"})'''
-            for j in indices_with_cut:
+            # 49: forces gamma to be 0 if there is no cut (technically gamma could be 1 for no-cut ULD as a=b=0)
+                #model.addConstr(p_ij[i,j] + gamma[i] <= a[j] + b[j] + 3, name={f"Gamma0ForItems_{i}_inBins_{j}_NoCut"})
+            '''for j in indices_with_cut:
                 # 47: forces gamma if item i is on cut and if i is in bin j
                 model.addConstr(z_lo[i] + b[j] / a[j] * x_l[i] - b[j] <= (1 - gamma[i]) * M + (1 - p_ij[i, j] * M),
-                                name=f"{i}_OnCutIn{j}")
+                                name=f"{i}_OnCutIn{j}")'''
 """ Other Constraints """
 #constraint 16 from lecture (flagging constraint)
 for i in range(nitems):
     for j in range(mbins):
         model.addConstr(u_j[j] >= p_ij[i, j])
 
-'''#some items might be fragile and, as such, no other box can be stacked on top of them
+#some items might be fragile and, as such, no other box can be stacked on top of them
 for i in range(nitems):
     for k in range(nitems):
         model.addConstr(
@@ -352,7 +283,7 @@ for i in range(nitems):
             name=f"Fragile_{i}_{k}")
 
 # Ensure that a ULD cannot contain both perishable and radioactive items
-for j in range(mbins):
+'''for j in range(mbins):
     model.addConstr(
         quicksum(p_ij[i, j] * perishable[i] for i in range(nitems)) +
         quicksum(p_ij[i, j] * radioactive[i] for i in range(nitems)) <= 1,
@@ -364,25 +295,14 @@ Objective Function
 objective = quicksum(Cj[j] * u_j[j] for j in range(len(Cj))) #sum of Cj[i] * u_j for each i
 model.setObjective(objective, GRB.MINIMIZE)
 
-
-'''
-Print constraints
-'''
-'''def my_callback(model, where):
-    if where == GRB.Callback.MIPSOL:  # At integer feasible solutions
-        print("\n--- Constraint Values at Current Iteration ---")
-        for constr in model.getConstrs():
-            lhs = sum(model.getVarByName(var.varName).X * coeff
-                      for var, coeff in zip(constr.getVars(), constr.getCoeff()))
-            rhs = constr.RHS
-            print(f"{constr.ConstrName}: LHS = {lhs}, RHS = {rhs}, Residual = {rhs - lhs}")'''
-
-
 model.optimize()
 
 if model.status == GRB.INFEASIBLE:
     print("The model is infeasible. Computing IIS...")
     model.computeIIS()
+    for constr in model.getConstrs():
+        if constr.IISConstr:
+            print(f"Infeasible Constraint: {constr.ConstrName}")
     model.write("infeasible.ilp")
 
 import matplotlib.pyplot as plt
@@ -421,7 +341,7 @@ def visualize_with_overlap(items, nitems, mbins, Lj, Hj, x_l, zi, x_i_prime, z_i
                             break
                 axs[j].add_patch(plt.Rectangle((x, z), w, h, color=rect_color, alpha=0.5))
 
-                axs[j].text(x + w / 2, z + h / 2, f"{item}\n {items[i][-3:]}", ha='center', va='center')
+                axs[j].text(x + w / 2, z + h / 2, f"{item}\n {items[i][-4:]}", ha='center', va='center')
 
             # **Draw the ULD outline**
             if j in bins_with_cut:  # Checking if bin has a cut
