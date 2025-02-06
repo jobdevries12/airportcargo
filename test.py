@@ -20,7 +20,7 @@ M = 10000       # Large number for dummy variables
 epsilon = 1     # Offset for overlap constraint (15)
 
 mbins = len(bins)  # number of bins -- should be halved i think
-nitems = 10                                    # number of items --> why???
+nitems = 7                                    # number of items --> why???
 n_axes = 2                                      # number of axes
 n_orients = 2                                   # number of different sides/orientations of an item
 li = [values[0] for values in items.values()]        # length of item
@@ -263,12 +263,13 @@ for i in range(nitems):
                 model.addConstr(p_ij[i, j] - p_ij[k, j] <= s[i, k], name=f"{k}_Supports_{i}_InSameBin1_{j}")
                 model.addConstr(p_ij[k, j] - p_ij[i, j] <= s[i, k], name=f"{k}_Supports_{i}_InSameBin2_{j}")
 
-            # 49: forces gamma to be 0 if there is no cut (technically gamma could be 1 for no-cut ULD as a=b=0)
-                #model.addConstr(p_ij[i,j] + gamma[i] <= a[j] + b[j] + 3, name={f"Gamma0ForItems_{i}_inBins_{j}_NoCut"})
-            '''for j in indices_with_cut:
-                # 47: forces gamma if item i is on cut and if i is in bin j
-                model.addConstr(z_lo[i] + b[j] / a[j] * x_l[i] - b[j] <= (1 - gamma[i]) * M + (1 - p_ij[i, j] * M),
-                                name=f"{i}_OnCutIn{j}")'''
+            # 49: forces gamma to be 0 if there is no cut (technically gamma could be 1 for no-cut ULD as a=b=-1)
+                model.addConstr(p_ij[i,j] + gamma[i] <= a[j] + b[j] + 3, name=f"Gamma0ForItems_{i}_inBins_{j}_NoCut")
+        for j in indices_with_cut:
+            # 47: forces gamma if item i is on cut and if i is in bin j
+            model.addConstr(z_lo[i] + b[j] / a[j] * x_l[i] - b[j] <= (1 - gamma[i]) * M + (1 - p_ij[i, j])*M,
+                            name=f"{i}_OnCutIn{j}")
+            #model.addConstr(z_lo[i] + (b[j] / a[j]) * x_l[i] - b[j] >= -M * (1 - p_ij[i,j])
 """ Other Constraints """
 #constraint 16 from lecture (flagging constraint)
 for i in range(nitems):
@@ -388,3 +389,81 @@ if model.status in [GRB.OPTIMAL, GRB.SUBOPTIMAL]:
         residual = rhs_value - lhs_value  # Difference between RHS and LHS
 
         print(f"{constr.ConstrName}: LHS = {lhs_value}, RHS = {rhs_value}, Residual = {residual}")
+
+    for i in range(nitems):
+        for j in range(mbins):
+                if p_ij[i, j].X == 1:
+                    print(f"p_ij[{i},{j}]: {p_ij[i, j].X}")
+
+    for j in range(mbins):
+        if u_j[j].X == 1:
+            print(f"u_j[{j}]: {u_j[j].X}")
+
+    for i in range(nitems):
+        for j in range(nitems):
+            if i != j:
+                if xp[i, j].X == 1:
+                    print(f"x_p[{i},{j}]: {xp[i, j].X}")
+
+    for i in range(nitems):
+        for j in range(nitems):
+            if i!=j:
+                if zp[i, j].X == 1:
+                    print(f"z_p[{i},{j}]: {zp[i, j].X}")
+
+    for i in range(nitems):
+        for j in range(n_orients):
+            for k in range(n_axes):
+                if r[i, j, k].X == 1:
+                    print(f"r[{i},{j},{k}]: {r[i, j, k].X}")
+
+    for i in range(nitems):
+        for b in range(n_orients):
+            for a in range(n_axes):
+                if r[i,a,b].X == 1:
+                    print(f"r[{i,a,b}]: {r[i,a,b].X}")
+    for i in range(nitems):
+        for j in range(nitems):
+            if i != j:
+                if s[i, j].X == 1:
+                    print(f"s[{i},{j}]: {s[i, j].X}")
+    for i in range(nitems):
+        for j in range(nitems):
+            if i != j:
+                if o[i, j].X == 1:
+                    print(f"o[{i},{j}]: {o[i, j].X}")
+    for i in range(nitems):
+        for j in range(nitems):
+            if i != j:
+                if m[i, j].X == 1:
+                    print(f"m[{i},{j}]: {m[i, j].X}")
+    for i in range(nitems):
+        for j in range(nitems):
+            if i != j:
+                if h[i, j].X == 1:
+                    print(f"h[{i},{j}]: {h[i, j].X}")
+    for i in range(nitems):
+        for j in range(nitems):
+            if i != j:
+                if v[i, j].X != 0:
+                    print(f"v[{i},{j}]: {v[i, j].X}")
+
+    for i in range(nitems):
+        if g[i].X == 1:
+            print(f"g[{i}]: {g[i].X}")
+
+    for i in range(nitems):
+        for j in range(nitems):
+            if i != j:
+                if beta1[i, j].X == 1:
+                    print(f"beta1[{i},{j}]: {beta1[i, j].X}")
+
+    for i in range(nitems):
+        for j in range(nitems):
+            if i != j:
+                if beta2[i, j].X == 1:
+                    print(f"beta2[{i},{j}]: {beta2[i, j].X}")
+
+    for i in range(nitems):
+        if gamma[i].X == 1:
+            print(f"gamma[{i}]: {gamma[i].X}")
