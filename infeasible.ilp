@@ -1,0 +1,32 @@
+\ Model 2DBPP_copy
+\ LP format - for model browsing. Use MPS format to capture full model detail.
+\ Signature: 0x431d912cb3a206ad
+Minimize
+ 
+Subject To
+ TransformZ_1: - zi[1] + zi_hi[1] - 64 r[1,1,0] - 35 r[1,1,1] = 0
+ TransformX_3: - xi_l[3] + xi_r[3] - 88 r[3,0,0] - 36 r[3,0,1] = 0
+ TransformX_4: - xi_l[4] + xi_r[4] - 88 r[4,0,0] - 30 r[4,0,1] = 0
+ TransformZ_4: - zi[4] + zi_hi[4] - 88 r[4,1,0] - 30 r[4,1,1] = 0
+ TransformZ_5: - zi[5] + zi_hi[5] - 86 r[5,1,0] - 29 r[5,1,1] = 0
+ SidesAlign_4: r[4,0,1] + r[4,1,1] = 1
+ Overlap_1_Above_4: 155 z_p[1,4] - zi[1] + zi_hi[4] <= 1
+ Overlap_3_ToRightOf_4: 300 x_p[3,4] - xi_l[3] + xi_r[4] <= 1
+ Overlap_4_ToRightOf_3: 300 x_p[4,3] - xi_l[4] + xi_r[3] <= 1
+ Overlap_4_Above_5: 155 z_p[4,5] - zi[4] + zi_hi[5] <= 1
+ Overlap_5_Above_1: 155 z_p[5,1] - zi[5] + zi_hi[1] <= 1
+Bounds
+ xi_l[3] free
+ xi_l[4] free
+ zi[1] free
+ zi[4] free
+ zi[5] free
+ xi_r[3] free
+ xi_r[4] free
+ zi_hi[1] free
+ zi_hi[4] free
+ zi_hi[5] free
+Binaries
+ x_p[3,4] x_p[4,3] z_p[1,4] z_p[4,5] z_p[5,1] r[1,1,0] r[1,1,1] r[3,0,0]
+ r[3,0,1] r[4,0,0] r[4,0,1] r[4,1,0] r[4,1,1] r[5,1,0] r[5,1,1]
+End
