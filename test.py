@@ -11,7 +11,7 @@ with open("I.pickle", "rb") as file2:
     items = pickle.load(file2)
 print(items)
 print(bins)
-items = {0: (65, 28, 1, 0, 0, 0), 1: (64, 35, 0, 0, 1, 0), 2: (53, 32, 1, 0, 0, 1), 3: (88, 36, 1, 1, 0, 0), 4: (88, 30, 1, 0, 0, 0), 5: (86, 29, 1, 0, 0, 0), 6: (78, 29, 1, 0, 0, 0), 7: (66, 43, 0, 0, 0, 0), 8: (78, 31, 1, 0, 0, 0), 9: (47, 36, 0, 1, 0, 0), 10: (77, 36, 1, 0, 0, 1), 11: (74, 44, 1, 0, 0, 0), 12: (49, 41, 1, 1, 0, 1), 13: (89, 39, 1, 0, 0, 0), 14: (45, 38, 1, 1, 0, 0), 15: (78, 40, 1, 0, 0, 0), 16: (61, 40, 1, 0, 0, 0), 17: (79, 26, 0, 0, 0, 0), 18: (45, 38, 1, 0, 1, 0), 19: (62, 42, 1, 0, 0, 0), 20: (45, 24, 1, 1, 1, 0), 21: (47, 45, 0, 0, 0, 0), 22: (67, 35, 1, 0, 0, 0), 23: (66, 36, 0, 0, 0, 0), 24: (50, 41, 0, 0, 0, 0)}
+#items = {0: (65, 28, 1, 0, 0, 0), 1: (64, 35, 0, 0, 1, 0), 2: (53, 32, 1, 0, 0, 1), 3: (88, 36, 1, 1, 0, 0), 4: (88, 30, 1, 0, 0, 0), 5: (86, 29, 1, 0, 0, 0), 6: (78, 29, 1, 0, 0, 0), 7: (66, 43, 0, 0, 0, 0), 8: (78, 31, 1, 0, 0, 0), 9: (47, 36, 0, 1, 0, 0), 10: (77, 36, 1, 0, 0, 1), 11: (74, 44, 1, 0, 0, 0), 12: (49, 41, 1, 1, 0, 1), 13: (89, 39, 1, 0, 0, 0), 14: (45, 38, 1, 1, 0, 0), 15: (78, 40, 1, 0, 0, 0), 16: (61, 40, 1, 0, 0, 0), 17: (79, 26, 0, 0, 0, 0), 18: (45, 38, 1, 0, 1, 0), 19: (62, 42, 1, 0, 0, 0), 20: (45, 24, 1, 1, 1, 0), 21: (47, 45, 0, 0, 0, 0), 22: (67, 35, 1, 0, 0, 0), 23: (66, 36, 0, 0, 0, 0), 24: (50, 41, 0, 0, 0, 0)}
 
 '''
 Parameter Definition
@@ -20,7 +20,7 @@ M = 10000       # Large number for dummy variables
 epsilon = 1     # Offset for overlap constraint (15)
 
 mbins = len(bins)  # number of bins -- should be halved i think
-nitems = 7                                    # number of items --> why???
+nitems = 9                                    # number of items --> why???
 n_axes = 2                                      # number of axes
 n_orients = 2                                   # number of different sides/orientations of an item
 li = [values[0] for values in items.values()]        # length of item
@@ -75,7 +75,7 @@ bcut = bins_with_cut['b']
 Model Definition
 '''
 model = Model("2DBPP")
-model.setParam('TimeLimit', 60*5)
+model.setParam('TimeLimit', 120*60)
 model.setParam('Method', 2)
 '''
 Variables Definition
@@ -372,7 +372,13 @@ def visualize_with_overlap(items, nitems, mbins, Lj, Hj, x_l, zi, x_i_prime, z_i
         plt.tight_layout()
         plt.show()
     else:
-        print("Model didn't find a solution within the time limit.")
+        print("Model didn't find an optimal solution within the time limit.")
+
+if model.SolCount > 0:  # Ensure there is at least one solution stored
+    model.write("solution.sol")  # Save the solution to a file
+    print("Solution saved!")
+else:
+    print("No solution found.")
 
 # Call the function
 if model.status == GRB.OPTIMAL or model.status == GRB.SUBOPTIMAL:
