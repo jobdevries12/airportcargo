@@ -103,11 +103,9 @@ Constraints Definition
 """ Geometric Constraints """
 
 # constraint 3: area (instead of mass) of items not larger than area of bin
-for i in range(nitems):
-    for j in range(mbins):
-        model.addConstr(
-            ai[i] * p_ij[i, j] <= Aj[j] * u_j[j],
-            name=f"AreaConstraint_{i}_{j}")
+for j in range(mbins):
+    model.addConstr(quicksum(ai[i] * p_ij[i, j] for i in range(nitems)) <= Aj[j] * u_j[j],
+        name=f"AreaConstraint_{j}")
 
 # Constraint 4: each item i is assigned to one bin j
 for i in range(nitems):
