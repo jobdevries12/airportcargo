@@ -291,8 +291,8 @@ for i in range(nitems):
 
             for j in range(mbins):
                 # 36: ensures s holds only for item i and item k in same bin j
-                model.addConstr(p_ij[i, j] - p_ij[k, j] <= s[i, k], name=f"{k}_Supports_{i}_InSameBin1_{j}")
-                model.addConstr(p_ij[k, j] - p_ij[i, j] <= s[i, k], name=f"{k}_Supports_{i}_InSameBin2_{j}")
+                model.addConstr(p_ij[i, j] - p_ij[k, j] <= 1 - s[i, k], name=f"{k}_Supports_{i}_InSameBin1_{j}")
+                model.addConstr(p_ij[k, j] - p_ij[i, j] <= 1 - s[i, k], name=f"{k}_Supports_{i}_InSameBin2_{j}")
 
             # 49: forces gamma to be 0 if there is no cut (technically gamma could be 1 for no-cut ULD as a=b=-1)
                 model.addConstr(p_ij[i,j] + gamma[i] <= a[j] + b[j] + 3, name=f"Gamma0ForItems_{i}_inBins_{j}_NoCut")
@@ -315,11 +315,11 @@ for i in range(nitems):
             name=f"Fragile_{i}_{k}")
 
 # Ensure that a ULD cannot contain both perishable and radioactive items
-'''for j in range(mbins):
+for j in range(mbins):
     model.addConstr(
         quicksum(p_ij[i, j] * perishable[i] for i in range(nitems)) +
         quicksum(p_ij[i, j] * radioactive[i] for i in range(nitems)) <= 1,
-        name=f"Perishable_radioactive_{j}")'''
+        name=f"Perishable_radioactive_{j}")
 
 '''
 Objective Function
