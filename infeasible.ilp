@@ -1,0 +1,28 @@
+\ Model 2DBPP_copy
+\ LP format - for model browsing. Use MPS format to capture full model detail.
+Minimize
+ 
+Subject To
+ OneItemOneBin_10: p_ij[10,0] + p_ij[10,1] + p_ij[10,2] + p_ij[10,3] = 1
+ 9_Supports_2_InSameBin2_0: - p_ij[2,0] + p_ij[9,0] - s[2,9] <= 0
+ 12_Supports_2_InSameBin1_0: p_ij[2,0] - p_ij[12,0] - s[2,12] <= 0
+ 9_Supports_10_InSameBin1_0: - p_ij[9,0] + p_ij[10,0] - s[10,9] <= 0
+ 9_Supports_10_InSameBin1_3: - p_ij[9,3] + p_ij[10,3] - s[10,9] <= 0
+ 12_Supports_10_InSameBin1_1: p_ij[10,1] - p_ij[12,1] - s[10,12] <= 0
+ 12_Supports_10_InSameBin1_2: p_ij[10,2] - p_ij[12,2] - s[10,12] <= 0
+ 9_Supports_12_InSameBin2_3: p_ij[9,3] - p_ij[12,3] - s[12,9] <= 0
+ Fragile_2_9: s[2,9] <= 0
+ Fragile_2_12: s[2,12] <= 0
+ Fragile_10_9: s[10,9] <= 0
+ Fragile_10_12: s[10,12] <= 0
+ Fragile_12_9: s[12,9] <= 0
+ Perishable_radioactive_0: p_ij[10,0] + p_ij[12,0] <= 1
+ Perishable_radioactive_1: p_ij[10,1] + p_ij[12,1] <= 1
+ Perishable_radioactive_2: p_ij[10,2] + p_ij[12,2] <= 1
+ Perishable_radioactive_3: p_ij[10,3] + p_ij[12,3] <= 1
+Bounds
+Binaries
+ p_ij[2,0] p_ij[9,0] p_ij[9,3] p_ij[10,0] p_ij[10,1] p_ij[10,2] p_ij[10,3]
+ p_ij[12,0] p_ij[12,1] p_ij[12,2] p_ij[12,3] s[2,9] s[2,12] s[10,9]
+ s[10,12] s[12,9]
+End
