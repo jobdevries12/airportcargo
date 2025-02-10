@@ -20,7 +20,7 @@ M = 10000       # Large number for dummy variables
 epsilon = 1     # Offset for overlap constraint (15)
 
 mbins = len(bins)  # number of bins -- should be halved i think
-nitems = 9                                    # number of items --> why???
+nitems = 9                                   # number of items --> why???
 n_axes = 2                                      # number of axes
 n_orients = 2                                   # number of different sides/orientations of an item
 li = [values[0] for values in items.values()]        # length of item
@@ -75,7 +75,7 @@ bcut = bins_with_cut['b']
 Model Definition
 '''
 model = Model("2DBPP")
-model.setParam('TimeLimit', 120*60)
+model.setParam('TimeLimit', 3*60)
 model.setParam('Method', 2)
 '''
 Variables Definition
@@ -117,7 +117,7 @@ for i in range(nitems):
 # Constraint 5: item should not exceed container width
 for i in range(nitems):
     model.addConstr(x_r[i] <= quicksum(Lj[j] * p_ij[i, j] for j in range(mbins)),
-                    name=f"ItemFitToBin_{i}")
+                    name=f"ItemFitToBinX_{i}")
 
 # Constraint 7: item should not exceed container height
 for i in range(nitems):
@@ -160,7 +160,7 @@ for i in range(nitems):
 for i in range(nitems):
     for k in range(nitems):
         if i != k:  # Avoid self-comparison
-            # 14:
+            # 14: if i to right of k, xp_ik = 1, thus x_r[k] must be smaller than x_l[i]
             model.addConstr(x_r[k] <= x_l[i] + (1 - xp[i, k]) * L, name=f"Overlap_{i}_ToRightOf_{k}")
             # 15:
             model.addConstr(x_l[i] + epsilon <= x_r[k] + xp[i, k] * L, name=f"Overlap_{i}NotToRightOf_{k}")
@@ -196,6 +196,11 @@ o = model.addVars(nitems, nitems, vtype=GRB.BINARY, name='o')   # 1 if item j ha
 s = model.addVars(nitems, nitems, vtype=GRB.BINARY, name='s')   # 1 if item j supports item i and they're in the same bin
 eta1 = model.addVars(nitems, nitems, vtype=GRB.BINARY, name='eta1') # 1 if vertex 1 of item j is to left of item i (x_l[j] <= x_l[i])
 eta2 = model.addVars(nitems, nitems, vtype=GRB.BINARY, name='eta2') # 1 if vertex 2 of item j is to right of item i (x_up[j] <= x_up[i])
+'''overlap1 = model.addVars(nitems, nitems, vtype=GRB.BINARY, name='overlap1') # 1 if vertex 1 of item j is to left of item i (x_l[j] <= x_l[i])
+overlap2 = model.addVars(nitems, nitems, vtype=GRB.BINARY, name='overlap2') # 1 if vertex 2 of item j is to right of item i (x_up[j] <= x_up[i])
+
+overlap_x = model.addVars(nitems, nitems, vtype=GRB.CONTINUOUS, name="overlap_x")'''
+
 
 beta1 = model.addVars(nitems, nitems, vtype=GRB.BINARY, name='beta1')   # 1 if vertex 1 of item i is supported by item j
 beta2 = model.addVars(nitems, nitems, vtype=GRB.BINARY, name='beta2')   # 1 if vertex 2 of item i is supported by item j
@@ -258,6 +263,34 @@ for i in range(nitems):
             model.addConstr(x_l[k] <= x_l[i] + eta1[i, k] * L, name=f"Eta1Flag_{i}_{k}")
             # 45: forces eta2 to be 1 if x_r[k] is smaller than x_r[i] (k cannot support vertex 2 of i)
             model.addConstr(x_r[i] <= x_r[k] + eta2[i, k] * L, name=f"Eta2Flag_{i}_{k}")
+            '''#ext1:
+            model.addConstr(x_l[i] <= x_r[k] - 0.2*x_l[i]*sum(r[i, 0, d]*[li[i], hi[i]][d] for d in range(n_orients)) + overlap1[i, k] * L,
+                            name='test1')
+            model.addConstr(x_l[k] <= x_r[i] - 0.2*x_l[i]*sum(r[i, 0, d]*[li[i], hi[i]][d] for d in range(n_orients)) + overlap2[i, k] * L,
+                            name='test2')
+            # Ensure overlap_x[i, k] captures the x overlap width when k is directly below i
+            model.addConstr(
+                overlap_x[i, k] >= x_r[i] - x_l[k] - (1 - beta2[i, k]) * M, name=f"X_Overlap_{i}_{k}_1")
+            model.addConstr(
+                overlap_x[i, k] >= x_r[k] - x_l[i] - (1 - beta1[i, k]) * M, name=f"X_Overlap_{i}_{k}_2")
+            model.addConstr(
+                overlap_x[i, k] <= x_r[i] - x_l[k], name=f"X_Overlap_{i}_{k}_UpperBound1")
+            model.addConstr(
+                overlap_x[i, k] <= x_r[k] - x_l[i], name=f"X_Overlap_{i}_{k}_UpperBound2")
+
+            # Overlap must be at least 20% of the smaller width between i and k
+            model.addConstr(
+                overlap_x[i, k] >= 0.2 * quicksum(r[i, 0, d] * [li[i], hi[i]][d] for d in range(n_orients)) * s[i, k],
+                name=f"Min_20_Percent_Overlap_{i}_{k}")'''
+            model.addConstr(
+                x_r[i] >= x_l[k] + 0.2 * (x_r[i] - x_l[i]) - M * (1 - s[i, k]),
+                name=f"MinOverlap1_{i}_{k}"
+            )
+            model.addConstr(
+                x_r[k] >= x_l[i] + 0.2 * (x_r[i] - x_l[i]) - M * (1 - s[i, k]),
+                name=f"MinOverlap2_{i}_{k}"
+            )
+
             for j in range(mbins):
                 # 36: ensures s holds only for item i and item k in same bin j
                 model.addConstr(p_ij[i, j] - p_ij[k, j] <= s[i, k], name=f"{k}_Supports_{i}_InSameBin1_{j}")
@@ -309,6 +342,7 @@ if model.status == GRB.INFEASIBLE:
 import matplotlib.pyplot as plt
 import numpy as np
 
+tol = 1e-9
 def visualize_with_overlap(items, nitems, mbins, Lj, Hj, x_l, zi, x_i_prime, z_i_prime, p_ij, bins_with_cut, a, b):
     fig, axs = plt.subplots(1, mbins, figsize=(15, 5))
 
@@ -337,7 +371,7 @@ def visualize_with_overlap(items, nitems, mbins, Lj, Hj, x_l, zi, x_i_prime, z_i
                 rect_color = "green"  # Default color for non-overlapping items
                 for x2, z2, w2, h2, other_item in bin_items:
                     if item != other_item:  # Don't compare an item with itself
-                        if not (x + w <= x2 or x2 + w2 <= x or z + h <= z2 or z2 + h2 <= z):
+                        if not (x + w <= x2 + tol or x2 + w2 <= x + tol or z + h <= z2 + tol or z2 + h2 <= z + tol):
                             rect_color = "red"  # Overlapping items are marked in red
                             break
                 axs[j].add_patch(plt.Rectangle((x, z), w, h, color=rect_color, alpha=0.5))

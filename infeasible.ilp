@@ -1,38 +1,1155 @@
 \ Model 2DBPP_copy
 \ LP format - for model browsing. Use MPS format to capture full model detail.
-\ Signature: 0x482758a12ecfbe02
+\ Signature: 0x2a69ab9466ec6d6f
 Minimize
  
 Subject To
- OneItemOneBin_5: p_ij[5,0] + p_ij[5,1] + p_ij[5,2] + p_ij[5,3] = 1
+ OneItemOneBin_0: p_ij[0,0] + p_ij[0,1] + p_ij[0,2] + p_ij[0,3] = 1
+ OneItemOneBin_1: p_ij[1,0] + p_ij[1,1] + p_ij[1,2] + p_ij[1,3] = 1
+ OneItemOneBin_2: p_ij[2,0] + p_ij[2,1] + p_ij[2,2] + p_ij[2,3] = 1
+ OneItemOneBin_3: p_ij[3,0] + p_ij[3,1] + p_ij[3,2] + p_ij[3,3] = 1
+ OneItemOneBin_4: p_ij[4,0] + p_ij[4,1] + p_ij[4,2] + p_ij[4,3] = 1
+ ItemFitToBinX_0: - 300 p_ij[0,0] - 300 p_ij[0,1] - 192 p_ij[0,2]
+   - 192 p_ij[0,3] + xi_r[0] <= 0
+ ItemFitToBinX_1: - 300 p_ij[1,0] - 300 p_ij[1,1] - 192 p_ij[1,2]
+   - 192 p_ij[1,3] + xi_r[1] <= 0
+ ItemFitToBinX_2: - 300 p_ij[2,0] - 300 p_ij[2,1] - 192 p_ij[2,2]
+   - 192 p_ij[2,3] + xi_r[2] <= 0
+ ItemFitToBinX_3: - 300 p_ij[3,0] - 300 p_ij[3,1] - 192 p_ij[3,2]
+   - 192 p_ij[3,3] + xi_r[3] <= 0
+ ItemFitToBinX_4: - 300 p_ij[4,0] - 300 p_ij[4,1] - 192 p_ij[4,2]
+   - 192 p_ij[4,3] + xi_r[4] <= 0
+ ItemFitToBinZ_0: - 155 p_ij[0,0] - 155 p_ij[0,1] - 155 p_ij[0,2]
+   - 155 p_ij[0,3] + zi_hi[0] <= 0
+ ItemFitToBinZ_1: - 155 p_ij[1,0] - 155 p_ij[1,1] - 155 p_ij[1,2]
+   - 155 p_ij[1,3] + zi_hi[1] <= 0
+ ItemFitToBinZ_2: - 155 p_ij[2,0] - 155 p_ij[2,1] - 155 p_ij[2,2]
+   - 155 p_ij[2,3] + zi_hi[2] <= 0
+ ItemFitToBinZ_3: - 155 p_ij[3,0] - 155 p_ij[3,1] - 155 p_ij[3,2]
+   - 155 p_ij[3,3] + zi_hi[3] <= 0
+ ItemFitToBinZ_4: - 155 p_ij[4,0] - 155 p_ij[4,1] - 155 p_ij[4,2]
+   - 155 p_ij[4,3] + zi_hi[4] <= 0
+ TransformX_0: - xi_l[0] + xi_r[0] - 65 r[0,0,0] - 28 r[0,0,1] = 0
+ TransformZ_0: - zi[0] + zi_hi[0] - 65 r[0,1,0] - 28 r[0,1,1] = 0
+ TransformX_1: - xi_l[1] + xi_r[1] - 64 r[1,0,0] - 35 r[1,0,1] = 0
+ TransformZ_1: - zi[1] + zi_hi[1] - 64 r[1,1,0] - 35 r[1,1,1] = 0
+ TransformX_2: - xi_l[2] + xi_r[2] - 53 r[2,0,0] - 32 r[2,0,1] = 0
+ TransformZ_2: - zi[2] + zi_hi[2] - 53 r[2,1,0] - 32 r[2,1,1] = 0
+ TransformX_3: - xi_l[3] + xi_r[3] - 88 r[3,0,0] - 36 r[3,0,1] = 0
+ TransformZ_3: - zi[3] + zi_hi[3] - 88 r[3,1,0] - 36 r[3,1,1] = 0
+ TransformX_4: - xi_l[4] + xi_r[4] - 88 r[4,0,0] - 30 r[4,0,1] = 0
+ TransformZ_4: - zi[4] + zi_hi[4] - 88 r[4,1,0] - 30 r[4,1,1] = 0
+ SidesAlign_0: r[0,0,0] + r[0,1,0] = 1
+ SidesAlign_1: r[0,0,1] + r[0,1,1] = 1
+ AxesAlign_0: r[0,0,0] + r[0,0,1] = 1
+ AxesAlign_1: r[0,1,0] + r[0,1,1] = 1
+ SidesAlign_0: r[1,0,0] + r[1,1,0] = 1
+ SidesAlign_1: r[1,0,1] + r[1,1,1] = 1
+ AxesAlign_0: r[1,0,0] + r[1,0,1] = 1
+ AxesAlign_1: r[1,1,0] + r[1,1,1] = 1
+ SidesAlign_0: r[2,0,0] + r[2,1,0] = 1
+ SidesAlign_1: r[2,0,1] + r[2,1,1] = 1
+ AxesAlign_0: r[2,0,0] + r[2,0,1] = 1
+ AxesAlign_1: r[2,1,0] + r[2,1,1] = 1
+ SidesAlign_0: r[3,0,0] + r[3,1,0] = 1
+ SidesAlign_1: r[3,0,1] + r[3,1,1] = 1
+ AxesAlign_0: r[3,0,0] + r[3,0,1] = 1
+ AxesAlign_1: r[3,1,0] + r[3,1,1] = 1
+ SidesAlign_0: r[4,0,0] + r[4,1,0] = 1
+ SidesAlign_1: r[4,0,1] + r[4,1,1] = 1
+ AxesAlign_0: r[4,0,0] + r[4,0,1] = 1
+ AxesAlign_1: r[4,1,0] + r[4,1,1] = 1
+ OverlapInBin_0_1_toBin_0: - p_ij[0,0] - p_ij[1,0] + x_p[0,1] + x_p[1,0]
+   + z_p[0,1] + z_p[1,0] >= -1
+ OverlapInBin_0_1_toBin_1: - p_ij[0,1] - p_ij[1,1] + x_p[0,1] + x_p[1,0]
+   + z_p[0,1] + z_p[1,0] >= -1
+ OverlapInBin_0_1_toBin_2: - p_ij[0,2] - p_ij[1,2] + x_p[0,1] + x_p[1,0]
+   + z_p[0,1] + z_p[1,0] >= -1
+ OverlapInBin_0_1_toBin_3: - p_ij[0,3] - p_ij[1,3] + x_p[0,1] + x_p[1,0]
+   + z_p[0,1] + z_p[1,0] >= -1
+ OverlapInBin_0_2_toBin_0: - p_ij[0,0] - p_ij[2,0] + x_p[0,2] + x_p[2,0]
+   + z_p[0,2] + z_p[2,0] >= -1
+ OverlapInBin_0_2_toBin_1: - p_ij[0,1] - p_ij[2,1] + x_p[0,2] + x_p[2,0]
+   + z_p[0,2] + z_p[2,0] >= -1
+ OverlapInBin_0_2_toBin_2: - p_ij[0,2] - p_ij[2,2] + x_p[0,2] + x_p[2,0]
+   + z_p[0,2] + z_p[2,0] >= -1
+ OverlapInBin_0_2_toBin_3: - p_ij[0,3] - p_ij[2,3] + x_p[0,2] + x_p[2,0]
+   + z_p[0,2] + z_p[2,0] >= -1
+ OverlapInBin_0_3_toBin_0: - p_ij[0,0] - p_ij[3,0] + x_p[0,3] + x_p[3,0]
+   + z_p[0,3] + z_p[3,0] >= -1
+ OverlapInBin_0_3_toBin_1: - p_ij[0,1] - p_ij[3,1] + x_p[0,3] + x_p[3,0]
+   + z_p[0,3] + z_p[3,0] >= -1
+ OverlapInBin_0_3_toBin_2: - p_ij[0,2] - p_ij[3,2] + x_p[0,3] + x_p[3,0]
+   + z_p[0,3] + z_p[3,0] >= -1
+ OverlapInBin_0_3_toBin_3: - p_ij[0,3] - p_ij[3,3] + x_p[0,3] + x_p[3,0]
+   + z_p[0,3] + z_p[3,0] >= -1
+ OverlapInBin_0_4_toBin_0: - p_ij[0,0] - p_ij[4,0] + x_p[0,4] + x_p[4,0]
+   + z_p[0,4] + z_p[4,0] >= -1
+ OverlapInBin_0_4_toBin_1: - p_ij[0,1] - p_ij[4,1] + x_p[0,4] + x_p[4,0]
+   + z_p[0,4] + z_p[4,0] >= -1
+ OverlapInBin_0_4_toBin_2: - p_ij[0,2] - p_ij[4,2] + x_p[0,4] + x_p[4,0]
+   + z_p[0,4] + z_p[4,0] >= -1
+ OverlapInBin_0_4_toBin_3: - p_ij[0,3] - p_ij[4,3] + x_p[0,4] + x_p[4,0]
+   + z_p[0,4] + z_p[4,0] >= -1
+ OverlapInBin_1_0_toBin_0: - p_ij[0,0] - p_ij[1,0] + x_p[0,1] + x_p[1,0]
+   + z_p[0,1] + z_p[1,0] >= -1
+ OverlapInBin_1_0_toBin_1: - p_ij[0,1] - p_ij[1,1] + x_p[0,1] + x_p[1,0]
+   + z_p[0,1] + z_p[1,0] >= -1
+ OverlapInBin_1_0_toBin_2: - p_ij[0,2] - p_ij[1,2] + x_p[0,1] + x_p[1,0]
+   + z_p[0,1] + z_p[1,0] >= -1
+ OverlapInBin_1_0_toBin_3: - p_ij[0,3] - p_ij[1,3] + x_p[0,1] + x_p[1,0]
+   + z_p[0,1] + z_p[1,0] >= -1
+ OverlapInBin_1_2_toBin_0: - p_ij[1,0] - p_ij[2,0] + x_p[1,2] + x_p[2,1]
+   + z_p[1,2] + z_p[2,1] >= -1
+ OverlapInBin_1_2_toBin_1: - p_ij[1,1] - p_ij[2,1] + x_p[1,2] + x_p[2,1]
+   + z_p[1,2] + z_p[2,1] >= -1
+ OverlapInBin_1_2_toBin_2: - p_ij[1,2] - p_ij[2,2] + x_p[1,2] + x_p[2,1]
+   + z_p[1,2] + z_p[2,1] >= -1
+ OverlapInBin_1_2_toBin_3: - p_ij[1,3] - p_ij[2,3] + x_p[1,2] + x_p[2,1]
+   + z_p[1,2] + z_p[2,1] >= -1
+ OverlapInBin_1_3_toBin_0: - p_ij[1,0] - p_ij[3,0] + x_p[1,3] + x_p[3,1]
+   + z_p[1,3] + z_p[3,1] >= -1
+ OverlapInBin_1_3_toBin_1: - p_ij[1,1] - p_ij[3,1] + x_p[1,3] + x_p[3,1]
+   + z_p[1,3] + z_p[3,1] >= -1
+ OverlapInBin_1_3_toBin_2: - p_ij[1,2] - p_ij[3,2] + x_p[1,3] + x_p[3,1]
+   + z_p[1,3] + z_p[3,1] >= -1
+ OverlapInBin_1_3_toBin_3: - p_ij[1,3] - p_ij[3,3] + x_p[1,3] + x_p[3,1]
+   + z_p[1,3] + z_p[3,1] >= -1
+ OverlapInBin_1_4_toBin_0: - p_ij[1,0] - p_ij[4,0] + x_p[1,4] + x_p[4,1]
+   + z_p[1,4] + z_p[4,1] >= -1
+ OverlapInBin_1_4_toBin_1: - p_ij[1,1] - p_ij[4,1] + x_p[1,4] + x_p[4,1]
+   + z_p[1,4] + z_p[4,1] >= -1
+ OverlapInBin_1_4_toBin_2: - p_ij[1,2] - p_ij[4,2] + x_p[1,4] + x_p[4,1]
+   + z_p[1,4] + z_p[4,1] >= -1
+ OverlapInBin_1_4_toBin_3: - p_ij[1,3] - p_ij[4,3] + x_p[1,4] + x_p[4,1]
+   + z_p[1,4] + z_p[4,1] >= -1
+ OverlapInBin_2_0_toBin_0: - p_ij[0,0] - p_ij[2,0] + x_p[0,2] + x_p[2,0]
+   + z_p[0,2] + z_p[2,0] >= -1
+ OverlapInBin_2_0_toBin_1: - p_ij[0,1] - p_ij[2,1] + x_p[0,2] + x_p[2,0]
+   + z_p[0,2] + z_p[2,0] >= -1
+ OverlapInBin_2_0_toBin_2: - p_ij[0,2] - p_ij[2,2] + x_p[0,2] + x_p[2,0]
+   + z_p[0,2] + z_p[2,0] >= -1
+ OverlapInBin_2_0_toBin_3: - p_ij[0,3] - p_ij[2,3] + x_p[0,2] + x_p[2,0]
+   + z_p[0,2] + z_p[2,0] >= -1
+ OverlapInBin_2_1_toBin_0: - p_ij[1,0] - p_ij[2,0] + x_p[1,2] + x_p[2,1]
+   + z_p[1,2] + z_p[2,1] >= -1
+ OverlapInBin_2_1_toBin_1: - p_ij[1,1] - p_ij[2,1] + x_p[1,2] + x_p[2,1]
+   + z_p[1,2] + z_p[2,1] >= -1
+ OverlapInBin_2_1_toBin_2: - p_ij[1,2] - p_ij[2,2] + x_p[1,2] + x_p[2,1]
+   + z_p[1,2] + z_p[2,1] >= -1
+ OverlapInBin_2_1_toBin_3: - p_ij[1,3] - p_ij[2,3] + x_p[1,2] + x_p[2,1]
+   + z_p[1,2] + z_p[2,1] >= -1
+ OverlapInBin_2_3_toBin_0: - p_ij[2,0] - p_ij[3,0] + x_p[2,3] + x_p[3,2]
+   + z_p[2,3] + z_p[3,2] >= -1
+ OverlapInBin_2_3_toBin_1: - p_ij[2,1] - p_ij[3,1] + x_p[2,3] + x_p[3,2]
+   + z_p[2,3] + z_p[3,2] >= -1
+ OverlapInBin_2_3_toBin_2: - p_ij[2,2] - p_ij[3,2] + x_p[2,3] + x_p[3,2]
+   + z_p[2,3] + z_p[3,2] >= -1
+ OverlapInBin_2_3_toBin_3: - p_ij[2,3] - p_ij[3,3] + x_p[2,3] + x_p[3,2]
+   + z_p[2,3] + z_p[3,2] >= -1
+ OverlapInBin_2_4_toBin_0: - p_ij[2,0] - p_ij[4,0] + x_p[2,4] + x_p[4,2]
+   + z_p[2,4] + z_p[4,2] >= -1
+ OverlapInBin_2_4_toBin_1: - p_ij[2,1] - p_ij[4,1] + x_p[2,4] + x_p[4,2]
+   + z_p[2,4] + z_p[4,2] >= -1
+ OverlapInBin_2_4_toBin_2: - p_ij[2,2] - p_ij[4,2] + x_p[2,4] + x_p[4,2]
+   + z_p[2,4] + z_p[4,2] >= -1
+ OverlapInBin_2_4_toBin_3: - p_ij[2,3] - p_ij[4,3] + x_p[2,4] + x_p[4,2]
+   + z_p[2,4] + z_p[4,2] >= -1
+ OverlapInBin_3_0_toBin_0: - p_ij[0,0] - p_ij[3,0] + x_p[0,3] + x_p[3,0]
+   + z_p[0,3] + z_p[3,0] >= -1
+ OverlapInBin_3_0_toBin_1: - p_ij[0,1] - p_ij[3,1] + x_p[0,3] + x_p[3,0]
+   + z_p[0,3] + z_p[3,0] >= -1
+ OverlapInBin_3_0_toBin_2: - p_ij[0,2] - p_ij[3,2] + x_p[0,3] + x_p[3,0]
+   + z_p[0,3] + z_p[3,0] >= -1
+ OverlapInBin_3_0_toBin_3: - p_ij[0,3] - p_ij[3,3] + x_p[0,3] + x_p[3,0]
+   + z_p[0,3] + z_p[3,0] >= -1
+ OverlapInBin_3_1_toBin_0: - p_ij[1,0] - p_ij[3,0] + x_p[1,3] + x_p[3,1]
+   + z_p[1,3] + z_p[3,1] >= -1
+ OverlapInBin_3_1_toBin_1: - p_ij[1,1] - p_ij[3,1] + x_p[1,3] + x_p[3,1]
+   + z_p[1,3] + z_p[3,1] >= -1
+ OverlapInBin_3_1_toBin_2: - p_ij[1,2] - p_ij[3,2] + x_p[1,3] + x_p[3,1]
+   + z_p[1,3] + z_p[3,1] >= -1
+ OverlapInBin_3_1_toBin_3: - p_ij[1,3] - p_ij[3,3] + x_p[1,3] + x_p[3,1]
+   + z_p[1,3] + z_p[3,1] >= -1
+ OverlapInBin_3_2_toBin_0: - p_ij[2,0] - p_ij[3,0] + x_p[2,3] + x_p[3,2]
+   + z_p[2,3] + z_p[3,2] >= -1
+ OverlapInBin_3_2_toBin_1: - p_ij[2,1] - p_ij[3,1] + x_p[2,3] + x_p[3,2]
+   + z_p[2,3] + z_p[3,2] >= -1
+ OverlapInBin_3_2_toBin_2: - p_ij[2,2] - p_ij[3,2] + x_p[2,3] + x_p[3,2]
+   + z_p[2,3] + z_p[3,2] >= -1
+ OverlapInBin_3_2_toBin_3: - p_ij[2,3] - p_ij[3,3] + x_p[2,3] + x_p[3,2]
+   + z_p[2,3] + z_p[3,2] >= -1
+ OverlapInBin_3_4_toBin_0: - p_ij[3,0] - p_ij[4,0] + x_p[3,4] + x_p[4,3]
+   + z_p[3,4] + z_p[4,3] >= -1
+ OverlapInBin_3_4_toBin_1: - p_ij[3,1] - p_ij[4,1] + x_p[3,4] + x_p[4,3]
+   + z_p[3,4] + z_p[4,3] >= -1
+ OverlapInBin_3_4_toBin_2: - p_ij[3,2] - p_ij[4,2] + x_p[3,4] + x_p[4,3]
+   + z_p[3,4] + z_p[4,3] >= -1
+ OverlapInBin_3_4_toBin_3: - p_ij[3,3] - p_ij[4,3] + x_p[3,4] + x_p[4,3]
+   + z_p[3,4] + z_p[4,3] >= -1
+ OverlapInBin_4_0_toBin_0: - p_ij[0,0] - p_ij[4,0] + x_p[0,4] + x_p[4,0]
+   + z_p[0,4] + z_p[4,0] >= -1
+ OverlapInBin_4_0_toBin_1: - p_ij[0,1] - p_ij[4,1] + x_p[0,4] + x_p[4,0]
+   + z_p[0,4] + z_p[4,0] >= -1
+ OverlapInBin_4_0_toBin_2: - p_ij[0,2] - p_ij[4,2] + x_p[0,4] + x_p[4,0]
+   + z_p[0,4] + z_p[4,0] >= -1
+ OverlapInBin_4_0_toBin_3: - p_ij[0,3] - p_ij[4,3] + x_p[0,4] + x_p[4,0]
+   + z_p[0,4] + z_p[4,0] >= -1
+ OverlapInBin_4_1_toBin_0: - p_ij[1,0] - p_ij[4,0] + x_p[1,4] + x_p[4,1]
+   + z_p[1,4] + z_p[4,1] >= -1
+ OverlapInBin_4_1_toBin_1: - p_ij[1,1] - p_ij[4,1] + x_p[1,4] + x_p[4,1]
+   + z_p[1,4] + z_p[4,1] >= -1
+ OverlapInBin_4_1_toBin_2: - p_ij[1,2] - p_ij[4,2] + x_p[1,4] + x_p[4,1]
+   + z_p[1,4] + z_p[4,1] >= -1
+ OverlapInBin_4_1_toBin_3: - p_ij[1,3] - p_ij[4,3] + x_p[1,4] + x_p[4,1]
+   + z_p[1,4] + z_p[4,1] >= -1
+ OverlapInBin_4_2_toBin_0: - p_ij[2,0] - p_ij[4,0] + x_p[2,4] + x_p[4,2]
+   + z_p[2,4] + z_p[4,2] >= -1
+ OverlapInBin_4_2_toBin_1: - p_ij[2,1] - p_ij[4,1] + x_p[2,4] + x_p[4,2]
+   + z_p[2,4] + z_p[4,2] >= -1
+ OverlapInBin_4_2_toBin_2: - p_ij[2,2] - p_ij[4,2] + x_p[2,4] + x_p[4,2]
+   + z_p[2,4] + z_p[4,2] >= -1
+ OverlapInBin_4_2_toBin_3: - p_ij[2,3] - p_ij[4,3] + x_p[2,4] + x_p[4,2]
+   + z_p[2,4] + z_p[4,2] >= -1
+ OverlapInBin_4_3_toBin_0: - p_ij[3,0] - p_ij[4,0] + x_p[3,4] + x_p[4,3]
+   + z_p[3,4] + z_p[4,3] >= -1
+ OverlapInBin_4_3_toBin_1: - p_ij[3,1] - p_ij[4,1] + x_p[3,4] + x_p[4,3]
+   + z_p[3,4] + z_p[4,3] >= -1
+ OverlapInBin_4_3_toBin_2: - p_ij[3,2] - p_ij[4,2] + x_p[3,4] + x_p[4,3]
+   + z_p[3,4] + z_p[4,3] >= -1
+ OverlapInBin_4_3_toBin_3: - p_ij[3,3] - p_ij[4,3] + x_p[3,4] + x_p[4,3]
+   + z_p[3,4] + z_p[4,3] >= -1
+ Overlap_0_ToRightOf_1: 300 x_p[0,1] - xi_l[0] + xi_r[1] <= 300
+ Overlap_0NotToRightOf_1: - 300 x_p[0,1] + xi_l[0] - xi_r[1] <= -1
+ Overlap_0_Above_1: 155 z_p[0,1] - zi[0] + zi_hi[1] <= 155
+ Overlap_0NotToRightOf_2: - 300 x_p[0,2] + xi_l[0] - xi_r[2] <= -1
+ Overlap_0_Above_2: 155 z_p[0,2] - zi[0] + zi_hi[2] <= 155
+ Overlap_0_ToRightOf_3: 300 x_p[0,3] - xi_l[0] + xi_r[3] <= 300
+ Overlap_0NotToRightOf_3: - 300 x_p[0,3] + xi_l[0] - xi_r[3] <= -1
+ Overlap_0_Above_3: 155 z_p[0,3] - zi[0] + zi_hi[3] <= 155
+ Overlap_0_ToRightOf_4: 300 x_p[0,4] - xi_l[0] + xi_r[4] <= 300
+ Overlap_0NotToRightOf_4: - 300 x_p[0,4] + xi_l[0] - xi_r[4] <= -1
+ Overlap_0_Above_4: 155 z_p[0,4] - zi[0] + zi_hi[4] <= 155
+ Overlap_1_ToRightOf_0: 300 x_p[1,0] - xi_l[1] + xi_r[0] <= 300
+ Overlap_1NotToRightOf_0: - 300 x_p[1,0] + xi_l[1] - xi_r[0] <= -1
+ Overlap_1_Above_0: 155 z_p[1,0] - zi[1] + zi_hi[0] <= 155
+ Overlap_1_ToRightOf_2: 300 x_p[1,2] - xi_l[1] + xi_r[2] <= 300
+ Overlap_1NotToRightOf_2: - 300 x_p[1,2] + xi_l[1] - xi_r[2] <= -1
+ Overlap_1_Above_2: 155 z_p[1,2] - zi[1] + zi_hi[2] <= 155
+ Overlap_1_ToRightOf_3: 300 x_p[1,3] - xi_l[1] + xi_r[3] <= 300
+ Overlap_1NotToRightOf_3: - 300 x_p[1,3] + xi_l[1] - xi_r[3] <= -1
+ Overlap_1_Above_3: 155 z_p[1,3] - zi[1] + zi_hi[3] <= 155
+ Overlap_1_ToRightOf_4: 300 x_p[1,4] - xi_l[1] + xi_r[4] <= 300
+ Overlap_1NotToRightOf_4: - 300 x_p[1,4] + xi_l[1] - xi_r[4] <= -1
+ Overlap_1_Above_4: 155 z_p[1,4] - zi[1] + zi_hi[4] <= 155
+ Overlap_2_ToRightOf_0: 300 x_p[2,0] - xi_l[2] + xi_r[0] <= 300
+ Overlap_2NotToRightOf_0: - 300 x_p[2,0] + xi_l[2] - xi_r[0] <= -1
+ Overlap_2_Above_0: 155 z_p[2,0] - zi[2] + zi_hi[0] <= 155
+ Overlap_2_ToRightOf_1: 300 x_p[2,1] - xi_l[2] + xi_r[1] <= 300
+ Overlap_2NotToRightOf_1: - 300 x_p[2,1] + xi_l[2] - xi_r[1] <= -1
+ Overlap_2_Above_1: 155 z_p[2,1] - zi[2] + zi_hi[1] <= 155
+ Overlap_2_ToRightOf_3: 300 x_p[2,3] - xi_l[2] + xi_r[3] <= 300
+ Overlap_2NotToRightOf_3: - 300 x_p[2,3] + xi_l[2] - xi_r[3] <= -1
+ Overlap_2_Above_3: 155 z_p[2,3] - zi[2] + zi_hi[3] <= 155
+ Overlap_2_ToRightOf_4: 300 x_p[2,4] - xi_l[2] + xi_r[4] <= 300
+ Overlap_2NotToRightOf_4: - 300 x_p[2,4] + xi_l[2] - xi_r[4] <= -1
+ Overlap_2_Above_4: 155 z_p[2,4] - zi[2] + zi_hi[4] <= 155
+ Overlap_3_ToRightOf_0: 300 x_p[3,0] - xi_l[3] + xi_r[0] <= 300
+ Overlap_3NotToRightOf_0: - 300 x_p[3,0] + xi_l[3] - xi_r[0] <= -1
+ Overlap_3_Above_0: 155 z_p[3,0] - zi[3] + zi_hi[0] <= 155
+ Overlap_3_ToRightOf_1: 300 x_p[3,1] - xi_l[3] + xi_r[1] <= 300
+ Overlap_3NotToRightOf_1: - 300 x_p[3,1] + xi_l[3] - xi_r[1] <= -1
+ Overlap_3_Above_1: 155 z_p[3,1] - zi[3] + zi_hi[1] <= 155
+ Overlap_3_ToRightOf_2: 300 x_p[3,2] - xi_l[3] + xi_r[2] <= 300
+ Overlap_3NotToRightOf_2: - 300 x_p[3,2] + xi_l[3] - xi_r[2] <= -1
+ Overlap_3_Above_2: 155 z_p[3,2] - zi[3] + zi_hi[2] <= 155
+ Overlap_3_ToRightOf_4: 300 x_p[3,4] - xi_l[3] + xi_r[4] <= 300
+ Overlap_3NotToRightOf_4: - 300 x_p[3,4] + xi_l[3] - xi_r[4] <= -1
+ Overlap_3_Above_4: 155 z_p[3,4] - zi[3] + zi_hi[4] <= 155
+ Overlap_4_ToRightOf_0: 300 x_p[4,0] - xi_l[4] + xi_r[0] <= 300
+ Overlap_4NotToRightOf_0: - 300 x_p[4,0] + xi_l[4] - xi_r[0] <= -1
+ Overlap_4_Above_0: 155 z_p[4,0] - zi[4] + zi_hi[0] <= 155
+ Overlap_4_ToRightOf_1: 300 x_p[4,1] - xi_l[4] + xi_r[1] <= 300
+ Overlap_4NotToRightOf_1: - 300 x_p[4,1] + xi_l[4] - xi_r[1] <= -1
+ Overlap_4_Above_1: 155 z_p[4,1] - zi[4] + zi_hi[1] <= 155
+ Overlap_4_ToRightOf_2: 300 x_p[4,2] - xi_l[4] + xi_r[2] <= 300
+ Overlap_4NotToRightOf_2: - 300 x_p[4,2] + xi_l[4] - xi_r[2] <= -1
+ Overlap_4_Above_2: 155 z_p[4,2] - zi[4] + zi_hi[2] <= 155
+ Overlap_4_ToRightOf_3: 300 x_p[4,3] - xi_l[4] + xi_r[3] <= 300
+ Overlap_4NotToRightOf_3: - 300 x_p[4,3] + xi_l[4] - xi_r[3] <= -1
+ Overlap_4_Above_3: 155 z_p[4,3] - zi[4] + zi_hi[3] <= 155
+ OrientationLength_1: r[1,1,0] <= 0
+ CutSupport_LowerBound_0_2: - 10000 p_ij[0,2] + 1.261904761904762 xi_l[0]
+   + zi[0] >= -9947
+ CutSupport_LowerBound_0_3: - 10000 p_ij[0,3] + 1.261904761904762 xi_l[0]
+   + zi[0] >= -9947
+ CutSupport_LowerBound_1_2: - 10000 p_ij[1,2] + 1.261904761904762 xi_l[1]
+   + zi[1] >= -9947
+ CutSupport_LowerBound_1_3: - 10000 p_ij[1,3] + 1.261904761904762 xi_l[1]
+   + zi[1] >= -9947
+ CutSupport_LowerBound_2_2: - 10000 p_ij[2,2] + 1.261904761904762 xi_l[2]
+   + zi[2] >= -9947
+ CutSupport_LowerBound_2_3: - 10000 p_ij[2,3] + 1.261904761904762 xi_l[2]
+   + zi[2] >= -9947
+ CutSupport_LowerBound_3_2: - 10000 p_ij[3,2] + 1.261904761904762 xi_l[3]
+   + zi[3] >= -9947
+ CutSupport_LowerBound_3_3: - 10000 p_ij[3,3] + 1.261904761904762 xi_l[3]
+   + zi[3] >= -9947
+ CutSupport_LowerBound_4_2: - 10000 p_ij[4,2] + 1.261904761904762 xi_l[4]
+   + zi[4] >= -9947
+ CutSupport_LowerBound_4_3: - 10000 p_ij[4,3] + 1.261904761904762 xi_l[4]
+   + zi[4] >= -9947
+ R220: 2 g[0] + beta1[0,1] + beta1[0,2] + beta1[0,3] + beta1[0,4]
+   + beta2[0,1] + beta2[0,2] + beta2[0,3] + beta2[0,4] + gamma[0] >= 2
+ R221: 2 g[1] + beta1[1,0] + beta1[1,2] + beta1[1,3] + beta1[1,4]
+   + beta2[1,0] + beta2[1,2] + beta2[1,3] + beta2[1,4] + gamma[1] >= 2
+ R222: 2 g[2] + beta1[2,0] + beta1[2,1] + beta1[2,3] + beta1[2,4]
+   + beta2[2,0] + beta2[2,1] + beta2[2,3] + beta2[2,4] + gamma[2] >= 2
+ R223: 2 g[3] + beta1[3,0] + beta1[3,1] + beta1[3,2] + beta1[3,4]
+   + beta2[3,0] + beta2[3,1] + beta2[3,2] + beta2[3,4] + gamma[3] >= 2
+ R224: 2 g[4] + beta1[4,0] + beta1[4,1] + beta1[4,2] + beta1[4,3]
+   + beta2[4,0] + beta2[4,1] + beta2[4,2] + beta2[4,3] + gamma[4] >= 2
+ GroundConstraint_0: zi[0] + 155 g[0] <= 155
+ 0_OnCutIn2: 10000 p_ij[0,2] + 1.261904761904762 xi_l[0] + zi[0]
+   + 10000 gamma[0] <= 20053
+ 0_OnCutIn3: 10000 p_ij[0,3] + 1.261904761904762 xi_l[0] + zi[0]
+   + 10000 gamma[0] <= 20053
+ AbsZ10_1: - zi[0] + zi_hi[1] - k[0,1] <= 0
+ AbsZ20_1: zi[0] - zi_hi[1] - k[0,1] <= 0
+ 1_Below_0: zi[0] - zi_hi[1] + k[0,1] + 310 m[0,1] <= 310
+ 1_NotBelow_0: - zi[0] + zi_hi[1] + k[0,1] - 310 m[0,1] <= 0
+ HeightCompat_0_1: h[0,1] - k[0,1] <= 0
+ NoHeightCompat_0_1: - 155 h[0,1] + k[0,1] <= 0
+ Overlap_0_1: - x_p[0,1] - x_p[1,0] + o[0,1] <= 0
+ NoOverlap_0_1: x_p[0,1] + x_p[1,0] - 2 o[0,1] <= 0
+ 3_Supports_0: - h[0,1] - o[0,1] - s[0,1] <= -1
+ 3_DoesntSupport_0: h[0,1] + o[0,1] + 2 s[0,1] <= 2
+ beta1_0_1: - s[0,1] + beta1[0,1] <= 0
+ beta2_0_1: - s[0,1] + beta2[0,1] <= 0
+ sBeta1Flag_0_1: - s[0,1] + beta1[0,1] <= 0
+ sBeta2Flag_0_1: - s[0,1] + beta2[0,1] <= 0
+ Eta1Overlap_0_1: eta1[0,1] + beta1[0,1] <= 1
+ Eta2Overlap_0_1: eta2[0,1] + beta2[0,1] <= 1
+ Eta1Flag_0_1: - xi_l[0] + xi_l[1] - 300 eta1[0,1] <= 0
+ Eta2Flag_0_1: xi_r[0] - xi_r[1] - 300 eta2[0,1] <= 0
+ X_Overlap_0_1_1: xi_l[1] - xi_r[0] + overlap_x[0,1] - 10000 beta2[0,1]
+   >= -10000
+ X_Overlap_0_1_2: xi_l[0] - xi_r[1] + overlap_x[0,1] - 10000 beta1[0,1]
+   >= -10000
+ X_Overlap_0_1_UpperBound1: xi_l[1] - xi_r[0] + overlap_x[0,1] <= 0
+ X_Overlap_0_1_UpperBound2: xi_l[0] - xi_r[1] + overlap_x[0,1] <= 0
+ 1_Supports_0_InSameBin1_0: p_ij[0,0] - p_ij[1,0] - s[0,1] <= 0
+ 1_Supports_0_InSameBin2_0: - p_ij[0,0] + p_ij[1,0] - s[0,1] <= 0
+ Gamma0ForItems_0_inBins_0_NoCut: p_ij[0,0] + gamma[0] <= 1
+ 1_Supports_0_InSameBin1_1: p_ij[0,1] - p_ij[1,1] - s[0,1] <= 0
+ 1_Supports_0_InSameBin2_1: - p_ij[0,1] + p_ij[1,1] - s[0,1] <= 0
+ Gamma0ForItems_0_inBins_1_NoCut: p_ij[0,1] + gamma[0] <= 1
+ 1_Supports_0_InSameBin1_2: p_ij[0,2] - p_ij[1,2] - s[0,1] <= 0
+ 1_Supports_0_InSameBin2_2: - p_ij[0,2] + p_ij[1,2] - s[0,1] <= 0
+ 1_Supports_0_InSameBin1_3: p_ij[0,3] - p_ij[1,3] - s[0,1] <= 0
+ 1_Supports_0_InSameBin2_3: - p_ij[0,3] + p_ij[1,3] - s[0,1] <= 0
+ 0_OnCutIn2: 10000 p_ij[0,2] + 1.261904761904762 xi_l[0] + zi[0]
+   + 10000 gamma[0] <= 20053
+ 0_OnCutIn3: 10000 p_ij[0,3] + 1.261904761904762 xi_l[0] + zi[0]
+   + 10000 gamma[0] <= 20053
+ AbsZ10_2: - zi[0] + zi_hi[2] - k[0,2] <= 0
+ AbsZ20_2: zi[0] - zi_hi[2] - k[0,2] <= 0
+ 2_Below_0: zi[0] - zi_hi[2] + k[0,2] + 310 m[0,2] <= 310
+ 2_NotBelow_0: - zi[0] + zi_hi[2] + k[0,2] - 310 m[0,2] <= 0
+ HeightCompat_0_2: h[0,2] - k[0,2] <= 0
+ NoHeightCompat_0_2: - 155 h[0,2] + k[0,2] <= 0
+ Overlap_0_2: - x_p[0,2] - x_p[2,0] + o[0,2] <= 0
+ NoOverlap_0_2: x_p[0,2] + x_p[2,0] - 2 o[0,2] <= 0
+ 3_Supports_0: - h[0,2] - o[0,2] - s[0,2] <= -1
+ 3_DoesntSupport_0: h[0,2] + o[0,2] + 2 s[0,2] <= 2
+ beta1_0_2: - s[0,2] + beta1[0,2] <= 0
+ beta2_0_2: - s[0,2] + beta2[0,2] <= 0
+ sBeta1Flag_0_2: - s[0,2] + beta1[0,2] <= 0
+ sBeta2Flag_0_2: - s[0,2] + beta2[0,2] <= 0
+ Eta1Overlap_0_2: eta1[0,2] + beta1[0,2] <= 1
+ Eta2Overlap_0_2: eta2[0,2] + beta2[0,2] <= 1
+ Eta1Flag_0_2: - xi_l[0] + xi_l[2] - 300 eta1[0,2] <= 0
+ Eta2Flag_0_2: xi_r[0] - xi_r[2] - 300 eta2[0,2] <= 0
+ X_Overlap_0_2_1: xi_l[2] - xi_r[0] + overlap_x[0,2] - 10000 beta2[0,2]
+   >= -10000
+ X_Overlap_0_2_2: xi_l[0] - xi_r[2] + overlap_x[0,2] - 10000 beta1[0,2]
+   >= -10000
+ X_Overlap_0_2_UpperBound1: xi_l[2] - xi_r[0] + overlap_x[0,2] <= 0
+ X_Overlap_0_2_UpperBound2: xi_l[0] - xi_r[2] + overlap_x[0,2] <= 0
+ 2_Supports_0_InSameBin1_0: p_ij[0,0] - p_ij[2,0] - s[0,2] <= 0
+ 2_Supports_0_InSameBin2_0: - p_ij[0,0] + p_ij[2,0] - s[0,2] <= 0
+ Gamma0ForItems_0_inBins_0_NoCut: p_ij[0,0] + gamma[0] <= 1
+ 2_Supports_0_InSameBin1_1: p_ij[0,1] - p_ij[2,1] - s[0,2] <= 0
+ 2_Supports_0_InSameBin2_1: - p_ij[0,1] + p_ij[2,1] - s[0,2] <= 0
+ Gamma0ForItems_0_inBins_1_NoCut: p_ij[0,1] + gamma[0] <= 1
+ 2_Supports_0_InSameBin1_2: p_ij[0,2] - p_ij[2,2] - s[0,2] <= 0
+ 2_Supports_0_InSameBin2_2: - p_ij[0,2] + p_ij[2,2] - s[0,2] <= 0
+ 2_Supports_0_InSameBin1_3: p_ij[0,3] - p_ij[2,3] - s[0,2] <= 0
+ 2_Supports_0_InSameBin2_3: - p_ij[0,3] + p_ij[2,3] - s[0,2] <= 0
+ 0_OnCutIn2: 10000 p_ij[0,2] + 1.261904761904762 xi_l[0] + zi[0]
+   + 10000 gamma[0] <= 20053
+ 0_OnCutIn3: 10000 p_ij[0,3] + 1.261904761904762 xi_l[0] + zi[0]
+   + 10000 gamma[0] <= 20053
+ AbsZ10_3: - zi[0] + zi_hi[3] - k[0,3] <= 0
+ AbsZ20_3: zi[0] - zi_hi[3] - k[0,3] <= 0
+ 3_Below_0: zi[0] - zi_hi[3] + k[0,3] + 310 m[0,3] <= 310
+ 3_NotBelow_0: - zi[0] + zi_hi[3] + k[0,3] - 310 m[0,3] <= 0
+ HeightCompat_0_3: h[0,3] - k[0,3] <= 0
+ NoHeightCompat_0_3: - 155 h[0,3] + k[0,3] <= 0
+ Overlap_0_3: - x_p[0,3] - x_p[3,0] + o[0,3] <= 0
+ NoOverlap_0_3: x_p[0,3] + x_p[3,0] - 2 o[0,3] <= 0
+ 3_Supports_0: - h[0,3] - o[0,3] - s[0,3] <= -1
+ beta1_0_3: - s[0,3] + beta1[0,3] <= 0
+ beta2_0_3: - s[0,3] + beta2[0,3] <= 0
+ Eta1Flag_0_3: - xi_l[0] + xi_l[3] - 300 eta1[0,3] <= 0
+ Eta2Flag_0_3: xi_r[0] - xi_r[3] - 300 eta2[0,3] <= 0
+ X_Overlap_0_3_1: xi_l[3] - xi_r[0] + overlap_x[0,3] - 10000 beta2[0,3]
+   >= -10000
+ X_Overlap_0_3_2: xi_l[0] - xi_r[3] + overlap_x[0,3] - 10000 beta1[0,3]
+   >= -10000
+ X_Overlap_0_3_UpperBound1: xi_l[3] - xi_r[0] + overlap_x[0,3] <= 0
+ X_Overlap_0_3_UpperBound2: xi_l[0] - xi_r[3] + overlap_x[0,3] <= 0
+ 3_Supports_0_InSameBin1_0: p_ij[0,0] - p_ij[3,0] - s[0,3] <= 0
+ 3_Supports_0_InSameBin2_0: - p_ij[0,0] + p_ij[3,0] - s[0,3] <= 0
+ Gamma0ForItems_0_inBins_0_NoCut: p_ij[0,0] + gamma[0] <= 1
+ 3_Supports_0_InSameBin1_1: p_ij[0,1] - p_ij[3,1] - s[0,3] <= 0
+ 3_Supports_0_InSameBin2_1: - p_ij[0,1] + p_ij[3,1] - s[0,3] <= 0
+ Gamma0ForItems_0_inBins_1_NoCut: p_ij[0,1] + gamma[0] <= 1
+ 3_Supports_0_InSameBin1_2: p_ij[0,2] - p_ij[3,2] - s[0,3] <= 0
+ 3_Supports_0_InSameBin2_2: - p_ij[0,2] + p_ij[3,2] - s[0,3] <= 0
+ 3_Supports_0_InSameBin1_3: p_ij[0,3] - p_ij[3,3] - s[0,3] <= 0
+ 3_Supports_0_InSameBin2_3: - p_ij[0,3] + p_ij[3,3] - s[0,3] <= 0
+ 0_OnCutIn2: 10000 p_ij[0,2] + 1.261904761904762 xi_l[0] + zi[0]
+   + 10000 gamma[0] <= 20053
+ 0_OnCutIn3: 10000 p_ij[0,3] + 1.261904761904762 xi_l[0] + zi[0]
+   + 10000 gamma[0] <= 20053
+ AbsZ10_4: - zi[0] + zi_hi[4] - k[0,4] <= 0
+ AbsZ20_4: zi[0] - zi_hi[4] - k[0,4] <= 0
+ 4_Below_0: zi[0] - zi_hi[4] + k[0,4] + 310 m[0,4] <= 310
+ 4_NotBelow_0: - zi[0] + zi_hi[4] + k[0,4] - 310 m[0,4] <= 0
+ HeightCompat_0_4: h[0,4] - k[0,4] <= 0
+ NoHeightCompat_0_4: - 155 h[0,4] + k[0,4] <= 0
+ Overlap_0_4: - x_p[0,4] - x_p[4,0] + o[0,4] <= 0
+ NoOverlap_0_4: x_p[0,4] + x_p[4,0] - 2 o[0,4] <= 0
+ 3_Supports_0: - h[0,4] - o[0,4] - s[0,4] <= -1
+ 3_DoesntSupport_0: h[0,4] + o[0,4] + 2 s[0,4] <= 2
+ beta1_0_4: - s[0,4] + beta1[0,4] <= 0
+ beta2_0_4: - s[0,4] + beta2[0,4] <= 0
+ sBeta1Flag_0_4: - s[0,4] + beta1[0,4] <= 0
+ sBeta2Flag_0_4: - s[0,4] + beta2[0,4] <= 0
+ Eta1Overlap_0_4: eta1[0,4] + beta1[0,4] <= 1
+ Eta2Overlap_0_4: eta2[0,4] + beta2[0,4] <= 1
+ Eta1Flag_0_4: - xi_l[0] + xi_l[4] - 300 eta1[0,4] <= 0
+ Eta2Flag_0_4: xi_r[0] - xi_r[4] - 300 eta2[0,4] <= 0
+ X_Overlap_0_4_1: xi_l[4] - xi_r[0] + overlap_x[0,4] - 10000 beta2[0,4]
+   >= -10000
+ X_Overlap_0_4_2: xi_l[0] - xi_r[4] + overlap_x[0,4] - 10000 beta1[0,4]
+   >= -10000
+ X_Overlap_0_4_UpperBound1: xi_l[4] - xi_r[0] + overlap_x[0,4] <= 0
+ X_Overlap_0_4_UpperBound2: xi_l[0] - xi_r[4] + overlap_x[0,4] <= 0
+ 4_Supports_0_InSameBin1_0: p_ij[0,0] - p_ij[4,0] - s[0,4] <= 0
+ 4_Supports_0_InSameBin2_0: - p_ij[0,0] + p_ij[4,0] - s[0,4] <= 0
+ Gamma0ForItems_0_inBins_0_NoCut: p_ij[0,0] + gamma[0] <= 1
+ 4_Supports_0_InSameBin1_1: p_ij[0,1] - p_ij[4,1] - s[0,4] <= 0
+ 4_Supports_0_InSameBin2_1: - p_ij[0,1] + p_ij[4,1] - s[0,4] <= 0
+ Gamma0ForItems_0_inBins_1_NoCut: p_ij[0,1] + gamma[0] <= 1
+ 4_Supports_0_InSameBin1_2: p_ij[0,2] - p_ij[4,2] - s[0,4] <= 0
+ 4_Supports_0_InSameBin2_2: - p_ij[0,2] + p_ij[4,2] - s[0,4] <= 0
+ 4_Supports_0_InSameBin1_3: p_ij[0,3] - p_ij[4,3] - s[0,4] <= 0
+ 4_Supports_0_InSameBin2_3: - p_ij[0,3] + p_ij[4,3] - s[0,4] <= 0
+ 0_OnCutIn2: 10000 p_ij[0,2] + 1.261904761904762 xi_l[0] + zi[0]
+   + 10000 gamma[0] <= 20053
+ 0_OnCutIn3: 10000 p_ij[0,3] + 1.261904761904762 xi_l[0] + zi[0]
+   + 10000 gamma[0] <= 20053
+ GroundConstraint_1: zi[1] + 155 g[1] <= 155
+ AbsZ11_0: - zi[1] + zi_hi[0] - k[1,0] <= 0
+ AbsZ21_0: zi[1] - zi_hi[0] - k[1,0] <= 0
+ 0_Below_1: zi[1] - zi_hi[0] + k[1,0] + 310 m[1,0] <= 310
+ 0_NotBelow_1: - zi[1] + zi_hi[0] + k[1,0] - 310 m[1,0] <= 0
+ HeightCompat_1_0: h[1,0] - k[1,0] <= 0
+ NoHeightCompat_1_0: - 155 h[1,0] + k[1,0] <= 0
+ Overlap_1_0: - x_p[0,1] - x_p[1,0] + o[1,0] <= 0
+ NoOverlap_1_0: x_p[0,1] + x_p[1,0] - 2 o[1,0] <= 0
+ 3_Supports_1: - h[1,0] - o[1,0] - s[1,0] <= -1
+ 3_DoesntSupport_1: h[1,0] + o[1,0] + 2 s[1,0] <= 2
+ beta1_1_0: - s[1,0] + beta1[1,0] <= 0
+ beta2_1_0: - s[1,0] + beta2[1,0] <= 0
+ sBeta1Flag_1_0: - s[1,0] + beta1[1,0] <= 0
+ sBeta2Flag_1_0: - s[1,0] + beta2[1,0] <= 0
+ Eta1Overlap_1_0: eta1[1,0] + beta1[1,0] <= 1
+ Eta2Overlap_1_0: eta2[1,0] + beta2[1,0] <= 1
+ Eta1Flag_1_0: xi_l[0] - xi_l[1] - 300 eta1[1,0] <= 0
+ Eta2Flag_1_0: - xi_r[0] + xi_r[1] - 300 eta2[1,0] <= 0
+ X_Overlap_1_0_1: xi_l[0] - xi_r[1] + overlap_x[1,0] - 10000 beta2[1,0]
+   >= -10000
+ X_Overlap_1_0_2: xi_l[1] - xi_r[0] + overlap_x[1,0] - 10000 beta1[1,0]
+   >= -10000
+ X_Overlap_1_0_UpperBound1: xi_l[0] - xi_r[1] + overlap_x[1,0] <= 0
+ X_Overlap_1_0_UpperBound2: xi_l[1] - xi_r[0] + overlap_x[1,0] <= 0
+ 0_Supports_1_InSameBin1_0: - p_ij[0,0] + p_ij[1,0] - s[1,0] <= 0
+ 0_Supports_1_InSameBin2_0: p_ij[0,0] - p_ij[1,0] - s[1,0] <= 0
+ Gamma0ForItems_1_inBins_0_NoCut: p_ij[1,0] + gamma[1] <= 1
+ 0_Supports_1_InSameBin1_1: - p_ij[0,1] + p_ij[1,1] - s[1,0] <= 0
+ 0_Supports_1_InSameBin2_1: p_ij[0,1] - p_ij[1,1] - s[1,0] <= 0
+ Gamma0ForItems_1_inBins_1_NoCut: p_ij[1,1] + gamma[1] <= 1
+ 0_Supports_1_InSameBin1_2: - p_ij[0,2] + p_ij[1,2] - s[1,0] <= 0
+ 0_Supports_1_InSameBin2_2: p_ij[0,2] - p_ij[1,2] - s[1,0] <= 0
+ 0_Supports_1_InSameBin1_3: - p_ij[0,3] + p_ij[1,3] - s[1,0] <= 0
+ 0_Supports_1_InSameBin2_3: p_ij[0,3] - p_ij[1,3] - s[1,0] <= 0
+ 1_OnCutIn2: 10000 p_ij[1,2] + 1.261904761904762 xi_l[1] + zi[1]
+   + 10000 gamma[1] <= 20053
+ 1_OnCutIn3: 10000 p_ij[1,3] + 1.261904761904762 xi_l[1] + zi[1]
+   + 10000 gamma[1] <= 20053
+ 1_OnCutIn2: 10000 p_ij[1,2] + 1.261904761904762 xi_l[1] + zi[1]
+   + 10000 gamma[1] <= 20053
+ 1_OnCutIn3: 10000 p_ij[1,3] + 1.261904761904762 xi_l[1] + zi[1]
+   + 10000 gamma[1] <= 20053
+ AbsZ11_2: - zi[1] + zi_hi[2] - k[1,2] <= 0
+ AbsZ21_2: zi[1] - zi_hi[2] - k[1,2] <= 0
+ 2_Below_1: zi[1] - zi_hi[2] + k[1,2] + 310 m[1,2] <= 310
+ 2_NotBelow_1: - zi[1] + zi_hi[2] + k[1,2] - 310 m[1,2] <= 0
+ HeightCompat_1_2: h[1,2] - k[1,2] <= 0
+ NoHeightCompat_1_2: - 155 h[1,2] + k[1,2] <= 0
+ Overlap_1_2: - x_p[1,2] - x_p[2,1] + o[1,2] <= 0
+ NoOverlap_1_2: x_p[1,2] + x_p[2,1] - 2 o[1,2] <= 0
+ 3_Supports_1: - h[1,2] - o[1,2] - s[1,2] <= -1
+ 3_DoesntSupport_1: h[1,2] + o[1,2] + 2 s[1,2] <= 2
+ beta1_1_2: - s[1,2] + beta1[1,2] <= 0
+ beta2_1_2: - s[1,2] + beta2[1,2] <= 0
+ sBeta1Flag_1_2: - s[1,2] + beta1[1,2] <= 0
+ sBeta2Flag_1_2: - s[1,2] + beta2[1,2] <= 0
+ Eta1Overlap_1_2: eta1[1,2] + beta1[1,2] <= 1
+ Eta2Overlap_1_2: eta2[1,2] + beta2[1,2] <= 1
+ Eta1Flag_1_2: - xi_l[1] + xi_l[2] - 300 eta1[1,2] <= 0
+ Eta2Flag_1_2: xi_r[1] - xi_r[2] - 300 eta2[1,2] <= 0
+ X_Overlap_1_2_1: xi_l[2] - xi_r[1] + overlap_x[1,2] - 10000 beta2[1,2]
+   >= -10000
+ X_Overlap_1_2_2: xi_l[1] - xi_r[2] + overlap_x[1,2] - 10000 beta1[1,2]
+   >= -10000
+ X_Overlap_1_2_UpperBound1: xi_l[2] - xi_r[1] + overlap_x[1,2] <= 0
+ X_Overlap_1_2_UpperBound2: xi_l[1] - xi_r[2] + overlap_x[1,2] <= 0
+ 2_Supports_1_InSameBin1_0: p_ij[1,0] - p_ij[2,0] - s[1,2] <= 0
+ 2_Supports_1_InSameBin2_0: - p_ij[1,0] + p_ij[2,0] - s[1,2] <= 0
+ Gamma0ForItems_1_inBins_0_NoCut: p_ij[1,0] + gamma[1] <= 1
+ 2_Supports_1_InSameBin1_1: p_ij[1,1] - p_ij[2,1] - s[1,2] <= 0
+ 2_Supports_1_InSameBin2_1: - p_ij[1,1] + p_ij[2,1] - s[1,2] <= 0
+ Gamma0ForItems_1_inBins_1_NoCut: p_ij[1,1] + gamma[1] <= 1
+ 2_Supports_1_InSameBin1_2: p_ij[1,2] - p_ij[2,2] - s[1,2] <= 0
+ 2_Supports_1_InSameBin2_2: - p_ij[1,2] + p_ij[2,2] - s[1,2] <= 0
+ 2_Supports_1_InSameBin1_3: p_ij[1,3] - p_ij[2,3] - s[1,2] <= 0
+ 2_Supports_1_InSameBin2_3: - p_ij[1,3] + p_ij[2,3] - s[1,2] <= 0
+ 1_OnCutIn2: 10000 p_ij[1,2] + 1.261904761904762 xi_l[1] + zi[1]
+   + 10000 gamma[1] <= 20053
+ 1_OnCutIn3: 10000 p_ij[1,3] + 1.261904761904762 xi_l[1] + zi[1]
+   + 10000 gamma[1] <= 20053
+ AbsZ11_3: - zi[1] + zi_hi[3] - k[1,3] <= 0
+ AbsZ21_3: zi[1] - zi_hi[3] - k[1,3] <= 0
+ 3_Below_1: zi[1] - zi_hi[3] + k[1,3] + 310 m[1,3] <= 310
+ 3_NotBelow_1: - zi[1] + zi_hi[3] + k[1,3] - 310 m[1,3] <= 0
+ HeightCompat_1_3: h[1,3] - k[1,3] <= 0
+ NoHeightCompat_1_3: - 155 h[1,3] + k[1,3] <= 0
+ Overlap_1_3: - x_p[1,3] - x_p[3,1] + o[1,3] <= 0
+ NoOverlap_1_3: x_p[1,3] + x_p[3,1] - 2 o[1,3] <= 0
+ 3_Supports_1: - h[1,3] - o[1,3] - s[1,3] <= -1
+ beta1_1_3: - s[1,3] + beta1[1,3] <= 0
+ beta2_1_3: - s[1,3] + beta2[1,3] <= 0
+ Eta1Flag_1_3: - xi_l[1] + xi_l[3] - 300 eta1[1,3] <= 0
+ Eta2Flag_1_3: xi_r[1] - xi_r[3] - 300 eta2[1,3] <= 0
+ X_Overlap_1_3_1: xi_l[3] - xi_r[1] + overlap_x[1,3] - 10000 beta2[1,3]
+   >= -10000
+ X_Overlap_1_3_2: xi_l[1] - xi_r[3] + overlap_x[1,3] - 10000 beta1[1,3]
+   >= -10000
+ X_Overlap_1_3_UpperBound1: xi_l[3] - xi_r[1] + overlap_x[1,3] <= 0
+ X_Overlap_1_3_UpperBound2: xi_l[1] - xi_r[3] + overlap_x[1,3] <= 0
+ 3_Supports_1_InSameBin1_0: p_ij[1,0] - p_ij[3,0] - s[1,3] <= 0
  3_Supports_1_InSameBin2_0: - p_ij[1,0] + p_ij[3,0] - s[1,3] <= 0
+ Gamma0ForItems_1_inBins_0_NoCut: p_ij[1,0] + gamma[1] <= 1
+ 3_Supports_1_InSameBin1_1: p_ij[1,1] - p_ij[3,1] - s[1,3] <= 0
+ 3_Supports_1_InSameBin2_1: - p_ij[1,1] + p_ij[3,1] - s[1,3] <= 0
+ Gamma0ForItems_1_inBins_1_NoCut: p_ij[1,1] + gamma[1] <= 1
+ 3_Supports_1_InSameBin1_2: p_ij[1,2] - p_ij[3,2] - s[1,3] <= 0
  3_Supports_1_InSameBin2_2: - p_ij[1,2] + p_ij[3,2] - s[1,3] <= 0
+ 3_Supports_1_InSameBin1_3: p_ij[1,3] - p_ij[3,3] - s[1,3] <= 0
  3_Supports_1_InSameBin2_3: - p_ij[1,3] + p_ij[3,3] - s[1,3] <= 0
- 9_Supports_1_InSameBin2_1: - p_ij[1,1] + p_ij[9,1] - s[1,9] <= 0
- 9_Supports_2_InSameBin2_0: - p_ij[2,0] + p_ij[9,0] - s[2,9] <= 0
- 9_Supports_2_InSameBin2_1: - p_ij[2,1] + p_ij[9,1] - s[2,9] <= 0
- 9_Supports_2_InSameBin2_2: - p_ij[2,2] + p_ij[9,2] - s[2,9] <= 0
- 9_Supports_2_InSameBin2_3: - p_ij[2,3] + p_ij[9,3] - s[2,9] <= 0
- 3_Supports_5_InSameBin1_0: - p_ij[3,0] + p_ij[5,0] - s[5,3] <= 0
- 3_Supports_5_InSameBin1_2: - p_ij[3,2] + p_ij[5,2] - s[5,3] <= 0
- 3_Supports_5_InSameBin1_3: - p_ij[3,3] + p_ij[5,3] - s[5,3] <= 0
- 9_Supports_5_InSameBin1_0: p_ij[5,0] - p_ij[9,0] - s[5,9] <= 0
- 9_Supports_5_InSameBin1_1: p_ij[5,1] - p_ij[9,1] - s[5,9] <= 0
- 9_Supports_5_InSameBin1_2: p_ij[5,2] - p_ij[9,2] - s[5,9] <= 0
- 9_Supports_5_InSameBin1_3: p_ij[5,3] - p_ij[9,3] - s[5,9] <= 0
+ 1_OnCutIn2: 10000 p_ij[1,2] + 1.261904761904762 xi_l[1] + zi[1]
+   + 10000 gamma[1] <= 20053
+ 1_OnCutIn3: 10000 p_ij[1,3] + 1.261904761904762 xi_l[1] + zi[1]
+   + 10000 gamma[1] <= 20053
+ AbsZ11_4: - zi[1] + zi_hi[4] - k[1,4] <= 0
+ AbsZ21_4: zi[1] - zi_hi[4] - k[1,4] <= 0
+ 4_Below_1: zi[1] - zi_hi[4] + k[1,4] + 310 m[1,4] <= 310
+ 4_NotBelow_1: - zi[1] + zi_hi[4] + k[1,4] - 310 m[1,4] <= 0
+ HeightCompat_1_4: h[1,4] - k[1,4] <= 0
+ NoHeightCompat_1_4: - 155 h[1,4] + k[1,4] <= 0
+ Overlap_1_4: - x_p[1,4] - x_p[4,1] + o[1,4] <= 0
+ NoOverlap_1_4: x_p[1,4] + x_p[4,1] - 2 o[1,4] <= 0
+ 3_Supports_1: - h[1,4] - o[1,4] - s[1,4] <= -1
+ 3_DoesntSupport_1: h[1,4] + o[1,4] + 2 s[1,4] <= 2
+ beta1_1_4: - s[1,4] + beta1[1,4] <= 0
+ beta2_1_4: - s[1,4] + beta2[1,4] <= 0
+ sBeta1Flag_1_4: - s[1,4] + beta1[1,4] <= 0
+ sBeta2Flag_1_4: - s[1,4] + beta2[1,4] <= 0
+ Eta1Overlap_1_4: eta1[1,4] + beta1[1,4] <= 1
+ Eta2Overlap_1_4: eta2[1,4] + beta2[1,4] <= 1
+ Eta1Flag_1_4: - xi_l[1] + xi_l[4] - 300 eta1[1,4] <= 0
+ Eta2Flag_1_4: xi_r[1] - xi_r[4] - 300 eta2[1,4] <= 0
+ X_Overlap_1_4_1: xi_l[4] - xi_r[1] + overlap_x[1,4] - 10000 beta2[1,4]
+   >= -10000
+ X_Overlap_1_4_2: xi_l[1] - xi_r[4] + overlap_x[1,4] - 10000 beta1[1,4]
+   >= -10000
+ X_Overlap_1_4_UpperBound1: xi_l[4] - xi_r[1] + overlap_x[1,4] <= 0
+ X_Overlap_1_4_UpperBound2: xi_l[1] - xi_r[4] + overlap_x[1,4] <= 0
+ 4_Supports_1_InSameBin1_0: p_ij[1,0] - p_ij[4,0] - s[1,4] <= 0
+ 4_Supports_1_InSameBin2_0: - p_ij[1,0] + p_ij[4,0] - s[1,4] <= 0
+ Gamma0ForItems_1_inBins_0_NoCut: p_ij[1,0] + gamma[1] <= 1
+ 4_Supports_1_InSameBin1_1: p_ij[1,1] - p_ij[4,1] - s[1,4] <= 0
+ 4_Supports_1_InSameBin2_1: - p_ij[1,1] + p_ij[4,1] - s[1,4] <= 0
+ Gamma0ForItems_1_inBins_1_NoCut: p_ij[1,1] + gamma[1] <= 1
+ 4_Supports_1_InSameBin1_2: p_ij[1,2] - p_ij[4,2] - s[1,4] <= 0
+ 4_Supports_1_InSameBin2_2: - p_ij[1,2] + p_ij[4,2] - s[1,4] <= 0
+ 4_Supports_1_InSameBin1_3: p_ij[1,3] - p_ij[4,3] - s[1,4] <= 0
+ 4_Supports_1_InSameBin2_3: - p_ij[1,3] + p_ij[4,3] - s[1,4] <= 0
+ 1_OnCutIn2: 10000 p_ij[1,2] + 1.261904761904762 xi_l[1] + zi[1]
+   + 10000 gamma[1] <= 20053
+ 1_OnCutIn3: 10000 p_ij[1,3] + 1.261904761904762 xi_l[1] + zi[1]
+   + 10000 gamma[1] <= 20053
+ GroundConstraint_2: zi[2] + 155 g[2] <= 155
+ AbsZ12_0: - zi[2] + zi_hi[0] - k[2,0] <= 0
+ AbsZ22_0: zi[2] - zi_hi[0] - k[2,0] <= 0
+ 0_Below_2: zi[2] - zi_hi[0] + k[2,0] + 310 m[2,0] <= 310
+ 0_NotBelow_2: - zi[2] + zi_hi[0] + k[2,0] - 310 m[2,0] <= 0
+ HeightCompat_2_0: h[2,0] - k[2,0] <= 0
+ NoHeightCompat_2_0: - 155 h[2,0] + k[2,0] <= 0
+ Overlap_2_0: - x_p[0,2] - x_p[2,0] + o[2,0] <= 0
+ NoOverlap_2_0: x_p[0,2] + x_p[2,0] - 2 o[2,0] <= 0
+ 3_Supports_2: - h[2,0] - o[2,0] - s[2,0] <= -1
+ 3_DoesntSupport_2: h[2,0] + o[2,0] + 2 s[2,0] <= 2
+ beta1_2_0: - s[2,0] + beta1[2,0] <= 0
+ beta2_2_0: - s[2,0] + beta2[2,0] <= 0
+ sBeta1Flag_2_0: - s[2,0] + beta1[2,0] <= 0
+ sBeta2Flag_2_0: - s[2,0] + beta2[2,0] <= 0
+ Eta1Overlap_2_0: eta1[2,0] + beta1[2,0] <= 1
+ Eta2Overlap_2_0: eta2[2,0] + beta2[2,0] <= 1
+ Eta1Flag_2_0: xi_l[0] - xi_l[2] - 300 eta1[2,0] <= 0
+ Eta2Flag_2_0: - xi_r[0] + xi_r[2] - 300 eta2[2,0] <= 0
+ X_Overlap_2_0_1: xi_l[0] - xi_r[2] + overlap_x[2,0] - 10000 beta2[2,0]
+   >= -10000
+ X_Overlap_2_0_2: xi_l[2] - xi_r[0] + overlap_x[2,0] - 10000 beta1[2,0]
+   >= -10000
+ X_Overlap_2_0_UpperBound1: xi_l[0] - xi_r[2] + overlap_x[2,0] <= 0
+ X_Overlap_2_0_UpperBound2: xi_l[2] - xi_r[0] + overlap_x[2,0] <= 0
+ 0_Supports_2_InSameBin1_0: - p_ij[0,0] + p_ij[2,0] - s[2,0] <= 0
+ 0_Supports_2_InSameBin2_0: p_ij[0,0] - p_ij[2,0] - s[2,0] <= 0
+ Gamma0ForItems_2_inBins_0_NoCut: p_ij[2,0] + gamma[2] <= 1
+ 0_Supports_2_InSameBin1_1: - p_ij[0,1] + p_ij[2,1] - s[2,0] <= 0
+ 0_Supports_2_InSameBin2_1: p_ij[0,1] - p_ij[2,1] - s[2,0] <= 0
+ Gamma0ForItems_2_inBins_1_NoCut: p_ij[2,1] + gamma[2] <= 1
+ 0_Supports_2_InSameBin1_2: - p_ij[0,2] + p_ij[2,2] - s[2,0] <= 0
+ 0_Supports_2_InSameBin2_2: p_ij[0,2] - p_ij[2,2] - s[2,0] <= 0
+ 0_Supports_2_InSameBin1_3: - p_ij[0,3] + p_ij[2,3] - s[2,0] <= 0
+ 0_Supports_2_InSameBin2_3: p_ij[0,3] - p_ij[2,3] - s[2,0] <= 0
+ 2_OnCutIn2: 10000 p_ij[2,2] + 1.261904761904762 xi_l[2] + zi[2]
+   + 10000 gamma[2] <= 20053
+ 2_OnCutIn3: 10000 p_ij[2,3] + 1.261904761904762 xi_l[2] + zi[2]
+   + 10000 gamma[2] <= 20053
+ AbsZ12_1: - zi[2] + zi_hi[1] - k[2,1] <= 0
+ AbsZ22_1: zi[2] - zi_hi[1] - k[2,1] <= 0
+ 1_Below_2: zi[2] - zi_hi[1] + k[2,1] + 310 m[2,1] <= 310
+ 1_NotBelow_2: - zi[2] + zi_hi[1] + k[2,1] - 310 m[2,1] <= 0
+ HeightCompat_2_1: h[2,1] - k[2,1] <= 0
+ NoHeightCompat_2_1: - 155 h[2,1] + k[2,1] <= 0
+ Overlap_2_1: - x_p[1,2] - x_p[2,1] + o[2,1] <= 0
+ NoOverlap_2_1: x_p[1,2] + x_p[2,1] - 2 o[2,1] <= 0
+ 3_Supports_2: - h[2,1] - o[2,1] - s[2,1] <= -1
+ 3_DoesntSupport_2: h[2,1] + o[2,1] + 2 s[2,1] <= 2
+ beta1_2_1: - s[2,1] + beta1[2,1] <= 0
+ beta2_2_1: - s[2,1] + beta2[2,1] <= 0
+ sBeta1Flag_2_1: - s[2,1] + beta1[2,1] <= 0
+ sBeta2Flag_2_1: - s[2,1] + beta2[2,1] <= 0
+ Eta1Overlap_2_1: eta1[2,1] + beta1[2,1] <= 1
+ Eta2Overlap_2_1: eta2[2,1] + beta2[2,1] <= 1
+ Eta1Flag_2_1: xi_l[1] - xi_l[2] - 300 eta1[2,1] <= 0
+ Eta2Flag_2_1: - xi_r[1] + xi_r[2] - 300 eta2[2,1] <= 0
+ X_Overlap_2_1_1: xi_l[1] - xi_r[2] + overlap_x[2,1] - 10000 beta2[2,1]
+   >= -10000
+ X_Overlap_2_1_2: xi_l[2] - xi_r[1] + overlap_x[2,1] - 10000 beta1[2,1]
+   >= -10000
+ X_Overlap_2_1_UpperBound1: xi_l[1] - xi_r[2] + overlap_x[2,1] <= 0
+ X_Overlap_2_1_UpperBound2: xi_l[2] - xi_r[1] + overlap_x[2,1] <= 0
+ 1_Supports_2_InSameBin1_0: - p_ij[1,0] + p_ij[2,0] - s[2,1] <= 0
+ 1_Supports_2_InSameBin2_0: p_ij[1,0] - p_ij[2,0] - s[2,1] <= 0
+ Gamma0ForItems_2_inBins_0_NoCut: p_ij[2,0] + gamma[2] <= 1
+ 1_Supports_2_InSameBin1_1: - p_ij[1,1] + p_ij[2,1] - s[2,1] <= 0
+ 1_Supports_2_InSameBin2_1: p_ij[1,1] - p_ij[2,1] - s[2,1] <= 0
+ Gamma0ForItems_2_inBins_1_NoCut: p_ij[2,1] + gamma[2] <= 1
+ 1_Supports_2_InSameBin1_2: - p_ij[1,2] + p_ij[2,2] - s[2,1] <= 0
+ 1_Supports_2_InSameBin2_2: p_ij[1,2] - p_ij[2,2] - s[2,1] <= 0
+ 1_Supports_2_InSameBin1_3: - p_ij[1,3] + p_ij[2,3] - s[2,1] <= 0
+ 1_Supports_2_InSameBin2_3: p_ij[1,3] - p_ij[2,3] - s[2,1] <= 0
+ 2_OnCutIn2: 10000 p_ij[2,2] + 1.261904761904762 xi_l[2] + zi[2]
+   + 10000 gamma[2] <= 20053
+ 2_OnCutIn3: 10000 p_ij[2,3] + 1.261904761904762 xi_l[2] + zi[2]
+   + 10000 gamma[2] <= 20053
+ 2_OnCutIn2: 10000 p_ij[2,2] + 1.261904761904762 xi_l[2] + zi[2]
+   + 10000 gamma[2] <= 20053
+ 2_OnCutIn3: 10000 p_ij[2,3] + 1.261904761904762 xi_l[2] + zi[2]
+   + 10000 gamma[2] <= 20053
+ AbsZ12_3: - zi[2] + zi_hi[3] - k[2,3] <= 0
+ AbsZ22_3: zi[2] - zi_hi[3] - k[2,3] <= 0
+ 3_Below_2: zi[2] - zi_hi[3] + k[2,3] + 310 m[2,3] <= 310
+ 3_NotBelow_2: - zi[2] + zi_hi[3] + k[2,3] - 310 m[2,3] <= 0
+ HeightCompat_2_3: h[2,3] - k[2,3] <= 0
+ NoHeightCompat_2_3: - 155 h[2,3] + k[2,3] <= 0
+ Overlap_2_3: - x_p[2,3] - x_p[3,2] + o[2,3] <= 0
+ NoOverlap_2_3: x_p[2,3] + x_p[3,2] - 2 o[2,3] <= 0
+ 3_Supports_2: - h[2,3] - o[2,3] - s[2,3] <= -1
+ beta1_2_3: - s[2,3] + beta1[2,3] <= 0
+ beta2_2_3: - s[2,3] + beta2[2,3] <= 0
+ Eta1Flag_2_3: - xi_l[2] + xi_l[3] - 300 eta1[2,3] <= 0
+ Eta2Flag_2_3: xi_r[2] - xi_r[3] - 300 eta2[2,3] <= 0
+ X_Overlap_2_3_1: xi_l[3] - xi_r[2] + overlap_x[2,3] - 10000 beta2[2,3]
+   >= -10000
+ X_Overlap_2_3_2: xi_l[2] - xi_r[3] + overlap_x[2,3] - 10000 beta1[2,3]
+   >= -10000
+ X_Overlap_2_3_UpperBound1: xi_l[3] - xi_r[2] + overlap_x[2,3] <= 0
+ X_Overlap_2_3_UpperBound2: xi_l[2] - xi_r[3] + overlap_x[2,3] <= 0
+ 3_Supports_2_InSameBin1_0: p_ij[2,0] - p_ij[3,0] - s[2,3] <= 0
+ 3_Supports_2_InSameBin2_0: - p_ij[2,0] + p_ij[3,0] - s[2,3] <= 0
+ Gamma0ForItems_2_inBins_0_NoCut: p_ij[2,0] + gamma[2] <= 1
+ 3_Supports_2_InSameBin1_1: p_ij[2,1] - p_ij[3,1] - s[2,3] <= 0
+ 3_Supports_2_InSameBin2_1: - p_ij[2,1] + p_ij[3,1] - s[2,3] <= 0
+ Gamma0ForItems_2_inBins_1_NoCut: p_ij[2,1] + gamma[2] <= 1
+ 3_Supports_2_InSameBin1_2: p_ij[2,2] - p_ij[3,2] - s[2,3] <= 0
+ 3_Supports_2_InSameBin2_2: - p_ij[2,2] + p_ij[3,2] - s[2,3] <= 0
+ 3_Supports_2_InSameBin1_3: p_ij[2,3] - p_ij[3,3] - s[2,3] <= 0
+ 3_Supports_2_InSameBin2_3: - p_ij[2,3] + p_ij[3,3] - s[2,3] <= 0
+ 2_OnCutIn2: 10000 p_ij[2,2] + 1.261904761904762 xi_l[2] + zi[2]
+   + 10000 gamma[2] <= 20053
+ 2_OnCutIn3: 10000 p_ij[2,3] + 1.261904761904762 xi_l[2] + zi[2]
+   + 10000 gamma[2] <= 20053
+ AbsZ12_4: - zi[2] + zi_hi[4] - k[2,4] <= 0
+ AbsZ22_4: zi[2] - zi_hi[4] - k[2,4] <= 0
+ 4_Below_2: zi[2] - zi_hi[4] + k[2,4] + 310 m[2,4] <= 310
+ 4_NotBelow_2: - zi[2] + zi_hi[4] + k[2,4] - 310 m[2,4] <= 0
+ HeightCompat_2_4: h[2,4] - k[2,4] <= 0
+ NoHeightCompat_2_4: - 155 h[2,4] + k[2,4] <= 0
+ Overlap_2_4: - x_p[2,4] - x_p[4,2] + o[2,4] <= 0
+ NoOverlap_2_4: x_p[2,4] + x_p[4,2] - 2 o[2,4] <= 0
+ 3_Supports_2: - h[2,4] - o[2,4] - s[2,4] <= -1
+ 3_DoesntSupport_2: h[2,4] + o[2,4] + 2 s[2,4] <= 2
+ beta1_2_4: - s[2,4] + beta1[2,4] <= 0
+ beta2_2_4: - s[2,4] + beta2[2,4] <= 0
+ sBeta1Flag_2_4: - s[2,4] + beta1[2,4] <= 0
+ sBeta2Flag_2_4: - s[2,4] + beta2[2,4] <= 0
+ Eta1Overlap_2_4: eta1[2,4] + beta1[2,4] <= 1
+ Eta2Overlap_2_4: eta2[2,4] + beta2[2,4] <= 1
+ Eta1Flag_2_4: - xi_l[2] + xi_l[4] - 300 eta1[2,4] <= 0
+ Eta2Flag_2_4: xi_r[2] - xi_r[4] - 300 eta2[2,4] <= 0
+ X_Overlap_2_4_1: xi_l[4] - xi_r[2] + overlap_x[2,4] - 10000 beta2[2,4]
+   >= -10000
+ X_Overlap_2_4_2: xi_l[2] - xi_r[4] + overlap_x[2,4] - 10000 beta1[2,4]
+   >= -10000
+ X_Overlap_2_4_UpperBound1: xi_l[4] - xi_r[2] + overlap_x[2,4] <= 0
+ X_Overlap_2_4_UpperBound2: xi_l[2] - xi_r[4] + overlap_x[2,4] <= 0
+ 4_Supports_2_InSameBin1_0: p_ij[2,0] - p_ij[4,0] - s[2,4] <= 0
+ 4_Supports_2_InSameBin2_0: - p_ij[2,0] + p_ij[4,0] - s[2,4] <= 0
+ Gamma0ForItems_2_inBins_0_NoCut: p_ij[2,0] + gamma[2] <= 1
+ 4_Supports_2_InSameBin1_1: p_ij[2,1] - p_ij[4,1] - s[2,4] <= 0
+ 4_Supports_2_InSameBin2_1: - p_ij[2,1] + p_ij[4,1] - s[2,4] <= 0
+ Gamma0ForItems_2_inBins_1_NoCut: p_ij[2,1] + gamma[2] <= 1
+ 4_Supports_2_InSameBin1_2: p_ij[2,2] - p_ij[4,2] - s[2,4] <= 0
+ 4_Supports_2_InSameBin2_2: - p_ij[2,2] + p_ij[4,2] - s[2,4] <= 0
+ 4_Supports_2_InSameBin1_3: p_ij[2,3] - p_ij[4,3] - s[2,4] <= 0
+ 4_Supports_2_InSameBin2_3: - p_ij[2,3] + p_ij[4,3] - s[2,4] <= 0
+ 2_OnCutIn2: 10000 p_ij[2,2] + 1.261904761904762 xi_l[2] + zi[2]
+   + 10000 gamma[2] <= 20053
+ 2_OnCutIn3: 10000 p_ij[2,3] + 1.261904761904762 xi_l[2] + zi[2]
+   + 10000 gamma[2] <= 20053
+ GroundConstraint_3: zi[3] + 155 g[3] <= 155
+ AbsZ13_0: - zi[3] + zi_hi[0] - k[3,0] <= 0
+ AbsZ23_0: zi[3] - zi_hi[0] - k[3,0] <= 0
+ 0_Below_3: zi[3] - zi_hi[0] + k[3,0] + 310 m[3,0] <= 310
+ 0_NotBelow_3: - zi[3] + zi_hi[0] + k[3,0] - 310 m[3,0] <= 0
+ HeightCompat_3_0: h[3,0] - k[3,0] <= 0
+ NoHeightCompat_3_0: - 155 h[3,0] + k[3,0] <= 0
+ Overlap_3_0: - x_p[0,3] - x_p[3,0] + o[3,0] <= 0
+ NoOverlap_3_0: x_p[0,3] + x_p[3,0] - 2 o[3,0] <= 0
+ 3_Supports_3: - h[3,0] - o[3,0] - s[3,0] <= -1
+ 3_DoesntSupport_3: h[3,0] + o[3,0] + 2 s[3,0] <= 2
+ beta1_3_0: - s[3,0] + beta1[3,0] <= 0
+ beta2_3_0: - s[3,0] + beta2[3,0] <= 0
+ sBeta1Flag_3_0: - s[3,0] + beta1[3,0] <= 0
+ sBeta2Flag_3_0: - s[3,0] + beta2[3,0] <= 0
+ Eta1Overlap_3_0: eta1[3,0] + beta1[3,0] <= 1
+ Eta2Overlap_3_0: eta2[3,0] + beta2[3,0] <= 1
+ Eta1Flag_3_0: xi_l[0] - xi_l[3] - 300 eta1[3,0] <= 0
+ Eta2Flag_3_0: - xi_r[0] + xi_r[3] - 300 eta2[3,0] <= 0
+ X_Overlap_3_0_1: xi_l[0] - xi_r[3] + overlap_x[3,0] - 10000 beta2[3,0]
+   >= -10000
+ X_Overlap_3_0_2: xi_l[3] - xi_r[0] + overlap_x[3,0] - 10000 beta1[3,0]
+   >= -10000
+ X_Overlap_3_0_UpperBound1: xi_l[0] - xi_r[3] + overlap_x[3,0] <= 0
+ X_Overlap_3_0_UpperBound2: xi_l[3] - xi_r[0] + overlap_x[3,0] <= 0
+ 0_Supports_3_InSameBin1_0: - p_ij[0,0] + p_ij[3,0] - s[3,0] <= 0
+ 0_Supports_3_InSameBin2_0: p_ij[0,0] - p_ij[3,0] - s[3,0] <= 0
+ Gamma0ForItems_3_inBins_0_NoCut: p_ij[3,0] + gamma[3] <= 1
+ 0_Supports_3_InSameBin1_1: - p_ij[0,1] + p_ij[3,1] - s[3,0] <= 0
+ 0_Supports_3_InSameBin2_1: p_ij[0,1] - p_ij[3,1] - s[3,0] <= 0
+ Gamma0ForItems_3_inBins_1_NoCut: p_ij[3,1] + gamma[3] <= 1
+ 0_Supports_3_InSameBin1_2: - p_ij[0,2] + p_ij[3,2] - s[3,0] <= 0
+ 0_Supports_3_InSameBin2_2: p_ij[0,2] - p_ij[3,2] - s[3,0] <= 0
+ 0_Supports_3_InSameBin1_3: - p_ij[0,3] + p_ij[3,3] - s[3,0] <= 0
+ 0_Supports_3_InSameBin2_3: p_ij[0,3] - p_ij[3,3] - s[3,0] <= 0
+ 3_OnCutIn2: 10000 p_ij[3,2] + 1.261904761904762 xi_l[3] + zi[3]
+   + 10000 gamma[3] <= 20053
+ 3_OnCutIn3: 10000 p_ij[3,3] + 1.261904761904762 xi_l[3] + zi[3]
+   + 10000 gamma[3] <= 20053
+ AbsZ13_1: - zi[3] + zi_hi[1] - k[3,1] <= 0
+ AbsZ23_1: zi[3] - zi_hi[1] - k[3,1] <= 0
+ 1_Below_3: zi[3] - zi_hi[1] + k[3,1] + 310 m[3,1] <= 310
+ 1_NotBelow_3: - zi[3] + zi_hi[1] + k[3,1] - 310 m[3,1] <= 0
+ HeightCompat_3_1: h[3,1] - k[3,1] <= 0
+ NoHeightCompat_3_1: - 155 h[3,1] + k[3,1] <= 0
+ Overlap_3_1: - x_p[1,3] - x_p[3,1] + o[3,1] <= 0
+ NoOverlap_3_1: x_p[1,3] + x_p[3,1] - 2 o[3,1] <= 0
+ 3_Supports_3: - h[3,1] - o[3,1] - s[3,1] <= -1
+ 3_DoesntSupport_3: h[3,1] + o[3,1] + 2 s[3,1] <= 2
+ beta1_3_1: - s[3,1] + beta1[3,1] <= 0
+ beta2_3_1: - s[3,1] + beta2[3,1] <= 0
+ sBeta1Flag_3_1: - s[3,1] + beta1[3,1] <= 0
+ sBeta2Flag_3_1: - s[3,1] + beta2[3,1] <= 0
+ Eta1Overlap_3_1: eta1[3,1] + beta1[3,1] <= 1
+ Eta2Overlap_3_1: eta2[3,1] + beta2[3,1] <= 1
+ Eta1Flag_3_1: xi_l[1] - xi_l[3] - 300 eta1[3,1] <= 0
+ Eta2Flag_3_1: - xi_r[1] + xi_r[3] - 300 eta2[3,1] <= 0
+ X_Overlap_3_1_1: xi_l[1] - xi_r[3] + overlap_x[3,1] - 10000 beta2[3,1]
+   >= -10000
+ X_Overlap_3_1_2: xi_l[3] - xi_r[1] + overlap_x[3,1] - 10000 beta1[3,1]
+   >= -10000
+ X_Overlap_3_1_UpperBound1: xi_l[1] - xi_r[3] + overlap_x[3,1] <= 0
+ X_Overlap_3_1_UpperBound2: xi_l[3] - xi_r[1] + overlap_x[3,1] <= 0
+ 1_Supports_3_InSameBin1_0: - p_ij[1,0] + p_ij[3,0] - s[3,1] <= 0
+ 1_Supports_3_InSameBin2_0: p_ij[1,0] - p_ij[3,0] - s[3,1] <= 0
+ Gamma0ForItems_3_inBins_0_NoCut: p_ij[3,0] + gamma[3] <= 1
+ 1_Supports_3_InSameBin1_1: - p_ij[1,1] + p_ij[3,1] - s[3,1] <= 0
+ 1_Supports_3_InSameBin2_1: p_ij[1,1] - p_ij[3,1] - s[3,1] <= 0
+ Gamma0ForItems_3_inBins_1_NoCut: p_ij[3,1] + gamma[3] <= 1
+ 1_Supports_3_InSameBin1_2: - p_ij[1,2] + p_ij[3,2] - s[3,1] <= 0
+ 1_Supports_3_InSameBin2_2: p_ij[1,2] - p_ij[3,2] - s[3,1] <= 0
+ 1_Supports_3_InSameBin1_3: - p_ij[1,3] + p_ij[3,3] - s[3,1] <= 0
+ 1_Supports_3_InSameBin2_3: p_ij[1,3] - p_ij[3,3] - s[3,1] <= 0
+ 3_OnCutIn2: 10000 p_ij[3,2] + 1.261904761904762 xi_l[3] + zi[3]
+   + 10000 gamma[3] <= 20053
+ 3_OnCutIn3: 10000 p_ij[3,3] + 1.261904761904762 xi_l[3] + zi[3]
+   + 10000 gamma[3] <= 20053
+ AbsZ13_2: - zi[3] + zi_hi[2] - k[3,2] <= 0
+ AbsZ23_2: zi[3] - zi_hi[2] - k[3,2] <= 0
+ 2_Below_3: zi[3] - zi_hi[2] + k[3,2] + 310 m[3,2] <= 310
+ 2_NotBelow_3: - zi[3] + zi_hi[2] + k[3,2] - 310 m[3,2] <= 0
+ HeightCompat_3_2: h[3,2] - k[3,2] <= 0
+ NoHeightCompat_3_2: - 155 h[3,2] + k[3,2] <= 0
+ Overlap_3_2: - x_p[2,3] - x_p[3,2] + o[3,2] <= 0
+ NoOverlap_3_2: x_p[2,3] + x_p[3,2] - 2 o[3,2] <= 0
+ 3_Supports_3: - h[3,2] - o[3,2] - s[3,2] <= -1
+ 3_DoesntSupport_3: h[3,2] + o[3,2] + 2 s[3,2] <= 2
+ beta1_3_2: - s[3,2] + beta1[3,2] <= 0
+ beta2_3_2: - s[3,2] + beta2[3,2] <= 0
+ sBeta1Flag_3_2: - s[3,2] + beta1[3,2] <= 0
+ sBeta2Flag_3_2: - s[3,2] + beta2[3,2] <= 0
+ Eta1Overlap_3_2: eta1[3,2] + beta1[3,2] <= 1
+ Eta2Overlap_3_2: eta2[3,2] + beta2[3,2] <= 1
+ Eta1Flag_3_2: xi_l[2] - xi_l[3] - 300 eta1[3,2] <= 0
+ Eta2Flag_3_2: - xi_r[2] + xi_r[3] - 300 eta2[3,2] <= 0
+ X_Overlap_3_2_1: xi_l[2] - xi_r[3] + overlap_x[3,2] - 10000 beta2[3,2]
+   >= -10000
+ X_Overlap_3_2_2: xi_l[3] - xi_r[2] + overlap_x[3,2] - 10000 beta1[3,2]
+   >= -10000
+ X_Overlap_3_2_UpperBound1: xi_l[2] - xi_r[3] + overlap_x[3,2] <= 0
+ X_Overlap_3_2_UpperBound2: xi_l[3] - xi_r[2] + overlap_x[3,2] <= 0
+ 2_Supports_3_InSameBin1_0: - p_ij[2,0] + p_ij[3,0] - s[3,2] <= 0
+ 2_Supports_3_InSameBin2_0: p_ij[2,0] - p_ij[3,0] - s[3,2] <= 0
+ Gamma0ForItems_3_inBins_0_NoCut: p_ij[3,0] + gamma[3] <= 1
+ 2_Supports_3_InSameBin1_1: - p_ij[2,1] + p_ij[3,1] - s[3,2] <= 0
+ 2_Supports_3_InSameBin2_1: p_ij[2,1] - p_ij[3,1] - s[3,2] <= 0
+ Gamma0ForItems_3_inBins_1_NoCut: p_ij[3,1] + gamma[3] <= 1
+ 2_Supports_3_InSameBin1_2: - p_ij[2,2] + p_ij[3,2] - s[3,2] <= 0
+ 2_Supports_3_InSameBin2_2: p_ij[2,2] - p_ij[3,2] - s[3,2] <= 0
+ 2_Supports_3_InSameBin1_3: - p_ij[2,3] + p_ij[3,3] - s[3,2] <= 0
+ 2_Supports_3_InSameBin2_3: p_ij[2,3] - p_ij[3,3] - s[3,2] <= 0
+ 3_OnCutIn2: 10000 p_ij[3,2] + 1.261904761904762 xi_l[3] + zi[3]
+   + 10000 gamma[3] <= 20053
+ 3_OnCutIn3: 10000 p_ij[3,3] + 1.261904761904762 xi_l[3] + zi[3]
+   + 10000 gamma[3] <= 20053
+ 3_OnCutIn2: 10000 p_ij[3,2] + 1.261904761904762 xi_l[3] + zi[3]
+   + 10000 gamma[3] <= 20053
+ 3_OnCutIn3: 10000 p_ij[3,3] + 1.261904761904762 xi_l[3] + zi[3]
+   + 10000 gamma[3] <= 20053
+ AbsZ13_4: - zi[3] + zi_hi[4] - k[3,4] <= 0
+ AbsZ23_4: zi[3] - zi_hi[4] - k[3,4] <= 0
+ 4_Below_3: zi[3] - zi_hi[4] + k[3,4] + 310 m[3,4] <= 310
+ 4_NotBelow_3: - zi[3] + zi_hi[4] + k[3,4] - 310 m[3,4] <= 0
+ HeightCompat_3_4: h[3,4] - k[3,4] <= 0
+ NoHeightCompat_3_4: - 155 h[3,4] + k[3,4] <= 0
+ Overlap_3_4: - x_p[3,4] - x_p[4,3] + o[3,4] <= 0
+ NoOverlap_3_4: x_p[3,4] + x_p[4,3] - 2 o[3,4] <= 0
+ 3_Supports_3: - h[3,4] - o[3,4] - s[3,4] <= -1
+ 3_DoesntSupport_3: h[3,4] + o[3,4] + 2 s[3,4] <= 2
+ beta1_3_4: - s[3,4] + beta1[3,4] <= 0
+ beta2_3_4: - s[3,4] + beta2[3,4] <= 0
+ sBeta1Flag_3_4: - s[3,4] + beta1[3,4] <= 0
+ sBeta2Flag_3_4: - s[3,4] + beta2[3,4] <= 0
+ Eta1Overlap_3_4: eta1[3,4] + beta1[3,4] <= 1
+ Eta2Overlap_3_4: eta2[3,4] + beta2[3,4] <= 1
+ Eta1Flag_3_4: - xi_l[3] + xi_l[4] - 300 eta1[3,4] <= 0
+ Eta2Flag_3_4: xi_r[3] - xi_r[4] - 300 eta2[3,4] <= 0
+ X_Overlap_3_4_1: xi_l[4] - xi_r[3] + overlap_x[3,4] - 10000 beta2[3,4]
+   >= -10000
+ X_Overlap_3_4_2: xi_l[3] - xi_r[4] + overlap_x[3,4] - 10000 beta1[3,4]
+   >= -10000
+ X_Overlap_3_4_UpperBound1: xi_l[4] - xi_r[3] + overlap_x[3,4] <= 0
+ X_Overlap_3_4_UpperBound2: xi_l[3] - xi_r[4] + overlap_x[3,4] <= 0
+ 4_Supports_3_InSameBin1_0: p_ij[3,0] - p_ij[4,0] - s[3,4] <= 0
+ 4_Supports_3_InSameBin2_0: - p_ij[3,0] + p_ij[4,0] - s[3,4] <= 0
+ Gamma0ForItems_3_inBins_0_NoCut: p_ij[3,0] + gamma[3] <= 1
+ 4_Supports_3_InSameBin1_1: p_ij[3,1] - p_ij[4,1] - s[3,4] <= 0
+ 4_Supports_3_InSameBin2_1: - p_ij[3,1] + p_ij[4,1] - s[3,4] <= 0
+ Gamma0ForItems_3_inBins_1_NoCut: p_ij[3,1] + gamma[3] <= 1
+ 4_Supports_3_InSameBin1_2: p_ij[3,2] - p_ij[4,2] - s[3,4] <= 0
+ 4_Supports_3_InSameBin2_2: - p_ij[3,2] + p_ij[4,2] - s[3,4] <= 0
+ 4_Supports_3_InSameBin1_3: p_ij[3,3] - p_ij[4,3] - s[3,4] <= 0
+ 4_Supports_3_InSameBin2_3: - p_ij[3,3] + p_ij[4,3] - s[3,4] <= 0
+ 3_OnCutIn2: 10000 p_ij[3,2] + 1.261904761904762 xi_l[3] + zi[3]
+   + 10000 gamma[3] <= 20053
+ 3_OnCutIn3: 10000 p_ij[3,3] + 1.261904761904762 xi_l[3] + zi[3]
+   + 10000 gamma[3] <= 20053
+ GroundConstraint_4: zi[4] + 155 g[4] <= 155
+ AbsZ14_0: - zi[4] + zi_hi[0] - k[4,0] <= 0
+ AbsZ24_0: zi[4] - zi_hi[0] - k[4,0] <= 0
+ 0_Below_4: zi[4] - zi_hi[0] + k[4,0] + 310 m[4,0] <= 310
+ 0_NotBelow_4: - zi[4] + zi_hi[0] + k[4,0] - 310 m[4,0] <= 0
+ HeightCompat_4_0: h[4,0] - k[4,0] <= 0
+ NoHeightCompat_4_0: - 155 h[4,0] + k[4,0] <= 0
+ Overlap_4_0: - x_p[0,4] - x_p[4,0] + o[4,0] <= 0
+ NoOverlap_4_0: x_p[0,4] + x_p[4,0] - 2 o[4,0] <= 0
+ 3_Supports_4: - h[4,0] - o[4,0] - s[4,0] <= -1
+ 3_DoesntSupport_4: h[4,0] + o[4,0] + 2 s[4,0] <= 2
+ beta1_4_0: - s[4,0] + beta1[4,0] <= 0
+ beta2_4_0: - s[4,0] + beta2[4,0] <= 0
+ sBeta1Flag_4_0: - s[4,0] + beta1[4,0] <= 0
+ sBeta2Flag_4_0: - s[4,0] + beta2[4,0] <= 0
+ Eta1Overlap_4_0: eta1[4,0] + beta1[4,0] <= 1
+ Eta2Overlap_4_0: eta2[4,0] + beta2[4,0] <= 1
+ Eta1Flag_4_0: xi_l[0] - xi_l[4] - 300 eta1[4,0] <= 0
+ Eta2Flag_4_0: - xi_r[0] + xi_r[4] - 300 eta2[4,0] <= 0
+ X_Overlap_4_0_1: xi_l[0] - xi_r[4] + overlap_x[4,0] - 10000 beta2[4,0]
+   >= -10000
+ X_Overlap_4_0_2: xi_l[4] - xi_r[0] + overlap_x[4,0] - 10000 beta1[4,0]
+   >= -10000
+ X_Overlap_4_0_UpperBound1: xi_l[0] - xi_r[4] + overlap_x[4,0] <= 0
+ X_Overlap_4_0_UpperBound2: xi_l[4] - xi_r[0] + overlap_x[4,0] <= 0
+ 0_Supports_4_InSameBin1_0: - p_ij[0,0] + p_ij[4,0] - s[4,0] <= 0
+ 0_Supports_4_InSameBin2_0: p_ij[0,0] - p_ij[4,0] - s[4,0] <= 0
+ Gamma0ForItems_4_inBins_0_NoCut: p_ij[4,0] + gamma[4] <= 1
+ 0_Supports_4_InSameBin1_1: - p_ij[0,1] + p_ij[4,1] - s[4,0] <= 0
+ 0_Supports_4_InSameBin2_1: p_ij[0,1] - p_ij[4,1] - s[4,0] <= 0
+ Gamma0ForItems_4_inBins_1_NoCut: p_ij[4,1] + gamma[4] <= 1
+ 0_Supports_4_InSameBin1_2: - p_ij[0,2] + p_ij[4,2] - s[4,0] <= 0
+ 0_Supports_4_InSameBin2_2: p_ij[0,2] - p_ij[4,2] - s[4,0] <= 0
+ 0_Supports_4_InSameBin1_3: - p_ij[0,3] + p_ij[4,3] - s[4,0] <= 0
+ 0_Supports_4_InSameBin2_3: p_ij[0,3] - p_ij[4,3] - s[4,0] <= 0
+ 4_OnCutIn2: 10000 p_ij[4,2] + 1.261904761904762 xi_l[4] + zi[4]
+   + 10000 gamma[4] <= 20053
+ 4_OnCutIn3: 10000 p_ij[4,3] + 1.261904761904762 xi_l[4] + zi[4]
+   + 10000 gamma[4] <= 20053
+ AbsZ14_1: - zi[4] + zi_hi[1] - k[4,1] <= 0
+ AbsZ24_1: zi[4] - zi_hi[1] - k[4,1] <= 0
+ 1_Below_4: zi[4] - zi_hi[1] + k[4,1] + 310 m[4,1] <= 310
+ 1_NotBelow_4: - zi[4] + zi_hi[1] + k[4,1] - 310 m[4,1] <= 0
+ HeightCompat_4_1: h[4,1] - k[4,1] <= 0
+ NoHeightCompat_4_1: - 155 h[4,1] + k[4,1] <= 0
+ Overlap_4_1: - x_p[1,4] - x_p[4,1] + o[4,1] <= 0
+ NoOverlap_4_1: x_p[1,4] + x_p[4,1] - 2 o[4,1] <= 0
+ 3_Supports_4: - h[4,1] - o[4,1] - s[4,1] <= -1
+ 3_DoesntSupport_4: h[4,1] + o[4,1] + 2 s[4,1] <= 2
+ beta1_4_1: - s[4,1] + beta1[4,1] <= 0
+ beta2_4_1: - s[4,1] + beta2[4,1] <= 0
+ sBeta1Flag_4_1: - s[4,1] + beta1[4,1] <= 0
+ sBeta2Flag_4_1: - s[4,1] + beta2[4,1] <= 0
+ Eta1Overlap_4_1: eta1[4,1] + beta1[4,1] <= 1
+ Eta2Overlap_4_1: eta2[4,1] + beta2[4,1] <= 1
+ Eta1Flag_4_1: xi_l[1] - xi_l[4] - 300 eta1[4,1] <= 0
+ Eta2Flag_4_1: - xi_r[1] + xi_r[4] - 300 eta2[4,1] <= 0
+ X_Overlap_4_1_1: xi_l[1] - xi_r[4] + overlap_x[4,1] - 10000 beta2[4,1]
+   >= -10000
+ X_Overlap_4_1_2: xi_l[4] - xi_r[1] + overlap_x[4,1] - 10000 beta1[4,1]
+   >= -10000
+ X_Overlap_4_1_UpperBound1: xi_l[1] - xi_r[4] + overlap_x[4,1] <= 0
+ X_Overlap_4_1_UpperBound2: xi_l[4] - xi_r[1] + overlap_x[4,1] <= 0
+ 1_Supports_4_InSameBin1_0: - p_ij[1,0] + p_ij[4,0] - s[4,1] <= 0
+ 1_Supports_4_InSameBin2_0: p_ij[1,0] - p_ij[4,0] - s[4,1] <= 0
+ Gamma0ForItems_4_inBins_0_NoCut: p_ij[4,0] + gamma[4] <= 1
+ 1_Supports_4_InSameBin1_1: - p_ij[1,1] + p_ij[4,1] - s[4,1] <= 0
+ 1_Supports_4_InSameBin2_1: p_ij[1,1] - p_ij[4,1] - s[4,1] <= 0
+ Gamma0ForItems_4_inBins_1_NoCut: p_ij[4,1] + gamma[4] <= 1
+ 1_Supports_4_InSameBin1_2: - p_ij[1,2] + p_ij[4,2] - s[4,1] <= 0
+ 1_Supports_4_InSameBin2_2: p_ij[1,2] - p_ij[4,2] - s[4,1] <= 0
+ 1_Supports_4_InSameBin1_3: - p_ij[1,3] + p_ij[4,3] - s[4,1] <= 0
+ 1_Supports_4_InSameBin2_3: p_ij[1,3] - p_ij[4,3] - s[4,1] <= 0
+ 4_OnCutIn2: 10000 p_ij[4,2] + 1.261904761904762 xi_l[4] + zi[4]
+   + 10000 gamma[4] <= 20053
+ 4_OnCutIn3: 10000 p_ij[4,3] + 1.261904761904762 xi_l[4] + zi[4]
+   + 10000 gamma[4] <= 20053
+ AbsZ14_2: - zi[4] + zi_hi[2] - k[4,2] <= 0
+ AbsZ24_2: zi[4] - zi_hi[2] - k[4,2] <= 0
+ 2_Below_4: zi[4] - zi_hi[2] + k[4,2] + 310 m[4,2] <= 310
+ 2_NotBelow_4: - zi[4] + zi_hi[2] + k[4,2] - 310 m[4,2] <= 0
+ HeightCompat_4_2: h[4,2] - k[4,2] <= 0
+ NoHeightCompat_4_2: - 155 h[4,2] + k[4,2] <= 0
+ Overlap_4_2: - x_p[2,4] - x_p[4,2] + o[4,2] <= 0
+ NoOverlap_4_2: x_p[2,4] + x_p[4,2] - 2 o[4,2] <= 0
+ 3_Supports_4: - h[4,2] - o[4,2] - s[4,2] <= -1
+ 3_DoesntSupport_4: h[4,2] + o[4,2] + 2 s[4,2] <= 2
+ beta1_4_2: - s[4,2] + beta1[4,2] <= 0
+ beta2_4_2: - s[4,2] + beta2[4,2] <= 0
+ sBeta1Flag_4_2: - s[4,2] + beta1[4,2] <= 0
+ sBeta2Flag_4_2: - s[4,2] + beta2[4,2] <= 0
+ Eta1Overlap_4_2: eta1[4,2] + beta1[4,2] <= 1
+ Eta2Overlap_4_2: eta2[4,2] + beta2[4,2] <= 1
+ Eta1Flag_4_2: xi_l[2] - xi_l[4] - 300 eta1[4,2] <= 0
+ Eta2Flag_4_2: - xi_r[2] + xi_r[4] - 300 eta2[4,2] <= 0
+ X_Overlap_4_2_1: xi_l[2] - xi_r[4] + overlap_x[4,2] - 10000 beta2[4,2]
+   >= -10000
+ X_Overlap_4_2_2: xi_l[4] - xi_r[2] + overlap_x[4,2] - 10000 beta1[4,2]
+   >= -10000
+ X_Overlap_4_2_UpperBound1: xi_l[2] - xi_r[4] + overlap_x[4,2] <= 0
+ X_Overlap_4_2_UpperBound2: xi_l[4] - xi_r[2] + overlap_x[4,2] <= 0
+ 2_Supports_4_InSameBin1_0: - p_ij[2,0] + p_ij[4,0] - s[4,2] <= 0
+ 2_Supports_4_InSameBin2_0: p_ij[2,0] - p_ij[4,0] - s[4,2] <= 0
+ Gamma0ForItems_4_inBins_0_NoCut: p_ij[4,0] + gamma[4] <= 1
+ 2_Supports_4_InSameBin1_1: - p_ij[2,1] + p_ij[4,1] - s[4,2] <= 0
+ 2_Supports_4_InSameBin2_1: p_ij[2,1] - p_ij[4,1] - s[4,2] <= 0
+ Gamma0ForItems_4_inBins_1_NoCut: p_ij[4,1] + gamma[4] <= 1
+ 2_Supports_4_InSameBin1_2: - p_ij[2,2] + p_ij[4,2] - s[4,2] <= 0
+ 2_Supports_4_InSameBin2_2: p_ij[2,2] - p_ij[4,2] - s[4,2] <= 0
+ 2_Supports_4_InSameBin1_3: - p_ij[2,3] + p_ij[4,3] - s[4,2] <= 0
+ 2_Supports_4_InSameBin2_3: p_ij[2,3] - p_ij[4,3] - s[4,2] <= 0
+ 4_OnCutIn2: 10000 p_ij[4,2] + 1.261904761904762 xi_l[4] + zi[4]
+   + 10000 gamma[4] <= 20053
+ 4_OnCutIn3: 10000 p_ij[4,3] + 1.261904761904762 xi_l[4] + zi[4]
+   + 10000 gamma[4] <= 20053
+ AbsZ14_3: - zi[4] + zi_hi[3] - k[4,3] <= 0
+ AbsZ24_3: zi[4] - zi_hi[3] - k[4,3] <= 0
+ 3_Below_4: zi[4] - zi_hi[3] + k[4,3] + 310 m[4,3] <= 310
+ 3_NotBelow_4: - zi[4] + zi_hi[3] + k[4,3] - 310 m[4,3] <= 0
+ HeightCompat_4_3: h[4,3] - k[4,3] <= 0
+ NoHeightCompat_4_3: - 155 h[4,3] + k[4,3] <= 0
+ Overlap_4_3: - x_p[3,4] - x_p[4,3] + o[4,3] <= 0
+ NoOverlap_4_3: x_p[3,4] + x_p[4,3] - 2 o[4,3] <= 0
+ 3_Supports_4: - h[4,3] - o[4,3] - s[4,3] <= -1
+ beta1_4_3: - s[4,3] + beta1[4,3] <= 0
+ beta2_4_3: - s[4,3] + beta2[4,3] <= 0
+ Eta1Flag_4_3: xi_l[3] - xi_l[4] - 300 eta1[4,3] <= 0
+ Eta2Flag_4_3: - xi_r[3] + xi_r[4] - 300 eta2[4,3] <= 0
+ X_Overlap_4_3_1: xi_l[3] - xi_r[4] + overlap_x[4,3] - 10000 beta2[4,3]
+   >= -10000
+ X_Overlap_4_3_2: xi_l[4] - xi_r[3] + overlap_x[4,3] - 10000 beta1[4,3]
+   >= -10000
+ X_Overlap_4_3_UpperBound1: xi_l[3] - xi_r[4] + overlap_x[4,3] <= 0
+ X_Overlap_4_3_UpperBound2: xi_l[4] - xi_r[3] + overlap_x[4,3] <= 0
+ 3_Supports_4_InSameBin1_0: - p_ij[3,0] + p_ij[4,0] - s[4,3] <= 0
+ 3_Supports_4_InSameBin2_0: p_ij[3,0] - p_ij[4,0] - s[4,3] <= 0
+ Gamma0ForItems_4_inBins_0_NoCut: p_ij[4,0] + gamma[4] <= 1
+ 3_Supports_4_InSameBin1_1: - p_ij[3,1] + p_ij[4,1] - s[4,3] <= 0
+ 3_Supports_4_InSameBin2_1: p_ij[3,1] - p_ij[4,1] - s[4,3] <= 0
+ Gamma0ForItems_4_inBins_1_NoCut: p_ij[4,1] + gamma[4] <= 1
+ 3_Supports_4_InSameBin1_2: - p_ij[3,2] + p_ij[4,2] - s[4,3] <= 0
+ 3_Supports_4_InSameBin2_2: p_ij[3,2] - p_ij[4,2] - s[4,3] <= 0
+ 3_Supports_4_InSameBin1_3: - p_ij[3,3] + p_ij[4,3] - s[4,3] <= 0
+ 3_Supports_4_InSameBin2_3: p_ij[3,3] - p_ij[4,3] - s[4,3] <= 0
+ 4_OnCutIn2: 10000 p_ij[4,2] + 1.261904761904762 xi_l[4] + zi[4]
+   + 10000 gamma[4] <= 20053
+ 4_OnCutIn3: 10000 p_ij[4,3] + 1.261904761904762 xi_l[4] + zi[4]
+   + 10000 gamma[4] <= 20053
+ 4_OnCutIn2: 10000 p_ij[4,2] + 1.261904761904762 xi_l[4] + zi[4]
+   + 10000 gamma[4] <= 20053
+ 4_OnCutIn3: 10000 p_ij[4,3] + 1.261904761904762 xi_l[4] + zi[4]
+   + 10000 gamma[4] <= 20053
+ Fragile_0_3: s[0,3] <= 0
  Fragile_1_3: s[1,3] <= 0
- Fragile_1_9: s[1,9] <= 0
- Fragile_2_9: s[2,9] <= 0
- Fragile_5_3: s[5,3] <= 0
- Fragile_5_9: s[5,9] <= 0
- Perishable_radioactive_0: p_ij[1,0] + p_ij[2,0] <= 1
- Perishable_radioactive_1: p_ij[1,1] + p_ij[2,1] <= 1
- Perishable_radioactive_2: p_ij[1,2] + p_ij[2,2] <= 1
- Perishable_radioactive_3: p_ij[1,3] + p_ij[2,3] <= 1
+ Fragile_2_3: s[2,3] <= 0
+ Fragile_4_3: s[4,3] <= 0
+ Min_20_Percent_Overlap_0_1: overlap_x[0,1] + [ - 13 r[0,0,0] * s[0,1]
+   - 5.6 r[0,0,1] * s[0,1] ] >= 0
+ Min_20_Percent_Overlap_0_2: overlap_x[0,2] + [ - 13 r[0,0,0] * s[0,2]
+   - 5.6 r[0,0,1] * s[0,2] ] >= 0
+ Min_20_Percent_Overlap_0_3: overlap_x[0,3] + [ - 13 r[0,0,0] * s[0,3]
+   - 5.6 r[0,0,1] * s[0,3] ] >= 0
+ Min_20_Percent_Overlap_0_4: overlap_x[0,4] + [ - 13 r[0,0,0] * s[0,4]
+   - 5.6 r[0,0,1] * s[0,4] ] >= 0
+ Min_20_Percent_Overlap_1_0: overlap_x[1,0] + [ - 12.8 r[1,0,0] * s[1,0]
+   - 7 r[1,0,1] * s[1,0] ] >= 0
+ Min_20_Percent_Overlap_1_2: overlap_x[1,2] + [ - 12.8 r[1,0,0] * s[1,2]
+   - 7 r[1,0,1] * s[1,2] ] >= 0
+ Min_20_Percent_Overlap_1_3: overlap_x[1,3] + [ - 12.8 r[1,0,0] * s[1,3]
+   - 7 r[1,0,1] * s[1,3] ] >= 0
+ Min_20_Percent_Overlap_1_4: overlap_x[1,4] + [ - 12.8 r[1,0,0] * s[1,4]
+   - 7 r[1,0,1] * s[1,4] ] >= 0
+ Min_20_Percent_Overlap_2_0: overlap_x[2,0] + [ - 10.6 r[2,0,0] * s[2,0]
+   - 6.4 r[2,0,1] * s[2,0] ] >= 0
+ Min_20_Percent_Overlap_2_1: overlap_x[2,1] + [ - 10.6 r[2,0,0] * s[2,1]
+   - 6.4 r[2,0,1] * s[2,1] ] >= 0
+ Min_20_Percent_Overlap_2_3: overlap_x[2,3] + [ - 10.6 r[2,0,0] * s[2,3]
+   - 6.4 r[2,0,1] * s[2,3] ] >= 0
+ Min_20_Percent_Overlap_2_4: overlap_x[2,4] + [ - 10.6 r[2,0,0] * s[2,4]
+   - 6.4 r[2,0,1] * s[2,4] ] >= 0
+ Min_20_Percent_Overlap_3_0: overlap_x[3,0] + [ - 17.6 r[3,0,0] * s[3,0]
+   - 7.2 r[3,0,1] * s[3,0] ] >= 0
+ Min_20_Percent_Overlap_3_1: overlap_x[3,1] + [ - 17.6 r[3,0,0] * s[3,1]
+   - 7.2 r[3,0,1] * s[3,1] ] >= 0
+ Min_20_Percent_Overlap_3_2: overlap_x[3,2] + [ - 17.6 r[3,0,0] * s[3,2]
+   - 7.2 r[3,0,1] * s[3,2] ] >= 0
+ Min_20_Percent_Overlap_3_4: overlap_x[3,4] + [ - 17.6 r[3,0,0] * s[3,4]
+   - 7.2 r[3,0,1] * s[3,4] ] >= 0
+ Min_20_Percent_Overlap_4_0: overlap_x[4,0] + [ - 17.6 r[4,0,0] * s[4,0]
+   - 6 r[4,0,1] * s[4,0] ] >= 0
+ Min_20_Percent_Overlap_4_1: overlap_x[4,1] + [ - 17.6 r[4,0,0] * s[4,1]
+   - 6 r[4,0,1] * s[4,1] ] >= 0
+ Min_20_Percent_Overlap_4_2: overlap_x[4,2] + [ - 17.6 r[4,0,0] * s[4,2]
+   - 6 r[4,0,1] * s[4,2] ] >= 0
+ Min_20_Percent_Overlap_4_3: overlap_x[4,3] + [ - 17.6 r[4,0,0] * s[4,3]
+   - 6 r[4,0,1] * s[4,3] ] >= 0
 Bounds
 Binaries
- p_ij[1,0] p_ij[1,1] p_ij[1,2] p_ij[1,3] p_ij[2,0] p_ij[2,1] p_ij[2,2]
- p_ij[2,3] p_ij[3,0] p_ij[3,2] p_ij[3,3] p_ij[5,0] p_ij[5,1] p_ij[5,2]
- p_ij[5,3] p_ij[9,0] p_ij[9,1] p_ij[9,2] p_ij[9,3] s[1,3] s[1,9] s[2,9]
- s[5,3] s[5,9]
+ p_ij[0,0] p_ij[0,1] p_ij[0,2] p_ij[0,3] p_ij[1,0] p_ij[1,1] p_ij[1,2]
+ p_ij[1,3] p_ij[2,0] p_ij[2,1] p_ij[2,2] p_ij[2,3] p_ij[3,0] p_ij[3,1]
+ p_ij[3,2] p_ij[3,3] p_ij[4,0] p_ij[4,1] p_ij[4,2] p_ij[4,3] x_p[0,1]
+ x_p[0,2] x_p[0,3] x_p[0,4] x_p[1,0] x_p[1,2] x_p[1,3] x_p[1,4] x_p[2,0]
+ x_p[2,1] x_p[2,3] x_p[2,4] x_p[3,0] x_p[3,1] x_p[3,2] x_p[3,4] x_p[4,0]
+ x_p[4,1] x_p[4,2] x_p[4,3] z_p[0,1] z_p[0,2] z_p[0,3] z_p[0,4] z_p[1,0]
+ z_p[1,2] z_p[1,3] z_p[1,4] z_p[2,0] z_p[2,1] z_p[2,3] z_p[2,4] z_p[3,0]
+ z_p[3,1] z_p[3,2] z_p[3,4] z_p[4,0] z_p[4,1] z_p[4,2] z_p[4,3] r[0,0,0]
+ r[0,0,1] r[0,1,0] r[0,1,1] r[1,0,0] r[1,0,1] r[1,1,0] r[1,1,1] r[2,0,0]
+ r[2,0,1] r[2,1,0] r[2,1,1] r[3,0,0] r[3,0,1] r[3,1,0] r[3,1,1] r[4,0,0]
+ r[4,0,1] r[4,1,0] r[4,1,1] g[0] g[1] g[2] g[3] g[4] h[0,1] h[0,2] h[0,3]
+ h[0,4] h[1,0] h[1,2] h[1,3] h[1,4] h[2,0] h[2,1] h[2,3] h[2,4] h[3,0]
+ h[3,1] h[3,2] h[3,4] h[4,0] h[4,1] h[4,2] h[4,3] o[0,1] o[0,2] o[0,3]
+ o[0,4] o[1,0] o[1,2] o[1,3] o[1,4] o[2,0] o[2,1] o[2,3] o[2,4] o[3,0]
+ o[3,1] o[3,2] o[3,4] o[4,0] o[4,1] o[4,2] o[4,3] s[0,1] s[0,2] s[0,3]
+ s[0,4] s[1,0] s[1,2] s[1,3] s[1,4] s[2,0] s[2,1] s[2,3] s[2,4] s[3,0]
+ s[3,1] s[3,2] s[3,4] s[4,0] s[4,1] s[4,2] s[4,3] eta1[0,1] eta1[0,2]
+ eta1[0,3] eta1[0,4] eta1[1,0] eta1[1,2] eta1[1,3] eta1[1,4] eta1[2,0]
+ eta1[2,1] eta1[2,3] eta1[2,4] eta1[3,0] eta1[3,1] eta1[3,2] eta1[3,4]
+ eta1[4,0] eta1[4,1] eta1[4,2] eta1[4,3] eta2[0,1] eta2[0,2] eta2[0,3]
+ eta2[0,4] eta2[1,0] eta2[1,2] eta2[1,3] eta2[1,4] eta2[2,0] eta2[2,1]
+ eta2[2,3] eta2[2,4] eta2[3,0] eta2[3,1] eta2[3,2] eta2[3,4] eta2[4,0]
+ eta2[4,1] eta2[4,2] eta2[4,3] beta1[0,1] beta1[0,2] beta1[0,3] beta1[0,4]
+ beta1[1,0] beta1[1,2] beta1[1,3] beta1[1,4] beta1[2,0] beta1[2,1]
+ beta1[2,3] beta1[2,4] beta1[3,0] beta1[3,1] beta1[3,2] beta1[3,4]
+ beta1[4,0] beta1[4,1] beta1[4,2] beta1[4,3] beta2[0,1] beta2[0,2]
+ beta2[0,3] beta2[0,4] beta2[1,0] beta2[1,2] beta2[1,3] beta2[1,4]
+ beta2[2,0] beta2[2,1] beta2[2,3] beta2[2,4] beta2[3,0] beta2[3,1]
+ beta2[3,2] beta2[3,4] beta2[4,0] beta2[4,1] beta2[4,2] beta2[4,3] gamma[0]
+ gamma[1] gamma[2] gamma[3] gamma[4] m[0,1] m[0,2] m[0,3] m[0,4] m[1,0]
+ m[1,2] m[1,3] m[1,4] m[2,0] m[2,1] m[2,3] m[2,4] m[3,0] m[3,1] m[3,2]
+ m[3,4] m[4,0] m[4,1] m[4,2] m[4,3]
 End
