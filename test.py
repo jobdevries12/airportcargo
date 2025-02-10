@@ -11,7 +11,7 @@ with open("I.pickle", "rb") as file2:
     items = pickle.load(file2)
 print(items)
 print(bins)
-#items = {0: (65, 28, 1, 0, 0, 0), 1: (64, 35, 0, 0, 1, 0), 2: (53, 32, 1, 0, 0, 1), 3: (88, 36, 1, 1, 0, 0), 4: (88, 30, 1, 0, 0, 0), 5: (86, 29, 1, 0, 0, 0), 6: (78, 29, 1, 0, 0, 0), 7: (66, 43, 0, 0, 0, 0), 8: (78, 31, 1, 0, 0, 0), 9: (47, 36, 0, 1, 0, 0), 10: (77, 36, 1, 0, 0, 1), 11: (74, 44, 1, 0, 0, 0), 12: (49, 41, 1, 1, 0, 1), 13: (89, 39, 1, 0, 0, 0), 14: (45, 38, 1, 1, 0, 0), 15: (78, 40, 1, 0, 0, 0), 16: (61, 40, 1, 0, 0, 0), 17: (79, 26, 0, 0, 0, 0), 18: (45, 38, 1, 0, 1, 0), 19: (62, 42, 1, 0, 0, 0), 20: (45, 24, 1, 1, 1, 0), 21: (47, 45, 0, 0, 0, 0), 22: (67, 35, 1, 0, 0, 0), 23: (66, 36, 0, 0, 0, 0), 24: (50, 41, 0, 0, 0, 0)}
+#items = {0: (65, 28, 1, 0, 0, 1), 1: (64, 35, 0, 0, 1, 0), 2: (53, 32, 1, 0, 0, 1), 3: (88, 36, 1, 1, 1, 0), 4: (88, 30, 1, 0, 0, 0), 5: (86, 29, 1, 0, 0, 0), 6: (78, 29, 1, 0, 0, 0), 7: (66, 43, 0, 0, 0, 0), 8: (78, 31, 1, 0, 0, 0), 9: (47, 36, 0, 1, 0, 0), 10: (77, 36, 1, 0, 0, 1), 11: (74, 44, 1, 0, 0, 0), 12: (49, 41, 1, 1, 0, 1), 13: (89, 39, 1, 0, 0, 0), 14: (45, 38, 1, 1, 0, 0), 15: (78, 40, 1, 0, 0, 0), 16: (61, 40, 1, 0, 0, 0), 17: (79, 26, 0, 0, 0, 0), 18: (45, 38, 1, 0, 1, 0), 19: (62, 42, 1, 0, 0, 0), 20: (45, 24, 1, 1, 1, 0), 21: (47, 45, 0, 0, 0, 0), 22: (67, 35, 1, 0, 0, 0), 23: (66, 36, 0, 0, 0, 0), 24: (50, 41, 0, 0, 0, 0)}
 
 '''
 Parameter Definition
@@ -20,7 +20,7 @@ M = 10000       # Large number for dummy variables
 epsilon = 1     # Offset for overlap constraint (15)
 
 mbins = len(bins)  # number of bins -- should be halved i think
-nitems = 9                                   # number of items --> why???
+nitems = 12                                   # number of items --> why???
 n_axes = 2                                      # number of axes
 n_orients = 2                                   # number of different sides/orientations of an item
 li = [values[0] for values in items.values()]        # length of item
@@ -207,6 +207,8 @@ gamma = model.addVars(nitems, vtype=GRB.BINARY, name='gamma')           # 1 if v
 v = model.addVars(nitems, nitems, vtype=GRB.CONTINUOUS, name='k')   # represents absolute value of z_hi[k] - z_lo[i]
 m = model.addVars(nitems, nitems, vtype=GRB.BINARY, name='m')   # 1 if k overlaps or exceeds i in height, i.e. z_hi[k] > z_lo[i]
 
+per = model.addVars(mbins, vtype=GRB.BINARY, name="per")
+rad = model.addVars(mbins, vtype=GRB.BINARY, name="rad")
 #'''Vertical Stability Constraints'''
 
 #Constraint 26 adapted for 2D stability
@@ -315,11 +317,19 @@ for i in range(nitems):
             name=f"Fragile_{i}_{k}")
 
 # Ensure that a ULD cannot contain both perishable and radioactive items
-for j in range(mbins):
+'''for j in range(mbins):
     model.addConstr(
         quicksum(p_ij[i, j] * perishable[i] for i in range(nitems)) +
         quicksum(p_ij[i, j] * radioactive[i] for i in range(nitems)) <= 1,
-        name=f"Perishable_radioactive_{j}")
+        name=f"Perishable_radioactive_{j}")'''
+for j in range(mbins):
+    # Link perishable items in bin j
+    model.addConstr(quicksum(p_ij[i, j] for i in range(nitems) if perishable[i] == 1) <= M * per[j],  name=f"LinkPerishable_{j}")
+    # Link radioactive items in bin j
+    model.addConstr(quicksum(p_ij[i, j] for i in range(nitems) if radioactive[i] == 1) <= M * rad[j], name=f"LinkRadioactive_{j}")
+    # If radioactive and perishable cannot be in same bin
+    model.addConstr(per[j] + rad[j] <= 1, name=f"Disjoint_{j}")
+
 
 '''
 Objective Function
