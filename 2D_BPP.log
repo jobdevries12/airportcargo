@@ -1,0 +1,130 @@
+
+Gurobi 12.0.1 (win64) logging started Tue Feb 11 17:20:21 2025
+
+Set parameter LogFile to value "2D_BPP.log"
+Set parameter Method to value 2
+Gurobi Optimizer version 12.0.1 build v12.0.1rc0 (win64 - Windows 11.0 (26100.2))
+
+CPU model: Intel(R) Core(TM) i7-9750H CPU @ 2.60GHz, instruction set [SSE2|AVX|AVX2]
+Thread count: 6 physical cores, 12 logical processors, using up to 12 threads
+
+Non-default parameters:
+TimeLimit  7200
+Method  2
+
+Optimize a model with 1402 rows, 492 columns and 4368 nonzeros
+Model fingerprint: 0xc3189711
+Variable types: 60 continuous, 432 integer (432 binary)
+Coefficient statistics:
+  Matrix range     [2e-01, 5e+04]
+  Objective range  [2e+02, 2e+02]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [1e+00, 2e+04]
+Presolve removed 661 rows and 209 columns
+Presolve time: 0.07s
+Presolved: 741 rows, 283 columns, 2617 nonzeros
+Variable types: 52 continuous, 231 integer (231 binary)
+Found heuristic solution: objective 300.0000000
+Root barrier log...
+
+Ordering time: 0.01s
+
+Barrier statistics:
+ AA' NZ     : 1.939e+04
+ Factor NZ  : 9.543e+04 (roughly 1 MB of memory)
+ Factor Ops : 1.756e+07 (less than 1 second per iteration)
+ Threads    : 6
+
+                  Objective                Residual
+Iter       Primal          Dual         Primal    Dual     Compl     Time
+   0   1.26500348e+04 -3.79193644e+05  7.46e+01 3.57e-01  1.75e+03     0s
+   1   9.16583966e+03 -2.70491141e+05  2.49e+01 4.97e-14  4.22e+02     0s
+   2   8.01096864e+02 -4.56427967e+04  5.00e-01 7.11e-13  3.74e+01     0s
+   3   4.59231992e+02 -2.06725833e+04  7.67e-03 2.91e-13  1.64e+01     0s
+   4   4.30406050e+02 -1.20724908e+03  6.31e-14 5.68e-14  1.27e+00     0s
+   5   3.27824205e+02  1.59529929e+02  1.42e-14 4.44e-15  1.30e-01     0s
+   6   3.00082769e+02  2.99006595e+02  2.66e-13 3.20e-14  8.34e-04     0s
+
+Barrier performed 6 iterations in 0.15 seconds (0.03 work units)
+Objective cutoff exceeded
+
+
+Root relaxation: cutoff, 0 iterations, 0.06 seconds (0.01 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0     cutoff    0       300.00000  300.00000  0.00%     -    0s
+
+Explored 1 nodes (0 simplex iterations) in 0.15 seconds (0.03 work units)
+Thread count was 12 (of 12 available processors)
+
+Solution count 1: 300 
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 3.000000000000e+02, best bound 3.000000000000e+02, gap 0.0000%
+
+Gurobi 12.0.1 (win64) logging started Tue Feb 11 17:20:52 2025
+
+Set parameter LogFile to value "2D_BPP.log"
+Set parameter Method to value 2
+Gurobi Optimizer version 12.0.1 build v12.0.1rc0 (win64 - Windows 11.0 (26100.2))
+
+CPU model: Intel(R) Core(TM) i7-9750H CPU @ 2.60GHz, instruction set [SSE2|AVX|AVX2]
+Thread count: 6 physical cores, 12 logical processors, using up to 12 threads
+
+Non-default parameters:
+TimeLimit  7200
+Method  2
+
+Optimize a model with 1402 rows, 492 columns and 4368 nonzeros
+Model fingerprint: 0xc3189711
+Variable types: 60 continuous, 432 integer (432 binary)
+Coefficient statistics:
+  Matrix range     [2e-01, 5e+04]
+  Objective range  [2e+02, 2e+02]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [1e+00, 2e+04]
+Presolve removed 661 rows and 209 columns
+Presolve time: 0.02s
+Presolved: 741 rows, 283 columns, 2617 nonzeros
+Variable types: 52 continuous, 231 integer (231 binary)
+Found heuristic solution: objective 300.0000000
+Root barrier log...
+
+Ordering time: 0.01s
+
+Barrier statistics:
+ AA' NZ     : 1.939e+04
+ Factor NZ  : 9.543e+04 (roughly 1 MB of memory)
+ Factor Ops : 1.756e+07 (less than 1 second per iteration)
+ Threads    : 6
+
+                  Objective                Residual
+Iter       Primal          Dual         Primal    Dual     Compl     Time
+   0   1.26500348e+04 -3.79193644e+05  7.46e+01 3.57e-01  1.75e+03     0s
+   1   9.16583966e+03 -2.70491141e+05  2.49e+01 4.97e-14  4.22e+02     0s
+   2   8.01096864e+02 -4.56427967e+04  5.00e-01 7.11e-13  3.74e+01     0s
+   3   4.59231992e+02 -2.06725833e+04  7.67e-03 2.91e-13  1.64e+01     0s
+   4   4.30406050e+02 -1.20724908e+03  6.31e-14 5.68e-14  1.27e+00     0s
+   5   3.27824205e+02  1.59529929e+02  1.42e-14 4.44e-15  1.30e-01     0s
+   6   3.00082769e+02  2.99006595e+02  2.66e-13 3.20e-14  8.34e-04     0s
+
+Barrier performed 6 iterations in 0.05 seconds (0.03 work units)
+Objective cutoff exceeded
+
+
+Root relaxation: cutoff, 0 iterations, 0.02 seconds (0.01 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0     cutoff    0       300.00000  300.00000  0.00%     -    0s
+
+Explored 1 nodes (0 simplex iterations) in 0.05 seconds (0.03 work units)
+Thread count was 12 (of 12 available processors)
+
+Solution count 1: 300 
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 3.000000000000e+02, best bound 3.000000000000e+02, gap 0.0000%

@@ -20,7 +20,7 @@ M = 10000       # Large number for dummy variables
 epsilon = 1     # Offset for overlap constraint (15)
 
 mbins = len(bins)  # number of bins -- should be halved i think
-nitems = len(items)                                   # number of items --> why???
+nitems = 6#len(items)                                   # number of items --> why???
 n_axes = 2                                      # number of axes
 n_orients = 2                                   # number of different sides/orientations of an item
 li = [values[0] for values in items.values()]        # length of item
@@ -76,6 +76,7 @@ Model Definition
 '''
 model = Model("2DBPP")
 model.setParam('TimeLimit', 120*60)
+model.params.LogFile='2D_BPP.log'
 model.setParam('Method', 2)
 '''
 Variables Definition
@@ -351,7 +352,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 tol = 1e-9
-def visualize_with_overlap(items, nitems, mbins, Lj, Hj, x_l, zi, x_i_prime, z_i_prime, p_ij, bins_with_cut, a, b,
+'''def visualize_with_overlap(items, nitems, mbins, Lj, Hj, x_l, zi, x_i_prime, z_i_prime, p_ij, bins_with_cut, a, b,
                            perishable, radioactive, fragile, rotations):
     # Determine the overall scale (same units for all bins)
     scale_factor = max(max(Lj), max(Hj))  # Normalize based on the largest bin
@@ -422,18 +423,18 @@ def visualize_with_overlap(items, nitems, mbins, Lj, Hj, x_l, zi, x_i_prime, z_i
 
                 # Draw diagonal lines for perishable items (orange) and radioactive items (blue)
                 if perishable[item]:  # Draw diagonal lines for perishable items
-                    for stripe_x in np.linspace(x, x + w, num=10):  # 10 vertical lines
-                        axs[j].plot([stripe_x, stripe_x], [z, z + h], color="red", linewidth=1)
+                    for stripe_x in np.linspace(x+5, x + w-5, num=5):  # 10 vertical lines
+                        axs[j].plot([stripe_x, stripe_x], [z, z + h], color="white", linewidth=1)
 
-                    for stripe_z in np.linspace(z, z + h, num=10):  # 10 horizontal lines
-                        axs[j].plot([x, x + w], [stripe_z, stripe_z], color="red", linewidth=1)
+                    for stripe_z in np.linspace(z+5, z + h - 5, num=5):  # 10 horizontal lines
+                        axs[j].plot([x, x + w], [stripe_z, stripe_z], color="white", linewidth=1)
 
                 elif radioactive[item]:  # Add yellow stripes for radioactive items
-                    for stripe_x in np.linspace(x, x + w, num=10):  # 10 vertical lines
-                        axs[j].plot([stripe_x, stripe_x], [z, z + h], color="yellow", linewidth=1)
+                    for stripe_x in np.linspace(x+5, x + w - 5, num=5):  # 10 vertical lines
+                        axs[j].plot([stripe_x, stripe_x], [z, z + h], color="orange", linewidth=1)
 
-                    for stripe_z in np.linspace(z, z + h, num=10):  # 10 horizontal lines
-                        axs[j].plot([x, x + w], [stripe_z, stripe_z], color="yellow", linewidth=1)
+                    for stripe_z in np.linspace(z+5, z + h-5, num=5):  # 10 horizontal lines
+                        axs[j].plot([x, x + w], [stripe_z, stripe_z], color="orange", linewidth=1)
 
                 axs[j].text(x + w / 2, z + h / 2, f"{item}\n {items[i][-4:]}", ha='center', va='center')
 
@@ -465,6 +466,144 @@ def visualize_with_overlap(items, nitems, mbins, Lj, Hj, x_l, zi, x_i_prime, z_i
                 axs[j].plot(outline_x, outline_z, 'k-', linewidth=2, label="Bin Outline")
 
         plt.tight_layout()
+        plt.show()'''
+
+
+def visualize_with_overlap(items, nitems, mbins, Lj, Hj, x_l, zi, x_i_prime, z_i_prime, p_ij, bins_with_cut, a, b,
+                           perishable, radioactive, fragile, rotations):
+    # Determine the overall scale (same units for all bins)
+    scale_factor = max(max(Lj), max(Hj))  # Normalize based on the largest bin
+
+    fig, axs = plt.subplots(2, 2, figsize=(12, 12))  # 2 rows, 2 columns
+    axs = axs.flatten()  # Flatten to 1D array for easier indexing
+
+    # Ensure the model is optimized before visualization
+    if model.status in [GRB.OPTIMAL, GRB.SUBOPTIMAL, GRB.TIME_LIMIT] and model.SolCount > 0:
+        for j in range(mbins):
+            # Set limits proportional to bin size but using the same scale
+            axs[j].set_xlim(0, Lj[j])
+            axs[j].set_ylim(0, Hj[j])
+            axs[j].set_title(f"Bin {j}")
+            axs[j].set_aspect('equal')  # Keep aspect ratio
+
+            # Add axis labels
+            axs[j].set_xlabel("Bin Width [m]")
+            axs[j].set_ylabel("Bin Height [m]")
+
+            # Add grid with fixed intervals
+            axs[j].grid(True, which='both', linestyle='--', linewidth=0.5)
+
+            # Set x and y ticks at fixed intervals based on scale factor
+            axs[j].set_xticks(np.arange(0, Lj[j] + 1, scale_factor / 10))
+            axs[j].set_yticks(np.arange(0, Hj[j] + 1, scale_factor / 10))
+
+            bin_items = []
+            for i in range(nitems):
+                if p_ij[i, j].X > 0.5:  # Only visualize items assigned to bin j
+                    x_start = x_l[i].X
+                    z_start = zi[i].X
+                    width = x_i_prime[i].X - x_l[i].X
+                    height = z_i_prime[i].X - zi[i].X
+                    bin_items.append((x_start, z_start, width, height, i))
+
+            # Define a list of colors for rotation, cycling through them
+            rotation_colors = ['green', 'blue', 'purple', 'orange', 'cyan']
+
+            # Draw items and check overlaps
+            for i, (x, z, w, h, item) in enumerate(bin_items):
+                # Get color based on the rotation index
+                rotation_color = rotation_colors[rotations[i] % len(rotation_colors)]  # Rotate through colors
+
+                # Default color based on item type
+                if radioactive[item]:
+                    rect_color = rotation_color  # Radioactive
+                    border_color = "black"  # Blue border for radioactive (here using black for consistency)
+                elif perishable[item]:
+                    rect_color = rotation_color  # Perishable
+                    border_color = "black"  # Orange border for perishable (here using black for consistency)
+                else:
+                    rect_color = rotation_color  # Normal, use the rotation color
+                    border_color = "black"  # Black border for normal items
+
+                # Check for overlaps
+                for x2, z2, w2, h2, other_item in bin_items:
+                    if item != other_item:  # Don't compare an item with itself
+                        if not (x + w <= x2 + tol or x2 + w2 <= x + tol or z + h <= z2 + tol or z2 + h2 <= z + tol):
+                            rect_color = "red"  # Overlapping items are marked in red
+                            border_color = "black"  # Red border for overlapping items
+                            break
+
+                # Plot the item with diagonal lines for perishable and radioactive items
+                if fragile[item]:  # If fragile, add red borders
+                    axs[j].add_patch(plt.Rectangle((x, z), w, h, facecolor=rect_color, alpha=0.5, edgecolor='red',
+                                                   linewidth=3))  # Thicker border
+                else:  # Otherwise, just plot the color and lines
+                    axs[j].add_patch(
+                        plt.Rectangle((x, z), w, h, facecolor=rect_color, alpha=0.5, edgecolor=border_color,
+                                      linewidth=2))
+
+                # Draw diagonal lines for perishable items (white stripes) and radioactive items (orange stripes)
+                if perishable[item]:
+                    for stripe_x in np.linspace(x + 5, x + w - 5, num=5):
+                        axs[j].plot([stripe_x, stripe_x], [z, z + h], color="white", linewidth=1)
+                    for stripe_z in np.linspace(z + 5, z + h - 5, num=5):
+                        axs[j].plot([x, x + w], [stripe_z, stripe_z], color="white", linewidth=1)
+                elif radioactive[item]:
+                    for stripe_x in np.linspace(x + 5, x + w - 5, num=5):
+                        axs[j].plot([stripe_x, stripe_x], [z, z + h], color="orange", linewidth=1)
+                    for stripe_z in np.linspace(z + 5, z + h - 5, num=5):
+                        axs[j].plot([x, x + w], [stripe_z, stripe_z], color="orange", linewidth=1)
+
+                axs[j].text(x + w / 2, z + h / 2, f"{item}\n {items[i][-4:]}", ha='center', va='center')
+
+            # **Draw the ULD outline with cut (if present)**
+            if j in bins_with_cut:
+                cut_a = a[j]
+                cut_b = b[j]
+                if cut_a != -1 and cut_b != -1:
+                    x_cut_vals = np.array([0, Lj[j]])
+                    z_cut_vals = - (cut_b / a[j]) * x_cut_vals + cut_b
+                    axs[j].plot(x_cut_vals, z_cut_vals, 'k--', linewidth=2, label="Cut Line")
+                    x_cut_intersect = cut_b / (cut_b / a[j])
+                    z_cut_intersect = 0
+                    outline_x = [1, 1, Lj[j], Lj[j], x_cut_intersect, 0]
+                    outline_z = [cut_b, Hj[j], Hj[j], 0, z_cut_intersect, cut_b]
+                    axs[j].plot(outline_x, outline_z, 'k-', linewidth=2, label="ULD Outline")
+            else:
+                outline_x = [0, 0, Lj[j], Lj[j], 0]
+                outline_z = [0, Hj[j], Hj[j], 0, 0]
+                axs[j].plot(outline_x, outline_z, 'k-', linewidth=2, label="Bin Outline")
+
+        # ---------------------------
+        # Add a single legend for the entire figure:
+        #
+        # For the legend, we want to indicate:
+        # - Rotatable items (use a representative rotation color, here 'green')
+        # - Non-Rotatable items (representative color, here 'blue')
+        # - Radioactive items (indicated by orange stripes)
+        # - Perishable items (indicated by white stripes)
+        # - Fragile items (indicated by a red outline)
+        #
+        # Create custom legend handles:
+        import matplotlib.patches as mpatches
+        import matplotlib.lines as mlines
+
+        # These choices are examples. You might adjust the colors to match your actual palette.
+        rot_patch = mpatches.Patch(color='green', label="Rotatable Items")
+        nonrot_patch = mpatches.Patch(color='blue', label="Non-Rotatable Items")
+        rad_line = mlines.Line2D([], [], color="orange", linestyle='-', linewidth=2, label="Radioactive Items")
+        per_line = mlines.Line2D([], [], color="white", linestyle='-', linewidth=2, label="Perishable Items")
+        fragile_patch = mpatches.Patch(facecolor="none", edgecolor="red", linewidth=3, label="Fragile Items")
+
+        # Add a title to the entire plot
+        fig.suptitle("2D Bin Packing Problem Optimization", fontsize=16, y=0.98)
+
+        # Place the legend under the title.
+        leg = fig.legend(handles=[rot_patch, nonrot_patch, rad_line, per_line, fragile_patch],
+                         loc="upper center", bbox_to_anchor=(0.5, 0.93), ncol=3, fontsize=12)
+        # ---------------------------
+        leg.get_frame().set_facecolor('grey')
+        plt.tight_layout(rect=[0, 0, 1, 1])
         plt.show()
 
 if model.SolCount > 0:  # Ensure there is at least one solution stored
