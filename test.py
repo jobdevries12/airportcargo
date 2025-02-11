@@ -12,7 +12,7 @@ with open("I.pickle", "rb") as file2:
     items = pickle.load(file2)
 print(items)
 print(bins)
-#items = {0: (65, 28, 1, 0, 0, 0), 1: (64, 35, 0, 1, 1, 0), 2: (53, 32, 1, 0, 0, 1), 3: (88, 36, 1, 1, 0, 0), 4: (88, 30, 1, 0, 0, 0), 5: (86, 29, 1, 0, 0, 0), 6: (78, 29, 1, 0, 0, 0), 7: (66, 43, 0, 0, 0, 0), 8: (78, 31, 1, 0, 0, 0), 9: (47, 36, 0, 1, 0, 0), 10: (77, 36, 1, 0, 0, 1), 11: (74, 44, 1, 0, 0, 0), 12: (49, 41, 1, 1, 0, 1), 13: (89, 39, 1, 0, 0, 0), 14: (45, 38, 1, 1, 0, 0), 15: (78, 40, 1, 0, 0, 0), 16: (61, 40, 1, 0, 0, 0), 17: (79, 26, 0, 0, 0, 0), 18: (45, 38, 1, 0, 1, 0), 19: (62, 42, 1, 0, 0, 0), 20: (45, 24, 1, 1, 1, 0), 21: (47, 45, 0, 0, 0, 0), 22: (67, 35, 1, 0, 0, 0), 23: (66, 36, 0, 0, 0, 0), 24: (50, 41, 0, 0, 0, 0)}
+items = {0: (65, 28, 1, 0, 0, 0), 1: (64, 35, 0, 1, 1, 0), 2: (53, 32, 1, 0, 0, 1), 3: (88, 36, 1, 1, 0, 0), 4: (88, 30, 1, 0, 0, 0), 5: (86, 29, 1, 0, 0, 0), 6: (78, 29, 1, 0, 0, 0), 7: (66, 43, 0, 0, 0, 0), 8: (78, 31, 1, 0, 0, 0), 9: (47, 36, 0, 1, 0, 0), 10: (77, 36, 1, 0, 0, 1), 11: (74, 44, 1, 0, 0, 0), 12: (49, 41, 1, 1, 0, 1), 13: (89, 39, 1, 0, 0, 0), 14: (45, 38, 1, 1, 0, 0), 15: (78, 40, 1, 0, 0, 0), 16: (61, 40, 1, 0, 0, 0), 17: (79, 26, 0, 0, 0, 0), 18: (45, 38, 1, 0, 1, 0), 19: (62, 42, 1, 0, 0, 0), 20: (45, 24, 1, 1, 1, 0), 21: (47, 45, 0, 0, 0, 0), 22: (67, 35, 1, 0, 0, 0), 23: (66, 36, 0, 0, 0, 0), 24: (50, 41, 0, 0, 0, 0)}
 
 '''
 Parameter Definition
@@ -362,7 +362,7 @@ def visualize_with_overlap(items, nitems, mbins, Lj, Hj, x_l, zi, x_i_prime, z_i
                     bin_items.append((x_start, z_start, width, height, i))
 
             # Define a list of colors for rotation, cycling through them
-            rotation_colors = ['blue', 'green', 'purple', 'orange', 'cyan']
+            rotation_colors = ['green', 'blue', 'purple', 'orange', 'cyan']
 
             # Draw items and check overlaps
             for i, (x, z, w, h, item) in enumerate(bin_items):
@@ -371,11 +371,11 @@ def visualize_with_overlap(items, nitems, mbins, Lj, Hj, x_l, zi, x_i_prime, z_i
 
                 # Default color based on item type
                 if radioactive[item]:
-                    rect_color = "red"  # Radioactive
-                    border_color = "blue"  # Blue border for radioactive
+                    rect_color = rotation_color  # Radioactive
+                    border_color = "black"  # Blue border for radioactive
                 elif perishable[item]:
-                    rect_color = "green"  # Perishable
-                    border_color = "orange"  # Orange border for perishable
+                    rect_color = rotation_color  # Perishable
+                    border_color = "black"  # Orange border for perishable
                 else:
                     rect_color = rotation_color  # Normal, use the rotation color
                     border_color = "black"  # Black border for normal items
@@ -385,7 +385,7 @@ def visualize_with_overlap(items, nitems, mbins, Lj, Hj, x_l, zi, x_i_prime, z_i
                     if item != other_item:  # Don't compare an item with itself
                         if not (x + w <= x2 or x2 + w2 <= x or z + h <= z2 or z2 + h2 <= z):
                             rect_color = "red"  # Overlapping items are marked in red
-                            border_color = "red"  # Red border for overlapping items
+                            border_color = "black"  # Red border for overlapping items
                             break
 
                 # Plot the item with diagonal lines for perishable and radioactive items
@@ -398,11 +398,18 @@ def visualize_with_overlap(items, nitems, mbins, Lj, Hj, x_l, zi, x_i_prime, z_i
 
                 # Draw diagonal lines for perishable items (orange) and radioactive items (blue)
                 if perishable[item]:  # Draw diagonal lines for perishable items
-                    axs[j].plot([x, x + w], [z, z + h], color="orange", linewidth=2)  # Top-left to bottom-right
-                    axs[j].plot([x + w, x], [z, z + h], color="orange", linewidth=2)  # Bottom-left to top-right
-                elif radioactive[item]:  # Draw diagonal lines for radioactive items
-                    axs[j].plot([x, x + w], [z, z + h], color="blue", linewidth=2)  # Top-left to bottom-right
-                    axs[j].plot([x + w, x], [z, z + h], color="blue", linewidth=2)  # Bottom-left to top-right
+                    for stripe_x in np.linspace(x, x + w, num=10):  # 10 vertical lines
+                        axs[j].plot([stripe_x, stripe_x], [z, z + h], color="red", linewidth=1)
+
+                    for stripe_z in np.linspace(z, z + h, num=10):  # 10 horizontal lines
+                        axs[j].plot([x, x + w], [stripe_z, stripe_z], color="red", linewidth=1)
+
+                elif radioactive[item]:  # Add yellow stripes for radioactive items
+                    for stripe_x in np.linspace(x, x + w, num=10):  # 10 vertical lines
+                        axs[j].plot([stripe_x, stripe_x], [z, z + h], color="yellow", linewidth=1)
+
+                    for stripe_z in np.linspace(z, z + h, num=10):  # 10 horizontal lines
+                        axs[j].plot([x, x + w], [stripe_z, stripe_z], color="yellow", linewidth=1)
 
                 axs[j].text(x + w / 2, z + h / 2, f"{item}\n {items[i][-4:]}", ha='center', va='center')
 
