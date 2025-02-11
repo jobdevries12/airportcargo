@@ -20,7 +20,7 @@ M = 10000       # Large number for dummy variables
 epsilon = 1     # Offset for overlap constraint (15)
 
 mbins = len(bins)  # number of bins -- should be halved i think
-nitems = 12                                   # number of items --> why???
+nitems = 22                                   # number of items --> why???
 n_axes = 2                                      # number of axes
 n_orients = 2                                   # number of different sides/orientations of an item
 li = [values[0] for values in items.values()]        # length of item
@@ -75,7 +75,7 @@ bcut = bins_with_cut['b']
 Model Definition
 '''
 model = Model("2DBPP")
-model.setParam('TimeLimit', 3*60)
+model.setParam('TimeLimit', 30*60)
 model.setParam('Method', 2)
 '''
 Variables Definition
@@ -355,7 +355,7 @@ def visualize_with_overlap(items, nitems, mbins, Lj, Hj, x_l, zi, x_i_prime, z_i
     fig, axs = plt.subplots(1, mbins, figsize=(15, 5))
 
     # Ensure the model is optimized before visualization
-    if model.status in [GRB.OPTIMAL, GRB.SUBOPTIMAL]:
+    if model.status in [GRB.OPTIMAL, GRB.SUBOPTIMAL, GRB.TIME_LIMIT] and model.SolCount > 0:
         for j in range(mbins):
             axs[j].set_xlim(0, Lj[j])
             axs[j].set_ylim(0, Hj[j])
@@ -413,8 +413,6 @@ def visualize_with_overlap(items, nitems, mbins, Lj, Hj, x_l, zi, x_i_prime, z_i
 
         plt.tight_layout()
         plt.show()
-    else:
-        print("Model didn't find an optimal solution within the time limit.")
 
 if model.SolCount > 0:  # Ensure there is at least one solution stored
     model.write("solution.sol")  # Save the solution to a file
@@ -423,10 +421,10 @@ else:
     print("No solution found.")
 
 # Call the function
-if model.status == GRB.OPTIMAL or model.status == GRB.SUBOPTIMAL:
+if model.status in [GRB.OPTIMAL, GRB.SUBOPTIMAL, GRB.TIME_LIMIT] and model.SolCount > 0:
     visualize_with_overlap(items, nitems, mbins, Lj, Hj, x_l, z_lo, x_r, z_hi, p_ij, indices_with_cut, a, b)
 else:
-    print("Model didn't find a solution within the time limit.")
+    print("Model didn't find an optimal solution within the time limit.")
 
 if model.status in [GRB.OPTIMAL, GRB.SUBOPTIMAL]:
     print("\n--- Final Constraint Values ---")
