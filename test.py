@@ -11,7 +11,7 @@ with open("I.pickle", "rb") as file2:
     items = pickle.load(file2)
 print(items)
 print(bins)
-#items = {0: (65, 28, 1, 0, 0, 1), 1: (64, 35, 0, 0, 1, 0), 2: (53, 32, 1, 0, 0, 1), 3: (88, 36, 1, 1, 1, 0), 4: (88, 30, 1, 0, 0, 0), 5: (86, 29, 1, 0, 0, 0), 6: (78, 29, 1, 0, 0, 0), 7: (66, 43, 0, 0, 0, 0), 8: (78, 31, 1, 0, 0, 0), 9: (47, 36, 0, 1, 0, 0), 10: (77, 36, 1, 0, 0, 1), 11: (74, 44, 1, 0, 0, 0), 12: (49, 41, 1, 1, 0, 1), 13: (89, 39, 1, 0, 0, 0), 14: (45, 38, 1, 1, 0, 0), 15: (78, 40, 1, 0, 0, 0), 16: (61, 40, 1, 0, 0, 0), 17: (79, 26, 0, 0, 0, 0), 18: (45, 38, 1, 0, 1, 0), 19: (62, 42, 1, 0, 0, 0), 20: (45, 24, 1, 1, 1, 0), 21: (47, 45, 0, 0, 0, 0), 22: (67, 35, 1, 0, 0, 0), 23: (66, 36, 0, 0, 0, 0), 24: (50, 41, 0, 0, 0, 0)}
+items = {0: (65, 28, 1, 0, 0, 1), 1: (64, 35, 0, 0, 1, 0), 2: (53, 32, 1, 0, 0, 1), 3: (88, 36, 1, 1, 1, 0), 4: (88, 30, 1, 0, 0, 0), 5: (86, 29, 1, 0, 0, 0), 6: (78, 29, 1, 0, 0, 0), 7: (66, 43, 0, 0, 0, 0), 8: (78, 31, 1, 0, 0, 0), 9: (47, 36, 0, 1, 0, 0), 10: (77, 36, 1, 0, 0, 1), 11: (74, 44, 1, 0, 0, 0), 12: (49, 41, 1, 1, 0, 1), 13: (89, 39, 1, 0, 0, 0), 14: (45, 38, 1, 1, 0, 0), 15: (78, 40, 1, 0, 0, 0), 16: (61, 40, 1, 0, 0, 0), 17: (79, 26, 0, 0, 0, 0), 18: (45, 38, 1, 0, 1, 0), 19: (62, 42, 1, 0, 0, 0), 20: (45, 24, 1, 1, 1, 0), 21: (47, 45, 0, 0, 0, 0), 22: (67, 35, 1, 0, 0, 0), 23: (66, 36, 0, 0, 0, 0), 24: (50, 41, 0, 0, 0, 0)}
 
 '''
 Parameter Definition
@@ -20,7 +20,7 @@ M = 10000       # Large number for dummy variables
 epsilon = 1     # Offset for overlap constraint (15)
 
 mbins = len(bins)  # number of bins -- should be halved i think
-nitems = 22                                   # number of items --> why???
+nitems = len(items)                                   # number of items --> why???
 n_axes = 2                                      # number of axes
 n_orients = 2                                   # number of different sides/orientations of an item
 li = [values[0] for values in items.values()]        # length of item
@@ -75,7 +75,7 @@ bcut = bins_with_cut['b']
 Model Definition
 '''
 model = Model("2DBPP")
-model.setParam('TimeLimit', 30*60)
+model.setParam('TimeLimit', 120*60)
 model.setParam('Method', 2)
 '''
 Variables Definition
@@ -351,19 +351,29 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 tol = 1e-9
-def visualize_with_overlap(items, nitems, mbins, Lj, Hj, x_l, zi, x_i_prime, z_i_prime, p_ij, bins_with_cut, a, b):
-    fig, axs = plt.subplots(1, mbins, figsize=(15, 5))
+def visualize_with_overlap(items, nitems, mbins, Lj, Hj, x_l, zi, x_i_prime, z_i_prime, p_ij, bins_with_cut, a, b,
+                           perishable, radioactive, fragile, rotations):
+    # Determine the overall scale (same units for all bins)
+    scale_factor = max(max(Lj), max(Hj))  # Normalize based on the largest bin
+
+    fig, axs = plt.subplots(2, 2, figsize=(12, 12))  # 2 rows, 2 columns
+    axs = axs.flatten()  # Flatten to 1D array for easier indexing
 
     # Ensure the model is optimized before visualization
     if model.status in [GRB.OPTIMAL, GRB.SUBOPTIMAL, GRB.TIME_LIMIT] and model.SolCount > 0:
         for j in range(mbins):
+            # Set limits proportional to bin size but using the same scale
             axs[j].set_xlim(0, Lj[j])
             axs[j].set_ylim(0, Hj[j])
             axs[j].set_title(f"Bin {j}")
-            axs[j].set_aspect('equal')
-            # Set x and y ticks every 25 units
-            axs[j].set_xticks(np.linspace(0, Lj[j], 5))
-            axs[j].set_yticks(np.linspace(0, Hj[j], 5))
+            axs[j].set_aspect('equal')  # Keep aspect ratio
+
+            # Add grid with fixed intervals
+            axs[j].grid(True, which='both', linestyle='--', linewidth=0.5)
+
+            # Set x and y ticks at fixed intervals based on scale factor
+            axs[j].set_xticks(np.arange(0, Lj[j] + 1, scale_factor / 10))
+            axs[j].set_yticks(np.arange(0, Hj[j] + 1, scale_factor / 10))
 
             bin_items = []
             for i in range(nitems):
@@ -374,19 +384,60 @@ def visualize_with_overlap(items, nitems, mbins, Lj, Hj, x_l, zi, x_i_prime, z_i
                     height = z_i_prime[i].X - zi[i].X
                     bin_items.append((x_start, z_start, width, height, i))
 
+            # Define a list of colors for rotation, cycling through them
+            rotation_colors = ['green', 'blue', 'purple', 'orange', 'cyan']
+
             # Draw items and check overlaps
             for i, (x, z, w, h, item) in enumerate(bin_items):
-                rect_color = "green"  # Default color for non-overlapping items
+                # Get color based on the rotation index
+                rotation_color = rotation_colors[rotations[i] % len(rotation_colors)]  # Rotate through colors
+
+                # Default color based on item type
+                if radioactive[item]:
+                    rect_color = rotation_color  # Radioactive
+                    border_color = "black"  # Blue border for radioactive
+                elif perishable[item]:
+                    rect_color = rotation_color  # Perishable
+                    border_color = "black"  # Orange border for perishable
+                else:
+                    rect_color = rotation_color  # Normal, use the rotation color
+                    border_color = "black"  # Black border for normal items
+
+                # Check for overlaps
                 for x2, z2, w2, h2, other_item in bin_items:
                     if item != other_item:  # Don't compare an item with itself
                         if not (x + w <= x2 + tol or x2 + w2 <= x + tol or z + h <= z2 + tol or z2 + h2 <= z + tol):
                             rect_color = "red"  # Overlapping items are marked in red
+                            border_color = "black"  # Red border for overlapping items
                             break
-                axs[j].add_patch(plt.Rectangle((x, z), w, h, color=rect_color, alpha=0.5))
+
+                # Plot the item with diagonal lines for perishable and radioactive items
+                if fragile[item]:  # If fragile, add red borders
+                    axs[j].add_patch(plt.Rectangle((x, z), w, h, facecolor=rect_color, alpha=0.5, edgecolor='red',
+                                                   linewidth=3))  # Thicker border
+                else:  # Otherwise, just plot the color and lines
+                    axs[j].add_patch(
+                        plt.Rectangle((x, z), w, h, facecolor=rect_color, alpha=0.5, edgecolor=border_color,
+                                      linewidth=2))
+
+                # Draw diagonal lines for perishable items (orange) and radioactive items (blue)
+                if perishable[item]:  # Draw diagonal lines for perishable items
+                    for stripe_x in np.linspace(x, x + w, num=10):  # 10 vertical lines
+                        axs[j].plot([stripe_x, stripe_x], [z, z + h], color="red", linewidth=1)
+
+                    for stripe_z in np.linspace(z, z + h, num=10):  # 10 horizontal lines
+                        axs[j].plot([x, x + w], [stripe_z, stripe_z], color="red", linewidth=1)
+
+                elif radioactive[item]:  # Add yellow stripes for radioactive items
+                    for stripe_x in np.linspace(x, x + w, num=10):  # 10 vertical lines
+                        axs[j].plot([stripe_x, stripe_x], [z, z + h], color="yellow", linewidth=1)
+
+                    for stripe_z in np.linspace(z, z + h, num=10):  # 10 horizontal lines
+                        axs[j].plot([x, x + w], [stripe_z, stripe_z], color="yellow", linewidth=1)
 
                 axs[j].text(x + w / 2, z + h / 2, f"{item}\n {items[i][-4:]}", ha='center', va='center')
 
-            # **Draw the ULD outline**
+            # **Draw the ULD outline with cut (if present)**
             if j in bins_with_cut:  # Checking if bin has a cut
                 cut_a = a[j]
                 cut_b = b[j]
@@ -395,15 +446,17 @@ def visualize_with_overlap(items, nitems, mbins, Lj, Hj, x_l, zi, x_i_prime, z_i
                     x_cut_vals = np.array([0, Lj[j]])  # X starts at 0, ends at bin width
                     z_cut_vals = - (cut_b / cut_a) * x_cut_vals + cut_b  # Compute cut line equation
 
+                    # **Draw ULD outline with cut**
+                    axs[j].plot(x_cut_vals, z_cut_vals, 'k--', linewidth=2, label="Cut Line")  # Draw cut line
+
                     # Find intersection of cut with bin edge
                     x_cut_intersect = cut_b / (cut_b / cut_a)  # Solves - (b/a) * x + b = 0
                     z_cut_intersect = 0  # At the bottom
 
-                    # **Draw ULD outline**
+                    # Outline the ULD
                     outline_x = [1, 1, Lj[j], Lj[j], x_cut_intersect, 0]  # x-coordinates
                     outline_z = [cut_b, Hj[j], Hj[j], 0, z_cut_intersect, cut_b]  # z-coordinates
-
-                    axs[j].plot(outline_x, outline_z, 'k-', linewidth=2, label="ULD Outline")  # Draw outline
+                    axs[j].plot(outline_x, outline_z, 'k-', linewidth=2, label="ULD Outline")  # Draw ULD outline
 
             else:  # **Regular bins (without a cut)**
                 outline_x = [0, 0, Lj[j], Lj[j], 0]  # Full rectangle
@@ -422,7 +475,7 @@ else:
 
 # Call the function
 if model.status in [GRB.OPTIMAL, GRB.SUBOPTIMAL, GRB.TIME_LIMIT] and model.SolCount > 0:
-    visualize_with_overlap(items, nitems, mbins, Lj, Hj, x_l, z_lo, x_r, z_hi, p_ij, indices_with_cut, a, b)
+    visualize_with_overlap(items, nitems, mbins, Lj, Hj, x_l, z_lo, x_r, z_hi, p_ij, indices_with_cut, a, b, perishable, radioactive, fragile, lip)
 else:
     print("Model didn't find an optimal solution within the time limit.")
 
