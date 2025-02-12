@@ -1,5 +1,6 @@
 import pickle
 from gurobipy import Model, GRB, quicksum, gurobi
+import time
 import os
 import numpy as np
 
@@ -11,7 +12,7 @@ with open("I.pickle", "rb") as file2:
     items = pickle.load(file2)
 print(items)
 print(bins)
-items = {0: (65, 28, 1, 0, 0, 1), 1: (64, 35, 0, 0, 1, 0), 2: (53, 32, 1, 0, 0, 1), 3: (88, 36, 1, 1, 1, 0), 4: (88, 30, 1, 0, 0, 0), 5: (86, 29, 1, 0, 0, 0), 6: (78, 29, 1, 0, 0, 0), 7: (66, 43, 0, 0, 0, 0), 8: (78, 31, 1, 0, 0, 0), 9: (47, 36, 0, 1, 0, 0), 10: (77, 36, 1, 0, 0, 1), 11: (74, 44, 1, 0, 0, 0), 12: (49, 41, 1, 1, 0, 1), 13: (89, 39, 1, 0, 0, 0), 14: (45, 38, 1, 1, 0, 0), 15: (78, 40, 1, 0, 0, 0), 16: (61, 40, 1, 0, 0, 0), 17: (79, 26, 0, 0, 0, 0), 18: (45, 38, 1, 0, 1, 0), 19: (62, 42, 1, 0, 0, 0), 20: (45, 24, 1, 1, 1, 0), 21: (47, 45, 0, 0, 0, 0), 22: (67, 35, 1, 0, 0, 0), 23: (66, 36, 0, 0, 0, 0), 24: (50, 41, 0, 0, 0, 0)}
+#items = {0: (65, 28, 1, 0, 0, 1), 1: (64, 35, 0, 0, 1, 0), 2: (53, 32, 1, 0, 0, 1), 3: (88, 36, 1, 1, 1, 0), 4: (88, 30, 1, 0, 0, 0), 5: (86, 29, 1, 0, 0, 0), 6: (78, 29, 1, 0, 0, 0), 7: (66, 43, 0, 0, 0, 0), 8: (78, 31, 1, 0, 0, 0), 9: (47, 36, 0, 1, 0, 0), 10: (77, 36, 1, 0, 0, 1), 11: (74, 44, 1, 0, 0, 0), 12: (49, 41, 1, 1, 0, 1), 13: (89, 39, 1, 0, 0, 0), 14: (45, 38, 1, 1, 0, 0), 15: (78, 40, 1, 0, 0, 0), 16: (61, 40, 1, 0, 0, 0), 17: (79, 26, 0, 0, 0, 0), 18: (45, 38, 1, 0, 1, 0), 19: (62, 42, 1, 0, 0, 0), 20: (45, 24, 1, 1, 1, 0), 21: (47, 45, 0, 0, 0, 0), 22: (67, 35, 1, 0, 0, 0), 23: (66, 36, 0, 0, 0, 0), 24: (50, 41, 0, 0, 0, 0)}
 
 '''
 Parameter Definition
@@ -20,7 +21,7 @@ M = 10000       # Large number for dummy variables
 epsilon = 1     # Offset for overlap constraint (15)
 
 mbins = len(bins)  # number of bins -- should be halved i think
-nitems = 6#len(items)                                   # number of items --> why???
+nitems = len(items)                                   # number of items
 n_axes = 2                                      # number of axes
 n_orients = 2                                   # number of different sides/orientations of an item
 li = [values[0] for values in items.values()]        # length of item
@@ -75,7 +76,7 @@ bcut = bins_with_cut['b']
 Model Definition
 '''
 model = Model("2DBPP")
-model.setParam('TimeLimit', 120*60)
+model.setParam('TimeLimit', 8*60*60)
 model.params.LogFile='2D_BPP.log'
 model.setParam('Method', 2)
 '''
@@ -343,8 +344,24 @@ Objective Function
 objective = quicksum(Cj[j] * u_j[j] for j in range(len(Cj))) #sum of Cj[i] * u_j for each i
 model.setObjective(objective, GRB.MINIMIZE)
 
-model.optimize()
+first_sol_time = None
 
+def mycallback(model, where):
+    global first_sol_time
+    if where == GRB.Callback.MIPSOL:
+        # MIPSOL is called when a new feasible solution is found.
+        if first_sol_time is None:
+            first_sol_time = time.time()  # Record the time of the first feasible solution.
+    # If a feasible solution has been found, check elapsed time.
+    if first_sol_time is not None:
+        elapsed = time.time() - first_sol_time
+        # If more than 30 minutes (1800 seconds) have passed since the first solution, terminate.
+        if elapsed > 30*60:
+            model.terminate()
+
+
+model.optimize(callback=mycallback)
+model.update()
 if model.status == GRB.INFEASIBLE:
     print("The model is infeasible. Computing IIS...")
     model.computeIIS()
@@ -360,6 +377,7 @@ tol = 1e-9
 
 def visualize_with_overlap(items, nitems, mbins, Lj, Hj, x_l, zi, x_i_prime, z_i_prime, p_ij, bins_with_cut, a, b,
                            perishable, radioactive, fragile, rotations):
+    print("test")
     # Determine the overall scale (same units for all bins)
     scale_factor = max(max(Lj), max(Hj))  # Normalize based on the largest bin
 
@@ -367,7 +385,7 @@ def visualize_with_overlap(items, nitems, mbins, Lj, Hj, x_l, zi, x_i_prime, z_i
     axs = axs.flatten()  # Flatten to 1D array for easier indexing
 
     # Ensure the model is optimized before visualization
-    if model.status in [GRB.OPTIMAL, GRB.SUBOPTIMAL, GRB.TIME_LIMIT] and model.SolCount > 0:
+    if model.status in [GRB.OPTIMAL, GRB.SUBOPTIMAL, GRB.TIME_LIMIT, GRB.INTERRUPTED] and model.SolCount > 0:
         for j in range(mbins):
             # Set limits proportional to bin size but using the same scale
             axs[j].set_xlim(0, Lj[j])
@@ -468,8 +486,8 @@ def visualize_with_overlap(items, nitems, mbins, Lj, Hj, x_l, zi, x_i_prime, z_i
         import matplotlib.lines as mlines
 
         # These choices are examples. You might adjust the colors to match your actual palette.
-        rot_patch = mpatches.Patch(color='green', label="Rotatable Items")
-        nonrot_patch = mpatches.Patch(color='blue', label="Non-Rotatable Items")
+        rot_patch = mpatches.Patch(color='green', label="Non-Rotatable Items")
+        nonrot_patch = mpatches.Patch(color='blue', label="Rotatable Items")
         rad_line = mlines.Line2D([], [], color="orange", linestyle='-', linewidth=2, label="Radioactive Items")
         per_line = mlines.Line2D([], [], color="white", linestyle='-', linewidth=2, label="Perishable Items")
         fragile_patch = mpatches.Patch(facecolor="none", edgecolor="red", linewidth=3, label="Fragile Items")
@@ -485,6 +503,7 @@ def visualize_with_overlap(items, nitems, mbins, Lj, Hj, x_l, zi, x_i_prime, z_i
         plt.tight_layout(rect=[0, 0, 1, 1])
         plt.show()
 
+
 if model.SolCount > 0:  # Ensure there is at least one solution stored
     model.write("solution.sol")  # Save the solution to a file
     print("Solution saved!")
@@ -492,9 +511,10 @@ else:
     print("No solution found.")
 
 # Call the function
-if model.status in [GRB.OPTIMAL, GRB.SUBOPTIMAL, GRB.TIME_LIMIT] and model.SolCount > 0:
+if model.status in [GRB.OPTIMAL, GRB.SUBOPTIMAL, GRB.TIME_LIMIT, GRB.INTERRUPTED] and model.SolCount > 0:
     visualize_with_overlap(items, nitems, mbins, Lj, Hj, x_l, z_lo, x_r, z_hi, p_ij, indices_with_cut, a, b, perishable, radioactive, fragile, lip)
 else:
+    print(model.status, GRB.OPTIMAL, GRB.SUBOPTIMAL, GRB.TIME_LIMIT, model.SolCount)
     print("Model didn't find an optimal solution within the time limit.")
 
 if model.status in [GRB.OPTIMAL, GRB.SUBOPTIMAL]:
