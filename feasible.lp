@@ -4376,7 +4376,7 @@ Subject To
  FlaggingConstraint_9_2: - p_ij[9,2] + u_j[2] >= 0
  FlaggingConstraint_9_3: - p_ij[9,3] + u_j[3] >= 0
  Fragile_0_0: s[0,0] <= 10
- Fragile_0_1: s[0,1] <= 0
+ Fragile_0_1: s[0,1] <= 10
  Fragile_0_2: s[0,2] <= 10
  Fragile_0_3: s[0,3] <= 0
  Fragile_0_4: s[0,4] <= 10
@@ -4386,7 +4386,7 @@ Subject To
  Fragile_0_8: s[0,8] <= 10
  Fragile_0_9: s[0,9] <= 0
  Fragile_1_0: s[1,0] <= 10
- Fragile_1_1: s[1,1] <= 0
+ Fragile_1_1: s[1,1] <= 10
  Fragile_1_2: s[1,2] <= 10
  Fragile_1_3: s[1,3] <= 0
  Fragile_1_4: s[1,4] <= 10
@@ -4396,7 +4396,7 @@ Subject To
  Fragile_1_8: s[1,8] <= 10
  Fragile_1_9: s[1,9] <= 0
  Fragile_2_0: s[2,0] <= 10
- Fragile_2_1: s[2,1] <= 0
+ Fragile_2_1: s[2,1] <= 10
  Fragile_2_2: s[2,2] <= 10
  Fragile_2_3: s[2,3] <= 0
  Fragile_2_4: s[2,4] <= 10
@@ -4406,7 +4406,7 @@ Subject To
  Fragile_2_8: s[2,8] <= 10
  Fragile_2_9: s[2,9] <= 0
  Fragile_3_0: s[3,0] <= 10
- Fragile_3_1: s[3,1] <= 0
+ Fragile_3_1: s[3,1] <= 10
  Fragile_3_2: s[3,2] <= 10
  Fragile_3_3: s[3,3] <= 0
  Fragile_3_4: s[3,4] <= 10
@@ -4416,7 +4416,7 @@ Subject To
  Fragile_3_8: s[3,8] <= 10
  Fragile_3_9: s[3,9] <= 0
  Fragile_4_0: s[4,0] <= 10
- Fragile_4_1: s[4,1] <= 0
+ Fragile_4_1: s[4,1] <= 10
  Fragile_4_2: s[4,2] <= 10
  Fragile_4_3: s[4,3] <= 0
  Fragile_4_4: s[4,4] <= 10
@@ -4426,7 +4426,7 @@ Subject To
  Fragile_4_8: s[4,8] <= 10
  Fragile_4_9: s[4,9] <= 0
  Fragile_5_0: s[5,0] <= 10
- Fragile_5_1: s[5,1] <= 0
+ Fragile_5_1: s[5,1] <= 10
  Fragile_5_2: s[5,2] <= 10
  Fragile_5_3: s[5,3] <= 0
  Fragile_5_4: s[5,4] <= 10
@@ -4436,7 +4436,7 @@ Subject To
  Fragile_5_8: s[5,8] <= 10
  Fragile_5_9: s[5,9] <= 0
  Fragile_6_0: s[6,0] <= 10
- Fragile_6_1: s[6,1] <= 0
+ Fragile_6_1: s[6,1] <= 10
  Fragile_6_2: s[6,2] <= 10
  Fragile_6_3: s[6,3] <= 0
  Fragile_6_4: s[6,4] <= 10
@@ -4446,7 +4446,7 @@ Subject To
  Fragile_6_8: s[6,8] <= 10
  Fragile_6_9: s[6,9] <= 0
  Fragile_7_0: s[7,0] <= 10
- Fragile_7_1: s[7,1] <= 0
+ Fragile_7_1: s[7,1] <= 10
  Fragile_7_2: s[7,2] <= 10
  Fragile_7_3: s[7,3] <= 0
  Fragile_7_4: s[7,4] <= 10
@@ -4456,7 +4456,7 @@ Subject To
  Fragile_7_8: s[7,8] <= 10
  Fragile_7_9: s[7,9] <= 0
  Fragile_8_0: s[8,0] <= 10
- Fragile_8_1: s[8,1] <= 0
+ Fragile_8_1: s[8,1] <= 10
  Fragile_8_2: s[8,2] <= 10
  Fragile_8_3: s[8,3] <= 0
  Fragile_8_4: s[8,4] <= 10
@@ -4466,7 +4466,7 @@ Subject To
  Fragile_8_8: s[8,8] <= 10
  Fragile_8_9: s[8,9] <= 0
  Fragile_9_0: s[9,0] <= 10
- Fragile_9_1: s[9,1] <= 0
+ Fragile_9_1: s[9,1] <= 10
  Fragile_9_2: s[9,2] <= 10
  Fragile_9_3: s[9,3] <= 0
  Fragile_9_4: s[9,4] <= 10
@@ -4475,10 +4475,10 @@ Subject To
  Fragile_9_7: s[9,7] <= 10
  Fragile_9_8: s[9,8] <= 10
  Fragile_9_9: s[9,9] <= 0
- Perishable_radioactive_0: [ p_ij[1,0] * p_ij[2,0] ] = 0
- Perishable_radioactive_1: [ p_ij[1,1] * p_ij[2,1] ] = 0
- Perishable_radioactive_2: [ p_ij[1,2] * p_ij[2,2] ] = 0
- Perishable_radioactive_3: [ p_ij[1,3] * p_ij[2,3] ] = 0
+ Perishable_radioactive_0: [ ] = 0
+ Perishable_radioactive_1: [ ] = 0
+ Perishable_radioactive_2: [ ] = 0
+ Perishable_radioactive_3: [ ] = 0
 Bounds
 Binaries
  p_ij[0,0] p_ij[0,1] p_ij[0,2] p_ij[0,3] p_ij[1,0] p_ij[1,1] p_ij[1,2]

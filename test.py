@@ -1,6 +1,5 @@
 import pickle
 from gurobipy import Model, GRB, quicksum, gurobi
-import time
 import os
 import numpy as np
 
