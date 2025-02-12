@@ -21,7 +21,7 @@ M = 10000       # Large number for dummy variables
 epsilon = 1     # Offset for overlap constraint (15)
 
 mbins = len(bins)  # number of bins -- should be halved i think
-nitems = len(items)                                   # number of items
+nitems = 18  #len(items)                                   # number of items
 n_axes = 2                                      # number of axes
 n_orients = 2                                   # number of different sides/orientations of an item
 li = [values[0] for values in items.values()]        # length of item
@@ -41,10 +41,11 @@ perishable = [values[4] for values in items.values()]
 radioactive = [values[5] for values in items.values()]
 # Orientation parameters
 lip = [values[2] for values in items.values()]       # item can be rotated by pi/2 or no
-#dont get points of this??:
-lplus = [1 if lip[i] == 1 else 0 for i in range(nitems)]  # 1 if can rotate along length, 0 otherwise
-hplus = [1 if lip[i] == 1 else 0 for i in range(nitems)]  # 1 if can rotate along height, 0 otherwise
 
+lplus = lip[0:nitems]  # 1 if can rotate along length, 0 otherwise
+hplus = lip[0:nitems]  # 1 if can rotate along height, 0 otherwise
+print(lplus)
+print(lip)
 '''
 How to tackle the cut???
 '''
@@ -95,7 +96,6 @@ x_r = model.addVars(nitems, vtype=GRB.CONTINUOUS, name="xi_r")  # Top-right x-co
 z_hi = model.addVars(nitems, vtype=GRB.CONTINUOUS, name="zi_hi")  # Top-right z-coordinate
 
 r = model.addVars(nitems, n_axes, n_orients, vtype=GRB.BINARY, name="r")             # if
-#rho = model.addVars(nitems, vtype=GRB.BINARY, name='rho')               # if item is rotated?
 
 model.update()
 '''
@@ -403,7 +403,7 @@ def visualize_with_overlap(items, nitems, mbins, Lj, Hj, x_l, zi, x_i_prime, z_i
             # Draw items and check overlaps
             for i, (x, z, w, h, item) in enumerate(bin_items):
                 # Get color based on the rotation index
-                rotation_color = rotation_colors[rotations[i] % len(rotation_colors)]  # Rotate through colors
+                rotation_color = rotation_colors[rotations[item] % len(rotation_colors)]  # Rotate through colors
 
                 # Default color based on item type
                 if radioactive[item]:
@@ -445,7 +445,7 @@ def visualize_with_overlap(items, nitems, mbins, Lj, Hj, x_l, zi, x_i_prime, z_i
                     for stripe_z in np.linspace(z + 5, z + h - 5, num=5):
                         axs[j].plot([x, x + w], [stripe_z, stripe_z], color="orange", linewidth=1)
 
-                axs[j].text(x + w / 2, z + h / 2, f"{item}\n {items[i][-4:]}", ha='center', va='center')
+                axs[j].text(x + w / 2, z + h / 2, f"{item}\n {items[item][-4:]}", ha='center', va='center')
 
             # **Draw the ULD outline with cut (if present)**
             if j in bins_with_cut:
@@ -469,9 +469,8 @@ def visualize_with_overlap(items, nitems, mbins, Lj, Hj, x_l, zi, x_i_prime, z_i
         import matplotlib.patches as mpatches
         import matplotlib.lines as mlines
 
-        # These choices are examples. You might adjust the colors to match your actual palette.
-        rot_patch = mpatches.Patch(color='green', label="Non-Rotatable Items")
-        nonrot_patch = mpatches.Patch(color='blue', label="Rotatable Items")
+        nonrot_patch = mpatches.Patch(color='green', label="Non-Rotatable Items")
+        rot_patch = mpatches.Patch(color='blue', label="Rotatable Items")
         rad_line = mlines.Line2D([], [], color="orange", linestyle='-', linewidth=2, label="Radioactive Items")
         per_line = mlines.Line2D([], [], color="white", linestyle='-', linewidth=2, label="Perishable Items")
         fragile_patch = mpatches.Patch(facecolor="none", edgecolor="red", linewidth=3, label="Fragile Items")
@@ -496,7 +495,7 @@ else:
 
 # Call the function
 if model.status in [GRB.OPTIMAL, GRB.SUBOPTIMAL, GRB.TIME_LIMIT, GRB.INTERRUPTED] and model.SolCount > 0:
-    visualize_with_overlap(items, nitems, mbins, Lj, Hj, x_l, z_lo, x_r, z_hi, p_ij, indices_with_cut, a, b, perishable, radioactive, fragile, lip)
+    visualize_with_overlap(items, nitems, mbins, Lj, Hj, x_l, z_lo, x_r, z_hi, p_ij, indices_with_cut, a, b, perishable, radioactive, fragile, lplus)
 else:
     print(model.status, GRB.OPTIMAL, GRB.SUBOPTIMAL, GRB.TIME_LIMIT, model.SolCount)
     print("Model didn't find an optimal solution within the time limit.")
