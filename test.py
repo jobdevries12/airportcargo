@@ -76,7 +76,7 @@ bcut = bins_with_cut['b']
 Model Definition
 '''
 model = Model("2DBPP")
-model.setParam('TimeLimit', 8*60*60)
+model.setParam('TimeLimit', 2*60*60)
 model.params.LogFile='2D_BPP.log'
 model.setParam('Method', 2)
 '''
@@ -166,7 +166,7 @@ for i in range(nitems):
             model.addConstr(x_l[i] + epsilon <= x_r[k] + xp[i, k] * L, name=f"Overlap_{i}NotToRightOf_{k}")
             # 18:
             model.addConstr(z_hi[k] <= z_lo[i] + (1 - zp[i,k]) * H, name=f"Overlap_{i}_Above_{k}")
-            #model.addConstr(z_lo[i] + epsilon <= z_hi[k] + zp[i,k] * H, name=f"Overlap_{i}_NotAbove_{k}")
+            model.addConstr(z_lo[i] + epsilon <= z_hi[k] + zp[i,k] * H, name=f"Overlap_{i}_NotAbove_{k}")
 
 # Orientation constraints (19(& 21))
 for i in range(nitems):
@@ -179,6 +179,7 @@ for i in range(nitems):
     is futile (i think).
     
     model.addConstr(r[i, 1, 1] <= hplus[i], name=f"OrientationHeight_{i}")"""
+    model.addConstr(r[i, 0, 1] <= lplus[i], name=f"OrientationHeight_{i}")
 
 
 # #Constraint 22
@@ -265,7 +266,7 @@ for i in range(nitems):
             model.addConstr(x_l[k] <= x_l[i] + eta1[i, k] * L, name=f"Eta1Flag_{i}_{k}")
             # 45: forces eta2 to be 1 if x_r[k] is smaller than x_r[i] (k cannot support vertex 2 of i)
             model.addConstr(x_r[i] <= x_r[k] + eta2[i, k] * L, name=f"Eta2Flag_{i}_{k}")
-            
+
             model.addConstr(
                 x_r[i] >= x_l[k] + 0.2 * (x_r[i] - x_l[i]) - M * (1 - s[i, k]),
                 name=f"MinOverlap1_{i}_{k}"
@@ -303,7 +304,7 @@ for i in range(nitems):
 # Ensure that a ULD cannot contain both perishable and radioactive items
 '''for j in range(mbins):
     model.addConstr(
-        quicksum(p_ij[i, j] * perishable[i] for i in range(nitems)) +
+        quicksum(p_ij[i, j] * perishable[i] for i in range(nitems))*
         quicksum(p_ij[i, j] * radioactive[i] for i in range(nitems)) <= 1,
         name=f"Perishable_radioactive_{j}")'''
 for j in range(mbins):
@@ -342,7 +343,8 @@ def mycallback(model, where):
             model.terminate()
 
 
-model.optimize(callback=mycallback)
+#model.optimize(callback=mycallback)
+model.optimize()
 model.update()
 if model.status == GRB.INFEASIBLE:
     print("The model is infeasible. Computing IIS...")
