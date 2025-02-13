@@ -557,12 +557,12 @@ if model.status in [GRB.OPTIMAL, GRB.SUBOPTIMAL]:
             if p_ij[i, j].X == 1:
                 if j not in Items_In_Bin:
                     Items_In_Bin[j] = []
-                x_l_1=x_l[i].X  # Obtener el valor de x_l[i]
-                z_lo_1 = z_lo[i].X  # Obtener el valor de z_lo[i]
-                li_1 = li[i]  # Obtener el valor de li[i]
-                hi_1 = hi[i]   # Obtener el valor de hi[i]
+                x_l_1=x_l[i].X
+                z_lo_1 = z_lo[i].X
+                li_1 = li[i]
+                hi_1 = hi[i]
                 Items_In_Bin[j].append(i)
-                I_info_solution[i] = [x_l_1, z_lo_1, li_1, hi_1]  # Guardar en la estructura de solución
+                I_info_solution[i] = [x_l_1, z_lo_1, li_1, hi_1]  
 
                 print(f"p_ij[{i},{j}]: {p_ij[i, j].X}")
     for i in range(nitems):
@@ -648,5 +648,5 @@ if model.status in [GRB.OPTIMAL, GRB.SUBOPTIMAL]:
     with open('data_solution.pkl', 'rb') as f:
         data = pickle.load(f)
 
-    # Mostrar el contenido
+
     print(data)
