@@ -22,7 +22,7 @@ M = 10000  # Large number for dummy variables
 epsilon = 1  # Offset for overlap constraint (15)
 
 mbins = len(bins)  # number of bins -- should be halved i think
-nitems = len(items)  # number of items
+nitems =10# len(items)  # number of items
 n_axes = 2  # number of axes
 n_orients = 2  # number of different sides/orientations of an item
 li = [values[0] for values in items.values()]  # length of item
@@ -288,6 +288,8 @@ for i in range(nitems):
             model.addConstr(
                 overlap_x[i, k] >= 0.2 * quicksum(r[i, 0, d] * [li[i], hi[i]][d] for d in range(n_orients)) * s[i, k],
                 name=f"Min_20_Percent_Overlap_{i}_{k}")'''
+
+
             model.addConstr(
                 x_r[i] >= x_l[k] + 0.2 * (x_r[i] - x_l[i]) - M * (1 - s[i, k]),
                 name=f"MinOverlap1_{i}_{k}"
@@ -432,7 +434,7 @@ def visualize_with_overlap(items, nitems, mbins, Lj, Hj, x_l, zi, x_i_prime, z_i
             # Draw items and check overlaps
             for i, (x, z, w, h, item) in enumerate(bin_items):
                 # Get color based on the rotation index
-                rotation_color = rotation_colors[rotations[i] % len(rotation_colors)]  # Rotate through colors
+                rotation_color = rotation_colors[rotations[item] % len(rotation_colors)]  # Rotate through colors
 
                 # Default color based on item type
                 if radioactive[item]:
@@ -474,7 +476,7 @@ def visualize_with_overlap(items, nitems, mbins, Lj, Hj, x_l, zi, x_i_prime, z_i
                     for stripe_z in np.linspace(z + 5, z + h - 5, num=5):
                         axs[j].plot([x, x + w], [stripe_z, stripe_z], color="orange", linewidth=1)
 
-                axs[j].text(x + w / 2, z + h / 2, f"{item}\n {items[i][-4:]}", ha='center', va='center')
+                axs[j].text(x + w / 2, z + h / 2, f"{item}\n {items[item][-4:]}", ha='center', va='center')
 
             # **Draw the ULD outline with cut (if present)**
             if j in bins_with_cut:
@@ -523,6 +525,7 @@ if model.SolCount > 0:  # Ensure there is at least one solution stored
 else:
     print("No solution found.")
 
+
 # Call the function
 if model.status in [GRB.OPTIMAL, GRB.SUBOPTIMAL, GRB.TIME_LIMIT, GRB.INTERRUPTED] and model.SolCount > 0:
     visualize_with_overlap(items, nitems, mbins, Lj, Hj, x_l, z_lo, x_r, z_hi, p_ij, indices_with_cut, a, b, perishable,
@@ -541,15 +544,27 @@ if model.status in [GRB.OPTIMAL, GRB.SUBOPTIMAL]:
 
         print(f"{constr.ConstrName}: LHS = {lhs_value}, RHS = {rhs_value}, Residual = {residual}")
 
+
+    bins_used=[]
+    I_info_solution = {}
+    Items_In_Bin={}
+    for j in range(mbins):
+        if u_j[j].X == 1:
+            bins_used.append(j)
+            print(f"u_j[{j}]: {u_j[j].X}")
     for i in range(nitems):
         for j in range(mbins):
             if p_ij[i, j].X == 1:
+                if j not in Items_In_Bin:
+                    Items_In_Bin[j] = []
+                x_l_1=x_l[i].X  # Obtener el valor de x_l[i]
+                z_lo_1 = z_lo[i].X  # Obtener el valor de z_lo[i]
+                li_1 = li[i]  # Obtener el valor de li[i]
+                hi_1 = hi[i]   # Obtener el valor de hi[i]
+                Items_In_Bin[j].append(i)
+                I_info_solution[i] = [x_l_1, z_lo_1, li_1, hi_1]  # Guardar en la estructura de solución
+
                 print(f"p_ij[{i},{j}]: {p_ij[i, j].X}")
-
-    for j in range(mbins):
-        if u_j[j].X == 1:
-            print(f"u_j[{j}]: {u_j[j].X}")
-
     for i in range(nitems):
         for j in range(nitems):
             if i != j:
@@ -618,3 +633,20 @@ if model.status in [GRB.OPTIMAL, GRB.SUBOPTIMAL]:
     for i in range(nitems):
         if gamma[i].X == 1:
             print(f"gamma[{i}]: {gamma[i].X}")
+
+
+    data = {
+    'bins_used': bins_used,
+    'Items_in_Bin': Items_In_Bin,
+    'I_info_solution': I_info_solution
+}
+    with open('data_solution.pkl', 'wb') as f:
+        pickle.dump(data, f)
+    import pickle
+
+
+    with open('data_solution.pkl', 'rb') as f:
+        data = pickle.load(f)
+
+    # Mostrar el contenido
+    print(data)
