@@ -21,7 +21,7 @@ M = 10000       # Large number for dummy variables
 epsilon = 1     # Offset for overlap constraint (15)
 
 mbins = len(bins)  # number of bins -- should be halved i think
-nitems = 18  #len(items)                                   # number of items
+nitems = len(items)                                   # number of items
 n_axes = 2                                      # number of axes
 n_orients = 2                                   # number of different sides/orientations of an item
 li = [values[0] for values in items.values()]        # length of item
@@ -77,9 +77,11 @@ bcut = bins_with_cut['b']
 Model Definition
 '''
 model = Model("2DBPP")
-model.setParam('TimeLimit', 2*60*60)
+model.setParam('TimeLimit', 3*60*60)
 model.params.LogFile='2D_BPP.log'
 model.setParam('Method', 2)
+#model.setParam("Heuristics", 0.3)
+#model.setParam("PumpPasses", 20)
 '''
 Variables Definition
 '''
@@ -155,7 +157,6 @@ for i in range(nitems):
                 model.addConstr(xp[i, k] + xp[k, i] + zp[i, k] + zp[k, i] >= (p_ij[i, j] + p_ij[k, j]) - 1,
                                 name=f"OverlapInBin_{i}_{k}_toBin_{j}")
 
-
 # Overlap cntd
 for i in range(nitems):
     for k in range(nitems):
@@ -185,7 +186,7 @@ for i in range(nitems):
 # #Constraint 22
 for i in range(nitems):
     for j in indices_with_cut:
-        model.addConstr(z_lo[i] + (b[j] / a[j]) * x_l[i] - b[j] >= -M * (1 - p_ij[i,j]),
+        model.addConstr(z_lo[i] + (b[j] / a[j]) * x_l[i] - b[j] >= -L * (1 - p_ij[i,j]),
                         name=f"CutSupport_LowerBound_{i}_{j}")
 
 '''Vertical Stability Variables'''
@@ -218,8 +219,7 @@ rad = model.addVars(mbins, vtype=GRB.BINARY, name="rad")
 for i in range(nitems):
     model.addConstr(
         gamma[i] + quicksum(beta1[i, j] for j in range(nitems) if i!= j) + quicksum(beta2[i, j] for j in range(nitems)if i!= j) + 2*g[i]
-        >= 2
-    )
+        >= 2)
 
 for i in range(nitems):
     # If item i is on the ground, z_lo must be small or equal to 0
@@ -268,11 +268,11 @@ for i in range(nitems):
             model.addConstr(x_r[i] <= x_r[k] + eta2[i, k] * L, name=f"Eta2Flag_{i}_{k}")
 
             model.addConstr(
-                x_r[i] >= x_l[k] + 0.2 * (x_r[i] - x_l[i]) - M * (1 - s[i, k]),
+                x_r[i] >= x_l[k] + 0.2 * (x_r[i] - x_l[i]) - L * (1 - s[i, k]),
                 name=f"MinOverlap1_{i}_{k}"
             )
             model.addConstr(
-                x_r[k] >= x_l[i] + 0.2 * (x_r[i] - x_l[i]) - M * (1 - s[i, k]),
+                x_r[k] >= x_l[i] + 0.2 * (x_r[i] - x_l[i]) - L * (1 - s[i, k]),
                 name=f"MinOverlap2_{i}_{k}"
             )
 
@@ -285,7 +285,7 @@ for i in range(nitems):
                 model.addConstr(p_ij[i,j] + gamma[i] <= a[j] + b[j] + 3, name=f"Gamma0ForItems_{i}_inBins_{j}_NoCut")
         for j in indices_with_cut:
             # 47: forces gamma if item i is on cut and if i is in bin j
-            model.addConstr(z_lo[i] + b[j] / a[j] * x_l[i] - b[j] <= (1 - gamma[i]) * M + (1 - p_ij[i, j])*M,
+            model.addConstr(z_lo[i] + b[j] / a[j] * x_l[i] - b[j] <= (1 - gamma[i]) * L + (1 - p_ij[i, j])*L,
                             name=f"{i}_OnCutIn{j}")
             #model.addConstr(z_lo[i] + (b[j] / a[j]) * x_l[i] - b[j] >= -M * (1 - p_ij[i,j])
 """ Other Constraints """
@@ -302,12 +302,12 @@ for i in range(nitems):
             name=f"Fragile_{i}_{k}")
 
 # Ensure that a ULD cannot contain both perishable and radioactive items
-'''for j in range(mbins):
+for j in range(mbins):
     model.addConstr(
         quicksum(p_ij[i, j] * perishable[i] for i in range(nitems))*
-        quicksum(p_ij[i, j] * radioactive[i] for i in range(nitems)) <= 1,
-        name=f"Perishable_radioactive_{j}")'''
-for j in range(mbins):
+        quicksum(p_ij[i, j] * radioactive[i] for i in range(nitems)) <= 0,
+        name=f"Perishable_radioactive_{j}")
+'''for j in range(mbins):
     # Link perishable items in bin j
     model.addConstr(quicksum(p_ij[i, j] for i in range(nitems) if perishable[i] == 1) <= M * per[j],  name=f"LinkPerishable_{j}")
     # Link radioactive items in bin j
@@ -318,7 +318,7 @@ for j in range(mbins):
     model.addConstr(rad[j] <= quicksum(p_ij[i, j] for i in range(nitems) if radioactive[i] == 1),
                     name=f"ForceRadioactiveZero_{j}")
     # If radioactive and perishable cannot be in same bin
-    model.addConstr(per[j] + rad[j] <= 1, name=f"Disjoint_{j}")
+    model.addConstr(per[j] + rad[j] <= 1, name=f"Disjoint_{j}")'''
 
 
 '''
@@ -444,7 +444,6 @@ def visualize_with_overlap(items, nitems, mbins, Lj, Hj, x_l, zi, x_i_prime, z_i
                         axs[j].plot([stripe_x, stripe_x], [z, z + h], color="orange", linewidth=1)
                     for stripe_z in np.linspace(z + 5, z + h - 5, num=5):
                         axs[j].plot([x, x + w], [stripe_z, stripe_z], color="orange", linewidth=1)
-
                 axs[j].text(x + w / 2, z + h / 2, f"{item}\n {items[item][-4:]}", ha='center', va='center')
 
             # **Draw the ULD outline with cut (if present)**
