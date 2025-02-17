@@ -1,0 +1,488 @@
+import pickle
+from gurobipy import Model, GRB, quicksum, gurobi
+import time
+import os
+import numpy as np
+
+# Data Extraction
+with open("B.pickle", "rb") as file1:
+    bins = pickle.load(file1)
+
+with open("I.pickle", "rb") as file2:
+    items = pickle.load(file2)
+
+'''
+Parameter Definition
+'''
+M = 10000  # Large number for dummy variables
+epsilon = 1  # Offset for overlap constraint (15)
+
+mbins = len(bins)  # number of bins -- should be halved i think
+nitems = len(items)  # number of items
+n_axes = 2  # number of axes
+n_orients = 2  # number of different sides/orientations of an item
+li = [values[0] for values in items.values()]  # length of item
+hi = [values[1] for values in items.values()]  # height of item
+ai = [li[i] * hi[i] for i in range(len(li))]  # area of item
+Lj = [values[1][0] for values in bins.values()]  # Length of bin
+L = M  # max(Lj)
+Hj = [values[1][1] for values in bins.values()]  # height of bin
+H = M  # max(Hj)
+Aj = [Lj[i] * Hj[i] for i in range(len(Lj))]  # area of bin
+Cj = [values[1][3] for values in bins.values()]  # cost of bin
+a = [values[1][4] for values in bins.values()]  # corner shape of bin
+b = [values[1][5] for values in bins.values()]  # corner shape of bin
+
+fragile = [values[3] for values in items.values()]
+perishable = [values[4] for values in items.values()]
+radioactive = [values[5] for values in items.values()]
+# Orientation parameters
+lip = [values[2] for values in items.values()]  # item can be rotated by pi/2 or no
+
+lplus = lip[0:nitems]  # 1 if can rotate along length, 0 otherwise
+hplus = lip[0:nitems]  # 1 if can rotate along height, 0 otherwise
+
+
+# Indices for bins without a cut (0-3) and bins with a cut (4-7)
+indices_no_cut = [k for k, v in bins.items() if v[1][-2:] == [-1, -1]]  # range(2)  # 0, 1, 2, 3
+indices_with_cut = [k for k, v in bins.items() if v[1][-2:] != [-1, -1]]  # range(2, 4)  # 4, 5, 6, 7
+
+# Divide into subsets
+bins_no_cut = {
+    "length": [Lj[i] for i in indices_no_cut],
+    "height": [Hj[i] for i in indices_no_cut]}
+
+bins_with_cut = {
+    "length": [Lj[i] for i in indices_with_cut],
+    "height": [Hj[i] for i in indices_with_cut],
+    "a": [a[i] for i in indices_with_cut],
+    "b": [b[i] for i in indices_with_cut]}
+
+'''
+Model Definition
+'''
+model = Model("2DBPP")
+model.setParam('TimeLimit', 2 * 60 * 60)
+model.params.LogFile = '2D_BPP.log'
+
+'''
+Variables Definition
+'''
+p_ij = model.addVars(nitems, mbins, vtype=GRB.BINARY, name="p_ij")  # if box i in container j
+u_j = model.addVars(mbins, vtype=GRB.BINARY, name='u_j')  # if container j is used
+
+xp = model.addVars(nitems, nitems, vtype=GRB.BINARY, name="x_p")  # if box i is to the right of box k
+zp = model.addVars(nitems, nitems, vtype=GRB.BINARY, name="z_p")  # if box i is above box k
+
+# Define variables (coordinates)
+x_l = model.addVars(nitems, vtype=GRB.CONTINUOUS, name="xi_l")  # Bottom-left x-coordinate
+z_lo = model.addVars(nitems, vtype=GRB.CONTINUOUS, name="zi")  # Bottom-left z-coordinate
+x_r = model.addVars(nitems, vtype=GRB.CONTINUOUS, name="xi_r")  # Top-right x-coordinate
+z_hi = model.addVars(nitems, vtype=GRB.CONTINUOUS, name="zi_hi")  # Top-right z-coordinate
+
+r = model.addVars(nitems, n_axes, n_orients, vtype=GRB.BINARY, name="r")  # if
+
+model.update()
+'''
+Constraints Definition
+'''
+
+""" Geometric Constraints """
+
+# constraint 3: area (instead of mass) of items not larger than area of bin
+for j in range(mbins):
+    model.addConstr(quicksum(ai[i] * p_ij[i, j] for i in range(nitems)) <= Aj[j] * u_j[j],
+                    name=f"AreaConstraint_{j}")
+
+# Constraint 4: each item i is assigned to one bin j
+for i in range(nitems):
+    model.addConstr(quicksum(p_ij[i, j] for j in range(mbins)) == 1, name=f"OneItemOneBin_{i}")
+
+# Constraint 5: item should not exceed container width
+for i in range(nitems):
+    model.addConstr(x_r[i] <= quicksum(Lj[j] * p_ij[i, j] for j in range(mbins)),
+                    name=f"ItemFitToBinX_{i}")
+
+# Constraint 7: item should not exceed container height
+for i in range(nitems):
+    model.addConstr(z_hi[i] <= quicksum(Hj[j] * p_ij[i, j] for j in range(mbins)),
+                    name=f"ItemFitToBinZ_{i}")
+
+# Constraint 8 and 10 : orthogonal rotation
+for i in range(nitems):
+    model.addConstr(x_r[i] - x_l[i] == sum(r[i, 0, d] * [li[i], hi[i]][d] for d in range(n_orients)),
+                    name=f"TransformX_{i}")
+    model.addConstr(z_hi[i] - z_lo[i] == sum(r[i, 1, d] * [li[i], hi[i]][d] for d in range(n_orients)),
+                    name=f"TransformZ_{i}")
+
+# Constraint 11 and 12:
+for i in range(nitems):
+    # Each side aligns with exactly one axis
+    for d in range(n_orients):
+        model.addConstr(quicksum(r[i, c, d] for c in range(n_axes)) == 1, name=f"SidesAlign_{d}")
+    # Each axis aligns with exactly one side
+    for c in range(n_axes):
+        model.addConstr(quicksum(r[i, c, d] for d in range(n_orients)) == 1, name=f"AxesAlign_{c}")
+
+
+# Constraint 13: Overlap occurs only within the same bin j
+for i in range(nitems):
+    for k in range(nitems):
+        for j in range(mbins):
+            if i != k:
+                model.addConstr(xp[i, k] + xp[k, i] + zp[i, k] + zp[k, i] >= (p_ij[i, j] + p_ij[k, j]) - 1,
+                                name=f"OverlapInBin_{i}{k}_toBin{j}")
+
+# Overlap cntd
+for i in range(nitems):
+    for k in range(nitems):
+        if i != k:  # Avoid self-comparison
+            # 14: if i to right of k, xp_ik = 1, thus x_r[k] must be smaller than x_l[i]
+            model.addConstr(x_r[k] <= x_l[i] + (1 - xp[i, k]) * L, name=f"Overlap_{i}ToRightOf{k}")
+            # 15:
+            model.addConstr(x_l[i] + epsilon <= x_r[k] + xp[i, k] * L, name=f"Overlap_{i}NotToRightOf_{k}")
+            # 18:
+            model.addConstr(z_hi[k] <= z_lo[i] + (1 - zp[i, k]) * H, name=f"Overlap_{i}Above{k}")
+            model.addConstr(z_lo[i] + epsilon <= z_hi[k] + zp[i, k] * H, name=f"Overlap_{i}NotAbove{k}")
+
+# Orientation constraints (19(& 21))
+for i in range(nitems):
+    # length side can only be along vertical axis if lplus is 1:
+    model.addConstr(r[i, 1, 0] <= lplus[i], name=f"OrientationLength_{i}")
+    # height side can only be along vertical axis if hplus is 1:
+    """
+    This can be removed because in our formulation the height side can 
+    always be along the z-axis, so hplus is one for every item so constraint
+    is futile (i think).
+
+    model.addConstr(r[i, 1, 1] <= hplus[i], name=f"OrientationHeight_{i}")"""
+    model.addConstr(r[i, 0, 1] <= lplus[i], name=f"OrientationHeight_{i}")
+
+# #Constraint 22
+for i in range(nitems):
+    for j in indices_with_cut:
+        model.addConstr(z_lo[i] + (b[j] / a[j]) * x_l[i] - b[j] >= -L * (1 - p_ij[i, j]),
+                        name=f"CutSupport_LowerBound_{i}_{j}")
+
+'''Vertical Stability Variables'''
+"""Additional variables"""
+g = model.addVars(nitems, vtype=GRB.BINARY, name='g')  # 1 if item i lies on the ground of the bin
+
+h = model.addVars(nitems, nitems, vtype=GRB.BINARY,
+                  name='h')  # 1 if item j has suitable height to support i (z_lo[i]==z_hi[j])
+o = model.addVars(nitems, nitems, vtype=GRB.BINARY,
+                  name='o')  # 1 if item j has non-empty intersec. on x axis with item i
+s = model.addVars(nitems, nitems, vtype=GRB.BINARY, name='s')  # 1 if item j supports item i and they're in the same bin
+eta1 = model.addVars(nitems, nitems, vtype=GRB.BINARY,
+                     name='eta1')  # 1 if vertex 1 of item j is to left of item i (x_l[j] <= x_l[i])
+eta2 = model.addVars(nitems, nitems, vtype=GRB.BINARY,
+                     name='eta2')  # 1 if vertex 2 of item j is to right of item i (x_up[j] <= x_up[i])
+
+beta1 = model.addVars(nitems, nitems, vtype=GRB.BINARY, name='beta1')  # 1 if vertex 1 of item i is supported by item j
+beta2 = model.addVars(nitems, nitems, vtype=GRB.BINARY, name='beta2')  # 1 if vertex 2 of item i is supported by item j
+gamma = model.addVars(nitems, vtype=GRB.BINARY,
+                      name='gamma')  # 1 if vertex 1 of item i is supported by the cut of the bin where it is placed
+
+v = model.addVars(nitems, nitems, vtype=GRB.CONTINUOUS, name='k')  # represents absolute value of z_hi[k] - z_lo[i]
+m = model.addVars(nitems, nitems, vtype=GRB.BINARY,
+                  name='m')  # 1 if k overlaps or exceeds i in height, i.e. z_hi[k] > z_lo[i]
+
+per = model.addVars(mbins, vtype=GRB.BINARY, name="per")
+rad = model.addVars(mbins, vtype=GRB.BINARY, name="rad")
+
+# Constraint 26 adapted for 2D stability
+for i in range(nitems):
+    model.addConstr(
+        gamma[i] + quicksum(beta1[i, j] for j in range(nitems) if i != j) + quicksum(
+            beta2[i, j] for j in range(nitems) if i != j) + 2 * g[i]
+        >= 2)
+
+for i in range(nitems):
+    # If item i is on the ground, z_lo must be small or equal to 0
+    model.addConstr(z_lo[i] <= (1 - g[i]) * H, name=f"GroundConstraint_{i}")
+    for k in range(nitems):
+        if i != k:
+            # 28&29: absolute value of height diff items i and k, v_ik can only be one if z coords at same height
+            model.addConstr(z_hi[k] - z_lo[i] <= v[i, k], name=f"AbsZ1{i}_{k}")
+            model.addConstr(z_lo[i] - z_hi[k] <= v[i, k], name=f"AbsZ2{i}_{k}")
+
+            # 30: forces m, m must be 0 if z_lo[i] larger than z_hi[k] as this means i above k
+            model.addConstr(v[i, k] <= z_hi[k] - z_lo[i] + 2 * H * (1 - m[i, k]), name=f"{k}Below{i}")
+            # 31: forces m, m must be 1 if z_hi[k] larger than z_lo[i] as this means i not above k
+            model.addConstr(v[i, k] <= z_lo[i] - z_hi[k] + 2 * H * m[i, k], name=f"{k}NotBelow{i}")
+
+            # 32: forces h, if v_ik is 0 then h must be zero (i and k height compatibility)
+            model.addConstr(h[i, k] <= v[i, k], name=f"HeightCompat_{i}_{k}")
+            # 33: forces h, if v_ik is larger than 0, then h must be 1 (no height comp.)
+            model.addConstr(v[i, k] <= h[i, k] * H, name=f"NoHeightCompat_{i}_{k}")
+
+            ####34 might need revising
+            # 34.1: forces o, if horizontal overlap, then o is 0 because neither i or k are to the right of each other
+            model.addConstr(o[i, k] <= xp[i, k] + xp[k, i], name=f"Overlap_{i}_{k}")
+            # 34.2: forces o, if no horizontal overlap, o must be 1 because either i or k are to right of each other
+            model.addConstr(xp[i, k] + xp[k, i] <= 2 * o[i, k], name=f"NoOverlap_{i}_{k}")
+
+            # 35.1: forces s=1, if hor. inters. (o=0) and/or suitable height (h=0), s must be 1 (k supports i)
+            model.addConstr((1 - s[i, k]) <= h[i, k] + o[i, k], name=f"{j}Supports{i}")
+            # 35.2:forces s=0, if hor. inters. (o=1) and suitable height (h=1), s must be 0 (k no support i)
+            model.addConstr(h[i, k] + o[i, k] <= 2 * (1 - s[i, k]), name=f"{j}DoesntSupport{i}")
+
+            # 37.1: if beta1 = 1, s automatically also becomes 1
+            model.addConstr(beta1[i, k] <= s[i, k], name=f"beta1_{i}_{k}")
+            # 37.2: if beta2 = 1, s automatically also becomes 1
+            model.addConstr(beta2[i, k] <= s[i, k], name=f"beta2_{i}_{k}")
+            # 38: forces s, if beta1 or beta2 is 1, s is flagged to 1
+            model.addConstr(beta1[i, k] <= s[i, k], name=f"sBeta1Flag_{i}_{k}")
+            model.addConstr(beta2[i, k] <= s[i, k], name=f"sBeta2Flag_{i}_{k}")
+            ####39 might need revising, might not even be necessary due to 34
+            # 39.1: if i supports j (beta=1), x_l[i]>x_l[j] (eta1 = 0) and x_r[k] > x_l[i]
+            model.addConstr(eta1[i, k] <= 1 - beta1[i, k], name=f"Eta1Overlap_{i}_{k}")
+            model.addConstr(eta2[i, k] <= 1 - beta2[i, k], name=f"Eta2Overlap_{i}_{k}")
+            # 43: forces eta1 to be 1 if x_l[i] is smaller than x_l[k] (k cannot support vertex 1 of i)
+            model.addConstr(x_l[k] <= x_l[i] + eta1[i, k] * L, name=f"Eta1Flag_{i}_{k}")
+            # 45: forces eta2 to be 1 if x_r[k] is smaller than x_r[i] (k cannot support vertex 2 of i)
+            model.addConstr(x_r[i] <= x_r[k] + eta2[i, k] * L, name=f"Eta2Flag_{i}_{k}")
+
+            for j in range(mbins):
+                # 36: ensures s holds only for item i and item k in same bin j
+                model.addConstr(p_ij[i, j] - p_ij[k, j] <= 1 - s[i, k], name=f"{k}Supports{i}InSameBin1{j}")
+                model.addConstr(p_ij[k, j] - p_ij[i, j] <= 1 - s[i, k], name=f"{k}Supports{i}InSameBin2{j}")
+
+                # 49: forces gamma to be 0 if there is no cut (technically gamma could be 1 for no-cut ULD as a=b=-1)
+                model.addConstr(p_ij[i, j] + gamma[i] <= a[j] + b[j] + 3, name=f"Gamma0ForItems_{i}inBins{j}_NoCut")
+        for j in indices_with_cut:
+            # 47: forces gamma if item i is on cut and if i is in bin j
+            model.addConstr(z_lo[i] + b[j] / a[j] * x_l[i] - b[j] <= (1 - gamma[i]) * L + (1 - p_ij[i, j]) * L,
+                            name=f"{i}_OnCutIn{j}")
+            # model.addConstr(z_lo[i] + (b[j] / a[j]) * x_l[i] - b[j] >= -M * (1 - p_ij[i,j])
+""" Other Constraints """
+# constraint 16 from lecture (flagging constraint)
+for i in range(nitems):
+    for j in range(mbins):
+        model.addConstr(u_j[j] >= p_ij[i, j])
+
+# some items might be fragile and, as such, no other box can be stacked on top of them
+for i in range(nitems):
+    for k in range(nitems):
+        model.addConstr(
+            s[i, k] <= nitems * (1 - fragile[k]),
+            name=f"Fragile_{i}_{k}")
+
+# Ensure that a ULD cannot contain both perishable and radioactive items
+
+for j in range(mbins):
+    # Link perishable items in bin j
+    model.addConstr(quicksum(p_ij[i, j] for i in range(nitems) if perishable[i] == 1) <= M * per[j],
+                    name=f"LinkPerishable_{j}")
+    # Link radioactive items in bin j
+    model.addConstr(quicksum(p_ij[i, j] for i in range(nitems) if radioactive[i] == 1) <= M * rad[j],
+                    name=f"LinkRadioactive_{j}")
+    # New constraints to force the indicator to 0 when the quicksum is 0:
+    model.addConstr(per[j] <= quicksum(p_ij[i, j] for i in range(nitems) if perishable[i] == 1),
+                    name=f"ForcePerishableZero_{j}")
+    model.addConstr(rad[j] <= quicksum(p_ij[i, j] for i in range(nitems) if radioactive[i] == 1),
+                    name=f"ForceRadioactiveZero_{j}")
+    # If radioactive and perishable cannot be in same bin
+    model.addConstr(per[j] + rad[j] <= 1, name=f"Disjoint_{j}")
+'''
+Objective Function
+'''
+objective = quicksum(Cj[j] * u_j[j] for j in range(len(Cj)))  # sum of Cj[i] * u_j for each i
+model.setObjective(objective, GRB.MINIMIZE)
+
+first_sol_time = None
+
+model.optimize()
+model.update()
+if model.status == GRB.INFEASIBLE:
+    print("The model is infeasible. Computing IIS...")
+    model.computeIIS()
+    for constr in model.getConstrs():
+        if constr.IISConstr:
+            print(f"Infeasible Constraint: {constr.ConstrName}")
+    model.write("infeasible.ilp")
+
+import matplotlib.pyplot as plt
+import numpy as np
+
+tol = 1e-9
+def visualize_with_overlap(items, nitems, mbins, Lj, Hj, x_l, zi, x_i_prime, z_i_prime, p_ij, bins_with_cut, a, b,
+                           perishable, radioactive, fragile, rotations):
+    print("test")
+    # Determine the overall scale (same units for all bins)
+    scale_factor = max(max(Lj), max(Hj))  # Normalize based on the largest bin
+
+    fig, axs = plt.subplots(2, 2, figsize=(12, 12))  # 2 rows, 2 columns
+    axs = axs.flatten()  # Flatten to 1D array for easier indexing
+
+    # Ensure the model is optimized before visualization
+    if model.status in [GRB.OPTIMAL, GRB.SUBOPTIMAL, GRB.TIME_LIMIT, GRB.INTERRUPTED] and model.SolCount > 0:
+        for j in range(mbins):
+            # Set limits proportional to bin size but using the same scale
+            axs[j].set_xlim(0, Lj[j])
+            axs[j].set_ylim(0, Hj[j])
+            axs[j].set_title(f"Bin {j}")
+            axs[j].set_aspect('equal')  # Keep aspect ratio
+
+            # Add axis labels
+            axs[j].set_xlabel("Bin Width [m]")
+            axs[j].set_ylabel("Bin Height [m]")
+
+            # Add grid with fixed intervals
+            axs[j].grid(True, which='both', linestyle='--', linewidth=0.5)
+
+            # Set x and y ticks at fixed intervals based on scale factor
+            axs[j].set_xticks(np.arange(0, Lj[j] + 1, scale_factor / 10))
+            axs[j].set_yticks(np.arange(0, Hj[j] + 1, scale_factor / 10))
+
+            bin_items = []
+            for i in range(nitems):
+                if p_ij[i, j].X > 0.5:  # Only visualize items assigned to bin j
+                    x_start = x_l[i].X
+                    z_start = zi[i].X
+                    width = x_i_prime[i].X - x_l[i].X
+                    height = z_i_prime[i].X - zi[i].X
+                    bin_items.append((x_start, z_start, width, height, i))
+
+            # Define a list of colors for rotation, cycling through them
+            rotation_colors = ['green', 'blue', 'purple', 'orange', 'cyan']
+
+            # Draw items and check overlaps
+            for i, (x, z, w, h, item) in enumerate(bin_items):
+                # Get color based on the rotation index
+                rotation_color = rotation_colors[rotations[item] % len(rotation_colors)]  # Rotate through colors
+
+                # Default color based on item type
+                if radioactive[item]:
+                    rect_color = rotation_color  # Radioactive
+                    border_color = "black"  # Blue border for radioactive (here using black for consistency)
+                elif perishable[item]:
+                    rect_color = rotation_color  # Perishable
+                    border_color = "black"  # Orange border for perishable (here using black for consistency)
+                else:
+                    rect_color = rotation_color  # Normal, use the rotation color
+                    border_color = "black"  # Black border for normal items
+
+                # Check for overlaps
+                for x2, z2, w2, h2, other_item in bin_items:
+                    if item != other_item:  # Don't compare an item with itself
+                        if not (x + w <= x2 + tol or x2 + w2 <= x + tol or z + h <= z2 + tol or z2 + h2 <= z + tol):
+                            rect_color = "red"  # Overlapping items are marked in red
+                            border_color = "black"  # Red border for overlapping items
+                            break
+
+                # Plot the item with diagonal lines for perishable and radioactive items
+                if fragile[item]:  # If fragile, add red borders
+                    axs[j].add_patch(plt.Rectangle((x, z), w, h, facecolor=rect_color, alpha=0.5, edgecolor='red',
+                                                   linewidth=3))  # Thicker border
+                else:  # Otherwise, just plot the color and lines
+                    axs[j].add_patch(
+                        plt.Rectangle((x, z), w, h, facecolor=rect_color, alpha=0.5, edgecolor=border_color,
+                                      linewidth=2))
+
+                # Draw diagonal lines for perishable items (white stripes) and radioactive items (orange stripes)
+                if perishable[item]:
+                    for stripe_x in np.linspace(x + 5, x + w - 5, num=5):
+                        axs[j].plot([stripe_x, stripe_x], [z, z + h], color="white", linewidth=1)
+                    for stripe_z in np.linspace(z + 5, z + h - 5, num=5):
+                        axs[j].plot([x, x + w], [stripe_z, stripe_z], color="white", linewidth=1)
+                elif radioactive[item]:
+                    for stripe_x in np.linspace(x + 5, x + w - 5, num=5):
+                        axs[j].plot([stripe_x, stripe_x], [z, z + h], color="orange", linewidth=1)
+                    for stripe_z in np.linspace(z + 5, z + h - 5, num=5):
+                        axs[j].plot([x, x + w], [stripe_z, stripe_z], color="orange", linewidth=1)
+                axs[j].text(x + w / 2, z + h / 2, f"{item}\n {items[item][-4:]}", ha='center', va='center')
+
+            # *Draw the ULD outline with cut (if present)*
+            if j in bins_with_cut:
+                cut_a = a[j]
+                cut_b = b[j]
+                if cut_a != -1 and cut_b != -1:
+                    x_cut_vals = np.array([0, Lj[j]])
+                    z_cut_vals = - (cut_b / a[j]) * x_cut_vals + cut_b
+                    axs[j].plot(x_cut_vals, z_cut_vals, 'k--', linewidth=2, label="Cut Line")
+                    x_cut_intersect = cut_b / (cut_b / a[j])
+                    z_cut_intersect = 0
+                    outline_x = [1, 1, Lj[j], Lj[j], x_cut_intersect, 0]
+                    outline_z = [cut_b, Hj[j], Hj[j], 0, z_cut_intersect, cut_b]
+                    axs[j].plot(outline_x, outline_z, 'k-', linewidth=2, label="ULD Outline")
+            else:
+                outline_x = [0, 0, Lj[j], Lj[j], 0]
+                outline_z = [0, Hj[j], Hj[j], 0, 0]
+                axs[j].plot(outline_x, outline_z, 'k-', linewidth=2, label="Bin Outline")
+
+        # Create custom legend handles:
+        import matplotlib.patches as mpatches
+        import matplotlib.lines as mlines
+
+        nonrot_patch = mpatches.Patch(color='green', label="Non-Rotatable Items")
+        rot_patch = mpatches.Patch(color='blue', label="Rotatable Items")
+        rad_line = mlines.Line2D([], [], color="orange", linestyle='-', linewidth=2, label="Radioactive Items")
+        per_line = mlines.Line2D([], [], color="white", linestyle='-', linewidth=2, label="Perishable Items")
+        fragile_patch = mpatches.Patch(facecolor="none", edgecolor="red", linewidth=3, label="Fragile Items")
+
+        # Add a title to the entire plot
+        fig.suptitle("2D Bin Packing Problem Optimization", fontsize=16, y=0.98)
+
+        # Place the legend under the title.
+        leg = fig.legend(handles=[rot_patch, nonrot_patch, rad_line, per_line, fragile_patch],
+                         loc="upper center", bbox_to_anchor=(0.5, 0.93), ncol=3, fontsize=12)
+        # ---------------------------
+        leg.get_frame().set_facecolor('grey')
+        plt.tight_layout(rect=[0, 0, 1, 1])
+        plt.show()
+
+
+if model.SolCount > 0:  # Ensure there is at least one solution stored
+    model.write("solution.sol")  # Save the solution to a file
+    print("Solution saved!")
+else:
+    print("No solution found.")
+
+# Call the function
+if model.status in [GRB.OPTIMAL, GRB.SUBOPTIMAL, GRB.TIME_LIMIT, GRB.INTERRUPTED] and model.SolCount > 0:
+    visualize_with_overlap(items, nitems, mbins, Lj, Hj, x_l, z_lo, x_r, z_hi, p_ij, indices_with_cut, a, b, perishable,
+                           radioactive, fragile, lplus)
+else:
+    print(model.status, GRB.OPTIMAL, GRB.SUBOPTIMAL, GRB.TIME_LIMIT, model.SolCount)
+    print("Model didn't find an optimal solution within the time limit.")
+
+if model.status in [GRB.OPTIMAL, GRB.SUBOPTIMAL]:
+    print("\n--- Final Constraint Values ---")
+    for constr in model.getConstrs():
+        expr = model.getRow(constr)  # Get the constraint's left-hand side expression
+        lhs_value = sum(expr.getVar(i).X * expr.getCoeff(i) for i in range(expr.size()))
+        rhs_value = constr.RHS  # Right-hand side of the constraint
+        residual = rhs_value - lhs_value  # Difference between RHS and LHS
+
+        print(f"{constr.ConstrName}: LHS = {lhs_value}, RHS = {rhs_value}, Residual = {residual}")
+
+    bins_used = []
+    I_info_solution = {}
+    Items_In_Bin = {}
+    for j in range(mbins):
+        if u_j[j].X == 1:
+            bins_used.append(j)
+            print(f"u_j[{j}]: {u_j[j].X}")
+    for i in range(nitems):
+        for j in range(mbins):
+            if p_ij[i, j].X == 1:
+                if j not in Items_In_Bin:
+                    Items_In_Bin[j] = []
+                x_l_1 = x_l[i].X
+                z_lo_1 = z_lo[i].X
+                li_1 = li[i]
+                hi_1 = hi[i]
+                Items_In_Bin[j].append(i)
+                I_info_solution[i] = [x_l_1, z_lo_1, li_1, hi_1]
+    data = {'bins_used': bins_used,
+        'Items_in_Bin': Items_In_Bin,
+        'I_info_solution': I_info_solution}
+
+    with open('data_solution.pkl', 'wb') as f:
+        pickle.dump(data, f)
+
+    with open('data_solution.pkl', 'rb') as f:
+        data = pickle.load(f)
+
+    print(data)

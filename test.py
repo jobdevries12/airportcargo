@@ -1,6 +1,7 @@
 import pickle
 from gurobipy import Model, GRB, quicksum, gurobi
 import os
+import time
 import numpy as np
 
 # Specify the full path to your Gurobi license file
@@ -22,6 +23,7 @@ print(bins)
 '''
 Parameter Definition
 '''
+<<<<<<< Updated upstream
 n_orient = 2
 n_axes = 2
 mbins = int(sum(entry[1][2] for entry in bins.values())/2)  # number of bins -- should be halved i think
@@ -37,6 +39,26 @@ Aj = [Lj[i] * Hj[i] for i in range(len(Lj))]         # area of bin
 Cj = [values[1][3] for values in bins.values()]         # cost of bin
 a = [values[1][4] for values in bins.values()]                  # corner shape of bin
 b = [values[1][5] for values in bins.values()]                 # corner shape of bin
+=======
+M = 10000  # Large number for dummy variables
+epsilon = 1  # Offset for overlap constraint (15)
+
+mbins = len(bins)  # number of bins -- should be halved i think
+nitems = len(items)  # number of items
+n_axes = 2  # number of axes
+n_orients = 2  # number of different sides/orientations of an item
+li = [values[0] for values in items.values()]  # length of item
+hi = [values[1] for values in items.values()]  # height of item
+ai = [li[i] * hi[i] for i in range(len(li))]  # area of item
+Lj = [values[1][0] for values in bins.values()]  # Length of bin
+L = M#max(Lj)
+Hj = [values[1][1] for values in bins.values()]  # height of bin
+H = M#max(Hj)
+Aj = [Lj[i] * Hj[i] for i in range(len(Lj))]  # area of bin
+Cj = [values[1][3] for values in bins.values()]  # cost of bin
+a = [values[1][4] for values in bins.values()]  # corner shape of bin
+b = [values[1][5] for values in bins.values()]  # corner shape of bin
+>>>>>>> Stashed changes
 
 # Orientation parameters
 lip = [values[2] for values in items.values()]       # item can be rotated by pi/2 or no
@@ -75,8 +97,14 @@ bcut = bins_with_cut['b']
 Model Definition
 '''
 model = Model("2DBPP")
+<<<<<<< Updated upstream
 model.setParam('TimeLimit', 60*20)
 model.setParam('Method', 2)
+=======
+model.setParam('TimeLimit', 4 * 60 * 60)
+model.params.LogFile = '2D_BPP.log'
+#model.setParam('Method', 2)
+>>>>>>> Stashed changes
 '''
 Variables Definition
 '''
@@ -154,6 +182,7 @@ for i in range(nitems):
 #Constraint 8 and 10 : orthogonal rotation
 # why is rho not used here?
 for i in range(nitems):
+<<<<<<< Updated upstream
     model.addConstr(
         xprime[i] - x[i] == sum(r[i, 0, b] * [li[i], hi[i]][b] for b in range(2)),
         name=f"TransformX_{i}")
@@ -171,6 +200,28 @@ for i in range(nitems):
     # Each axis has exactly one side aligned
     model.addConstr(r[i, 0, 0] + r[i, 0, 1] == 1, name=f"XAxisAlign_{i}")
     model.addConstr(r[i, 1, 0] + r[i, 1, 1] == 1, name=f"ZAxisAlign_{i}")
+=======
+    model.addConstr(x_r[i] - x_l[i] == sum(r[i, 0, d] * [li[i], hi[i]][d] for d in range(n_orients)),
+                    name=f"TransformX_{i}")
+    model.addConstr(z_hi[i] - z_lo[i] == sum(r[i, 1, d] * [li[i], hi[i]][d] for d in range(n_orients)),
+                    name=f"TransformZ_{i}")
+    '''# Each axis has exactly one side aligned
+    model.addConstr(r[i, 0, 0] + r[i, 0, 1] == 1, name=f"XAxisAlign_{i}")
+    model.addConstr(r[i, 1, 0] + r[i, 1, 1] == 1, name=f"ZAxisAlign_{i}")'''
+
+# Constraint 11 and 12:
+for i in range(nitems):
+    # Each side aligns with exactly one axis
+    for d in range(n_orients):
+        model.addConstr(quicksum(r[i, c, d] for c in range(n_axes)) == 1, name=f"SidesAlign_{d}")
+    # Each axis aligns with exactly one side
+    for c in range(n_axes):
+        model.addConstr(quicksum(r[i, c, d] for d in range(n_orients)) == 1, name=f"AxesAlign_{c}")
+    """model.addConstr(r[i, 0, 0] + r[i, 1, 0] == 1, name=f"LengthAlign_{i}")
+    model.addConstr(r[i, 0, 1] + r[i, 1, 1] == 1, name=f"HeightAlign_{i}")
+"""
+
+>>>>>>> Stashed changes
 
 # Constraint 13: Overlap occurs only within the same bin j
 for i in range(nitems):
@@ -224,6 +275,7 @@ for i in range(nitems):
 # #Constraint 22
 '''for i in range(nitems):
     for j in indices_with_cut:
+<<<<<<< Updated upstream
         model.addConstr(
             z[i] + b[j]/a[j] * x[i] >= b[j] - M*(1 - p_ij[i, j]), name=f'Constraint_{i}_{j}'
         )
@@ -268,6 +320,178 @@ for i in range(nitems):
 #             u_j[j] >= - bcut[j]/acut[j] * x[i] + bcut[j] - (1 - p_ij[i,j]) + (1 - gamma[i])
 #         )
 model.update()
+=======
+        model.addConstr(z_lo[i] + (b[j] / a[j]) * x_l[i] - b[j] >= -L * (1 - p_ij[i, j]),
+                        name=f"CutSupport_LowerBound_{i}_{j}")
+
+'''Vertical Stability Variables'''
+"""Additional variables"""
+g = model.addVars(nitems, vtype=GRB.BINARY, name='g')  # 1 if item i lies on the ground of the bin
+
+h = model.addVars(nitems, nitems, vtype=GRB.BINARY,
+                  name='h')  # 1 if item j has suitable height to support i (z_lo[i]==z_hi[j])
+o = model.addVars(nitems, nitems, vtype=GRB.BINARY,
+                  name='o')  # 1 if item j has non-empty intersec. on x axis with item i
+s = model.addVars(nitems, nitems, vtype=GRB.BINARY, name='s')  # 1 if item j supports item i and they're in the same bin
+eta1 = model.addVars(nitems, nitems, vtype=GRB.BINARY,
+                     name='eta1')  # 1 if vertex 1 of item j is to left of item i (x_l[j] <= x_l[i])
+eta2 = model.addVars(nitems, nitems, vtype=GRB.BINARY,
+                     name='eta2')  # 1 if vertex 2 of item j is to right of item i (x_up[j] <= x_up[i])
+'''overlap1 = model.addVars(nitems, nitems, vtype=GRB.BINARY, name='overlap1') # 1 if vertex 1 of item j is to left of item i (x_l[j] <= x_l[i])
+overlap2 = model.addVars(nitems, nitems, vtype=GRB.BINARY, name='overlap2') # 1 if vertex 2 of item j is to right of item i (x_up[j] <= x_up[i])
+
+overlap_x = model.addVars(nitems, nitems, vtype=GRB.CONTINUOUS, name="overlap_x")'''
+
+beta1 = model.addVars(nitems, nitems, vtype=GRB.BINARY, name='beta1')  # 1 if vertex 1 of item i is supported by item j
+beta2 = model.addVars(nitems, nitems, vtype=GRB.BINARY, name='beta2')  # 1 if vertex 2 of item i is supported by item j
+gamma = model.addVars(nitems, vtype=GRB.BINARY,
+                      name='gamma')  # 1 if vertex 1 of item i is supported by the cut of the bin where it is placed
+
+v = model.addVars(nitems, nitems, vtype=GRB.CONTINUOUS, name='k')  # represents absolute value of z_hi[k] - z_lo[i]
+m = model.addVars(nitems, nitems, vtype=GRB.BINARY,
+                  name='m')  # 1 if k overlaps or exceeds i in height, i.e. z_hi[k] > z_lo[i]
+
+per = model.addVars(mbins, vtype=GRB.BINARY, name="per")
+rad = model.addVars(mbins, vtype=GRB.BINARY, name="rad")
+# '''Vertical Stability Constraints'''
+
+# Constraint 26 adapted for 2D stability
+for i in range(nitems):
+    model.addConstr(
+        gamma[i] + quicksum(beta1[i, j] for j in range(nitems) if i != j) + quicksum(
+            beta2[i, j] for j in range(nitems) if i != j) + 2 * g[i]
+        >= 2
+    )
+
+for i in range(nitems):
+    # If item i is on the ground, z_lo must be small or equal to 0
+    model.addConstr(z_lo[i] <= (1 - g[i]) * H, name=f"GroundConstraint_{i}")
+    for k in range(nitems):
+        if i != k:
+            # 28&29: absolute value of height diff items i and k, v_ik can only be one if z coords at same height
+            model.addConstr(z_hi[k] - z_lo[i] <= v[i, k], name=f"AbsZ1{i}_{k}")
+            model.addConstr(z_lo[i] - z_hi[k] <= v[i, k], name=f"AbsZ2{i}_{k}")
+
+            # 30: forces m, m must be 0 if z_lo[i] larger than z_hi[k] as this means i above k
+            model.addConstr(v[i, k] <= z_hi[k] - z_lo[i] + 2 * H * (1 - m[i, k]), name=f"{k}_Below_{i}")
+            # 31: forces m, m must be 1 if z_hi[k] larger than z_lo[i] as this means i not above k
+            model.addConstr(v[i, k] <= z_lo[i] - z_hi[k] + 2
+                            * H * m[i, k], name=f"{k}_NotBelow_{i}")
+
+            # 32: forces h, if v_ik is 0 then h must be zero (i and k height compatibility)
+            model.addConstr(h[i, k] <= v[i, k], name=f"HeightCompat_{i}_{k}")
+            # 33: forces h, if v_ik is larger than 0, then h must be 1 (no height comp.)
+            model.addConstr(v[i, k] <= h[i, k] * H, name=f"NoHeightCompat_{i}_{k}")
+
+            ####34 might need revising
+            # 34.1: forces o, if horizontal overlap, then o is 0 because neither i or k are to the right of each other
+            model.addConstr(o[i, k] <= xp[i, k] + xp[k, i], name=f"Overlap_{i}_{k}")
+            # 34.2: forces o, if no horizontal overlap, o must be 1 because either i or k are to right of each other
+            model.addConstr(xp[i, k] + xp[k, i] <= 2 * o[i, k], name=f"NoOverlap_{i}_{k}")
+
+            # 35.1: forces s=1, if hor. inters. (o=0) and/or suitable height (h=0), s must be 1 (k supports i)
+            model.addConstr((1 - s[i, k]) <= h[i, k] + o[i, k], name=f"{j}_Supports_{i}")
+            # 35.2:forces s=0, if hor. inters. (o=1) and suitable height (h=1), s must be 0 (k no support i)
+            model.addConstr(h[i, k] + o[i, k] <= 2 * (1 - s[i, k]), name=f"{j}_DoesntSupport_{i}")
+
+            # 37.1: if beta1 = 1, s automatically also becomes 1
+            model.addConstr(beta1[i, k] <= s[i, k], name=f"beta1_{i}_{k}")
+            # 37.2: if beta2 = 1, s automatically also becomes 1
+            model.addConstr(beta2[i, k] <= s[i, k], name=f"beta2_{i}_{k}")
+            # 38: forces s, if beta1 or beta2 is 1, s is flagged to 1
+            model.addConstr(beta1[i, k] <= s[i, k], name=f"sBeta1Flag_{i}_{k}")
+            model.addConstr(beta2[i, k] <= s[i, k], name=f"sBeta2Flag_{i}_{k}")
+            ####39 might need revising, might not even be necessary due to 34
+            # 39.1: if i supports j (beta=1), x_l[i]>x_l[j] (eta1 = 0) and x_r[k] > x_l[i]
+            model.addConstr(eta1[i, k] <= 1 - beta1[i, k], name=f"Eta1Overlap_{i}_{k}")
+            model.addConstr(eta2[i, k] <= 1 - beta2[i, k], name=f"Eta2Overlap_{i}_{k}")
+            # 43: forces eta1 to be 1 if x_l[i] is smaller than x_l[k] (k cannot support vertex 1 of i)
+            model.addConstr(x_l[k] <= x_l[i] + eta1[i, k] * L, name=f"Eta1Flag_{i}_{k}")
+            # 45: forces eta2 to be 1 if x_r[k] is smaller than x_r[i] (k cannot support vertex 2 of i)
+            model.addConstr(x_r[i] <= x_r[k] + eta2[i, k] * L, name=f"Eta2Flag_{i}_{k}")
+            '''#ext1:
+            model.addConstr(x_l[i] <= x_r[k] - 0.2*x_l[i]*sum(r[i, 0, d]*[li[i], hi[i]][d] for d in range(n_orients)) + overlap1[i, k] * L,
+                            name='test1')
+            model.addConstr(x_l[k] <= x_r[i] - 0.2*x_l[i]*sum(r[i, 0, d]*[li[i], hi[i]][d] for d in range(n_orients)) + overlap2[i, k] * L,
+                            name='test2')
+            # Ensure overlap_x[i, k] captures the x overlap width when k is directly below i
+            model.addConstr(
+                overlap_x[i, k] >= x_r[i] - x_l[k] - (1 - beta2[i, k]) * M, name=f"X_Overlap_{i}_{k}_1")
+            model.addConstr(
+                overlap_x[i, k] >= x_r[k] - x_l[i] - (1 - beta1[i, k]) * M, name=f"X_Overlap_{i}_{k}_2")
+            model.addConstr(
+                overlap_x[i, k] <= x_r[i] - x_l[k], name=f"X_Overlap_{i}_{k}_UpperBound1")
+            model.addConstr(
+                overlap_x[i, k] <= x_r[k] - x_l[i], name=f"X_Overlap_{i}_{k}_UpperBound2")
+
+            # Overlap must be at least 20% of the smaller width between i and k
+            model.addConstr(
+                overlap_x[i, k] >= 0.2 * quicksum(r[i, 0, d] * [li[i], hi[i]][d] for d in range(n_orients)) * s[i, k],
+                name=f"Min_20_Percent_Overlap_{i}_{k}")'''
+
+
+            model.addConstr(
+                x_r[i] >= x_l[k] + 0.2 * (x_r[i] - x_l[i]) - L * (1 - s[i, k]),
+                name=f"MinOverlap1_{i}_{k}"
+            )
+            model.addConstr(
+                x_r[k] >= x_l[i] + 0.2 * (x_r[i] - x_l[i]) - L * (1 - s[i, k]),
+                name=f"MinOverlap2_{i}_{k}"
+            )
+
+            for j in range(mbins):
+                # 36: ensures s holds only for item i and item k in same bin j
+                model.addConstr(p_ij[i, j] - p_ij[k, j] <= 1 - s[i, k], name=f"{k}_Supports_{i}_InSameBin1_{j}")
+                model.addConstr(p_ij[k, j] - p_ij[i, j] <= 1 - s[i, k], name=f"{k}_Supports_{i}_InSameBin2_{j}")
+
+                # 49: forces gamma to be 0 if there is no cut (technically gamma could be 1 for no-cut ULD as a=b=-1)
+                model.addConstr(p_ij[i, j] + gamma[i] <= a[j] + b[j] + 3, name=f"Gamma0ForItems_{i}_inBins_{j}_NoCut")
+        for j in indices_with_cut:
+            # 47: forces gamma if item i is on cut and if i is in bin j
+            model.addConstr(z_lo[i] + b[j] / a[j] * x_l[i] - b[j] <= (1 - gamma[i]) * H + (1 - p_ij[i, j]) * H,
+                            name=f"{i}_OnCutIn{j}")
+            # model.addConstr(z_lo[i] + (b[j] / a[j]) * x_l[i] - b[j] >= -H * (1 - p_ij[i,j])
+""" Other Constraints """
+# constraint 16 from lecture (flagging constraint)
+for i in range(nitems):
+    for j in range(mbins):
+        model.addConstr(u_j[j] >= p_ij[i, j])
+
+# some items might be fragile and, as such, no other box can be stacked on top of them
+for i in range(nitems):
+    for k in range(nitems):
+        model.addConstr(
+            s[i, k] <= nitems * (1 - fragile[k]),
+            name=f"Fragile_{i}_{k}")
+
+# Ensure that a ULD cannot contain both perishable and radioactive items
+'''for j in range(mbins):
+    model.addConstr(
+        quicksum(p_ij[i, j] * perishable[i] for i in range(nitems)) +
+        quicksum(p_ij[i, j] * radioactive[i] for i in range(nitems)) <= 1,
+        name=f"Perishable_radioactive_{j}")'''
+
+for j in range(mbins):
+    # Link perishable items in bin j
+    model.addConstr(quicksum(p_ij[i, j] for i in range(nitems) if perishable[i] == 1) <= M * per[j],  name=f"LinkPerishable_{j}")
+    # Link radioactive items in bin j
+    model.addConstr(quicksum(p_ij[i, j] for i in range(nitems) if radioactive[i] == 1) <= M * rad[j], name=f"LinkRadioactive_{j}")
+    # New constraints to force the indicator to 0 when the quicksum is 0:
+    model.addConstr(per[j] <= quicksum(p_ij[i, j] for i in range(nitems) if perishable[i] == 1),
+                    name=f"ForcePerishableZero_{j}")
+    model.addConstr(rad[j] <= quicksum(p_ij[i, j] for i in range(nitems) if radioactive[i] == 1),
+                    name=f"ForceRadioactiveZero_{j}")
+    # If radioactive and perishable cannot be in same bin
+    model.addConstr(per[j] + rad[j] <= 1, name=f"Disjoint_{j}")
+
+''''
+for j in range(mbins):
+    model.addConstr(
+        quicksum(p_ij[i, j] * perishable[i] for i in range(nitems)) *
+        quicksum(p_ij[i, j] * radioactive[i] for i in range(nitems)) == 0,
+        name=f"Perishable_radioactive_{j}"
+    )'''
+>>>>>>> Stashed changes
 '''
 Objective Function
 '''
@@ -275,6 +499,7 @@ objective = quicksum(Cj[j] * u_j[j] for j in range(len(Cj))) #sum of Cj[i] * u_j
 model.setObjective(objective, GRB.MINIMIZE)
 model.update()
 
+<<<<<<< Updated upstream
 '''
 Print constraints
 '''
@@ -290,6 +515,27 @@ Print constraints
 
 model.optimize()
 model.write('resuts.lp')
+=======
+first_sol_time = None
+
+
+def mycallback(model, where):
+    global first_sol_time
+    if where == GRB.Callback.MIPSOL:
+        # MIPSOL is called when a new feasible solution is found.
+        if first_sol_time is None:
+            first_sol_time = time.time()  # Record the time of the first feasible solution.
+    # If a feasible solution has been found, check elapsed time.
+    if first_sol_time is not None:
+        elapsed = time.time() - first_sol_time
+        # If more than 30 minutes (1800 seconds) have passed since the first solution, terminate.
+        if elapsed > 45 * 60:
+            model.terminate()
+
+
+model.optimize(mycallback)
+model.update()
+>>>>>>> Stashed changes
 if model.status == GRB.INFEASIBLE:
     print("The model is infeasible. Computing IIS...")
     model.computeIIS()
